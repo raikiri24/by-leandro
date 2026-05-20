@@ -312,7 +312,9 @@ const initialPubMat: PubMatState = {
 // ─── page ─────────────────────────────────────────────────────────────────────
 export default function Page() {
   const cardRef = useRef<HTMLDivElement>(null);
+  const previewViewportRef = useRef<HTMLDivElement>(null);
   const [showSplash, setShowSplash] = useState(true);
+  const [previewSize, setPreviewSize] = useState({ height: 0, scale: 1 });
   const [generatorMode, setGeneratorMode] = useState<GeneratorMode>("cards");
   const [mode, setMode] = useState<"manual" | "scrape">("manual");
   const [cardType, setCardType] = useState<CardType>("swiss");
@@ -347,11 +349,45 @@ export default function Page() {
   ]);
 
   const palette = designs[design];
+  const canvasWidth = generatorMode === "pubmat" ? 780 : 680;
+  const fallbackCanvasHeight = generatorMode === "pubmat" ? 1080 : 760;
+  const previewScale = previewSize.scale;
+  const previewBoxHeight =
+    (previewSize.height || fallbackCanvasHeight) * previewScale;
 
   useEffect(() => {
     const timer = window.setTimeout(() => setShowSplash(false), 3000);
     return () => window.clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    const viewport = previewViewportRef.current;
+    const canvas = cardRef.current;
+    if (!viewport || !canvas) return;
+
+    const updatePreviewSize = () => {
+      const nextScale = Math.min(1, viewport.clientWidth / canvasWidth);
+      const nextHeight = canvas.offsetHeight;
+      setPreviewSize((current) => {
+        const scaleChanged = Math.abs(current.scale - nextScale) > 0.001;
+        const heightChanged = Math.abs(current.height - nextHeight) > 1;
+        return scaleChanged || heightChanged
+          ? { height: nextHeight, scale: nextScale }
+          : current;
+      });
+    };
+
+    updatePreviewSize();
+    const observer = new ResizeObserver(updatePreviewSize);
+    observer.observe(viewport);
+    observer.observe(canvas);
+    window.addEventListener("resize", updatePreviewSize);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updatePreviewSize);
+    };
+  }, [canvasWidth, generatorMode]);
 
   const playerMatches = useMemo(() => {
     const needle = scrapePlayer.trim().toLowerCase();
@@ -953,7 +989,7 @@ export default function Page() {
         </div>
       </aside>
 
-      <section className="card-stage flex min-h-screen flex-col items-center gap-6 overflow-auto p-6 lg:p-10">
+      <section className="card-stage flex min-h-screen flex-col items-center gap-6 overflow-auto p-4 sm:p-6 lg:p-10">
         <div
           className={cn(
             "w-full font-condensed text-xs font-bold uppercase tracking-[0.28em] text-muted-foreground",
@@ -963,29 +999,53 @@ export default function Page() {
           Live Preview
         </div>
         <div
-          ref={cardRef}
-          className={cn(
-            "shadow-2xl",
-            generatorMode === "pubmat" ? "pubmat-stage" : "report-card",
-          )}
-          style={{
-            background:
-              generatorMode === "pubmat"
-                ? pubMatThemes[pubTheme].paper
-                : palette.bg,
-          }}
+          ref={previewViewportRef}
+          className="flex w-full justify-center overflow-visible"
         >
-          {generatorMode === "pubmat" ? (
-            <PubMatPoster pubMat={pubMat} theme={pubMatThemes[pubTheme]} />
-          ) : (
-            <CardRenderer
-              form={form}
-              rounds={rounds}
-              topCut={topCut}
-              cardType={cardType}
-              palette={palette}
-            />
-          )}
+          <div
+            className="relative"
+            style={{
+              width: canvasWidth * previewScale,
+              height: previewBoxHeight,
+            }}
+          >
+            <div
+              className="absolute left-1/2 top-0"
+              style={{
+                transform: `translateX(-50%) scale(${previewScale})`,
+                transformOrigin: "top center",
+              }}
+            >
+              <div
+                ref={cardRef}
+                className={cn(
+                  "shadow-2xl",
+                  generatorMode === "pubmat" ? "pubmat-stage" : "report-card",
+                )}
+                style={{
+                  background:
+                    generatorMode === "pubmat"
+                      ? pubMatThemes[pubTheme].paper
+                      : palette.bg,
+                }}
+              >
+                {generatorMode === "pubmat" ? (
+                  <PubMatPoster
+                    pubMat={pubMat}
+                    theme={pubMatThemes[pubTheme]}
+                  />
+                ) : (
+                  <CardRenderer
+                    form={form}
+                    rounds={rounds}
+                    topCut={topCut}
+                    cardType={cardType}
+                    palette={palette}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </main>
@@ -1000,7 +1060,7 @@ function SplashScreen() {
         <div className="splash-logo-wrap relative">
           <div className="absolute inset-0 rounded-full bg-[#f2b84a]/20 blur-3xl" />
           <img
-            src="/tool-icon.svg"
+            src="/icon.png"
             alt="Leandro's Tournament Card Generator"
             className="relative h-44 w-44 drop-shadow-[0_0_34px_rgba(242,184,74,0.55)] md:h-56 md:w-56"
             draggable={false}

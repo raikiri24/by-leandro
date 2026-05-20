@@ -6,9 +6,9 @@ export const metadata: Metadata = {
   description:
     "Generate player result cards from Challonge tournaments or manual inputs.",
   icons: {
-    icon: "/tool-icon.svg",
-    shortcut: "/tool-icon.svg",
-    apple: "/tool-icon.svg",
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
   },
 };
 

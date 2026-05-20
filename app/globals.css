@@ -48,13 +48,13 @@
 }
 
 .report-card {
-  width: min(680px, calc(100vw - 32px));
+  width: 680px;
   overflow: hidden;
   position: relative;
 }
 
 .pubmat-stage {
-  width: min(780px, calc(100vw - 32px));
+  width: 780px;
   position: relative;
   overflow: hidden;
 }
