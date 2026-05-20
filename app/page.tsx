@@ -1,14 +1,18 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toJpeg } from "html-to-image";
 import {
+  CalendarDays,
   ChevronLeft,
   ChevronRight,
   Download,
+  ImagePlus,
   Loader2,
   Plus,
   Search,
+  Sparkles,
+  Trash2,
   Trophy,
   Wand2,
 } from "lucide-react";
@@ -19,7 +23,9 @@ import { cn } from "@/lib/utils";
 
 // ─── types ────────────────────────────────────────────────────────────────────
 type CardType = "swiss" | "topcut";
+type GeneratorMode = "cards" | "pubmat";
 type LayoutKey = "report" | "arcade" | "blade" | "award" | "minimal";
+type PubMatThemeKey = "deadly" | "pop" | "clean";
 type DesignKey =
   | "signal"
   | "ember"
@@ -90,6 +96,42 @@ type CardProps = {
   topCut: TopCutMatch[];
   cardType: CardType;
   palette: Design;
+};
+type ImageSlotKey =
+  | "hero"
+  | "product"
+  | "gallery1"
+  | "gallery2"
+  | "gallery3"
+  | "gallery4";
+type PubMatState = {
+  shopName: string;
+  partners: string;
+  game: string;
+  eventName: string;
+  eventType: string;
+  venue: string;
+  date: string;
+  prepTime: string;
+  startTime: string;
+  preRegPrice: string;
+  walkInPrice: string;
+  prizeHeadline: string;
+  guestHeadline: string;
+  guests: string[];
+  sponsors: string[];
+  notes: string[];
+  images: Record<ImageSlotKey, string>;
+};
+type PubMatTheme = {
+  label: string;
+  bg: string;
+  paper: string;
+  ink: string;
+  muted: string;
+  accent: string;
+  accent2: string;
+  block: string;
 };
 
 // ─── design catalog ───────────────────────────────────────────────────────────
@@ -207,12 +249,76 @@ const initialRounds: Round[] = [
   { rnd: "R3", opp: "", score: "", result: "loss" },
 ];
 
+const pubMatThemes: Record<PubMatThemeKey, PubMatTheme> = {
+  deadly: {
+    label: "Deadly Spin",
+    bg: "#111111",
+    paper: "#e8e3d8",
+    ink: "#202124",
+    muted: "#6b665e",
+    accent: "#f52236",
+    accent2: "#7a1720",
+    block: "#111111",
+  },
+  pop: {
+    label: "Pop Blast",
+    bg: "#0b1020",
+    paper: "#f7f3ff",
+    ink: "#151322",
+    muted: "#6d647d",
+    accent: "#ff3d9a",
+    accent2: "#00a6ff",
+    block: "#151322",
+  },
+  clean: {
+    label: "Shop Board",
+    bg: "#101316",
+    paper: "#f6f7f2",
+    ink: "#181a1c",
+    muted: "#666b70",
+    accent: "#1d9a6c",
+    accent2: "#f4b942",
+    block: "#181a1c",
+  },
+};
+
+const initialPubMat: PubMatState = {
+  shopName: "Hobby Shop",
+  partners: "Community Tournament",
+  game: "Beyblade X",
+  eventName: "Grand Tournament",
+  eventType: "Ranked Event",
+  venue: "At Your Hobby Shop",
+  date: "05.23.26",
+  prepTime: "11AM Prep",
+  startTime: "12PM Start",
+  preRegPrice: "P649",
+  walkInPrice: "P699",
+  prizeHeadline: "Progressive Prizes",
+  guestHeadline: "With Special Guests",
+  guests: ["Guest One", "Guest Two", "Guest Three", "Guest Four"],
+  sponsors: ["Shop", "Team", "Cafe", "League", "Brand", "Club"],
+  notes: ["Limited slots", "Bring legal deck", "On-site registration"],
+  images: {
+    hero: "",
+    product: "",
+    gallery1: "",
+    gallery2: "",
+    gallery3: "",
+    gallery4: "",
+  },
+};
+
 // ─── page ─────────────────────────────────────────────────────────────────────
 export default function Page() {
   const cardRef = useRef<HTMLDivElement>(null);
+  const [showSplash, setShowSplash] = useState(true);
+  const [generatorMode, setGeneratorMode] = useState<GeneratorMode>("cards");
   const [mode, setMode] = useState<"manual" | "scrape">("manual");
   const [cardType, setCardType] = useState<CardType>("swiss");
   const [design, setDesign] = useState<DesignKey>("signal");
+  const [pubTheme, setPubTheme] = useState<PubMatThemeKey>("deadly");
+  const [pubMat, setPubMat] = useState<PubMatState>(initialPubMat);
   const [scrapeUrl, setScrapeUrl] = useState("https://challonge.com/kr11x97w");
   const [scrapePlayer, setScrapePlayer] = useState("");
   const [scraped, setScraped] = useState<ScrapedData | null>(null);
@@ -241,6 +347,11 @@ export default function Page() {
   ]);
 
   const palette = designs[design];
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setShowSplash(false), 3000);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const playerMatches = useMemo(() => {
     const needle = scrapePlayer.trim().toLowerCase();
@@ -371,17 +482,19 @@ export default function Page() {
     if (!cardRef.current) return;
     setExporting(true);
     try {
+      const fileName =
+        generatorMode === "pubmat"
+          ? `${pubMat.shopName}_${pubMat.eventName}_pub_mat`
+          : `${form.player}_${form.tournament}_${cardType}`;
       const dataUrl = await toJpeg(cardRef.current, {
         pixelRatio: 2,
         cacheBust: true,
-        backgroundColor: palette.bg,
+        backgroundColor:
+          generatorMode === "pubmat" ? pubMatThemes[pubTheme].paper : palette.bg,
         quality: 0.95,
       });
       const a = document.createElement("a");
-      a.download =
-        `${form.player}_${form.tournament}_${cardType}`
-          .replace(/\W+/g, "_")
-          .toLowerCase() + ".jpg";
+      a.download = fileName.replace(/\W+/g, "_").toLowerCase() + ".jpg";
       a.href = dataUrl;
       a.click();
     } finally {
@@ -391,6 +504,7 @@ export default function Page() {
 
   return (
     <main className="grid min-h-screen grid-cols-1 lg:grid-cols-[440px_1fr]">
+      {showSplash && <SplashScreen />}
       <aside className="bg-card lg:h-screen lg:overflow-y-auto">
         <div className="sticky top-0 z-20 border-b bg-card/95 px-6 py-5 backdrop-blur">
           <h1 className="font-display text-3xl tracking-[0.15em] text-primary">
@@ -398,6 +512,34 @@ export default function Page() {
           </h1>
         </div>
 
+        <Section title="Module">
+          <div className="grid grid-cols-2 rounded-md border bg-secondary p-1">
+            <Button
+              variant={generatorMode === "cards" ? "default" : "ghost"}
+              onClick={() => setGeneratorMode("cards")}
+              className="font-condensed uppercase tracking-[0.18em]"
+            >
+              Cards
+            </Button>
+            <Button
+              variant={generatorMode === "pubmat" ? "default" : "ghost"}
+              onClick={() => setGeneratorMode("pubmat")}
+              className="font-condensed uppercase tracking-[0.18em]"
+            >
+              Pub Mat
+            </Button>
+          </div>
+        </Section>
+
+        {generatorMode === "pubmat" ? (
+          <PubMatEditor
+            pubMat={pubMat}
+            setPubMat={setPubMat}
+            theme={pubTheme}
+            setTheme={setPubTheme}
+          />
+        ) : (
+          <>
         <Section title="Input Mode">
           <div className="grid grid-cols-2 rounded-md border bg-secondary p-1">
             {(["manual", "scrape"] as const).map((item) => (
@@ -796,6 +938,8 @@ export default function Page() {
             </div>
           </Section>
         )}
+          </>
+        )}
 
         <div className="space-y-3 px-6 pb-6">
           <Button
@@ -810,24 +954,686 @@ export default function Page() {
       </aside>
 
       <section className="card-stage flex min-h-screen flex-col items-center gap-6 overflow-auto p-6 lg:p-10">
-        <div className="w-full max-w-[680px] font-condensed text-xs font-bold uppercase tracking-[0.28em] text-muted-foreground">
+        <div
+          className={cn(
+            "w-full font-condensed text-xs font-bold uppercase tracking-[0.28em] text-muted-foreground",
+            generatorMode === "pubmat" ? "max-w-[780px]" : "max-w-[680px]",
+          )}
+        >
           Live Preview
         </div>
         <div
           ref={cardRef}
-          className="report-card shadow-2xl"
-          style={{ background: palette.bg }}
+          className={cn(
+            "shadow-2xl",
+            generatorMode === "pubmat" ? "pubmat-stage" : "report-card",
+          )}
+          style={{
+            background:
+              generatorMode === "pubmat"
+                ? pubMatThemes[pubTheme].paper
+                : palette.bg,
+          }}
         >
-          <CardRenderer
-            form={form}
-            rounds={rounds}
-            topCut={topCut}
-            cardType={cardType}
-            palette={palette}
-          />
+          {generatorMode === "pubmat" ? (
+            <PubMatPoster pubMat={pubMat} theme={pubMatThemes[pubTheme]} />
+          ) : (
+            <CardRenderer
+              form={form}
+              rounds={rounds}
+              topCut={topCut}
+              cardType={cardType}
+              palette={palette}
+            />
+          )}
         </div>
       </section>
     </main>
+  );
+}
+
+function SplashScreen() {
+  return (
+    <div className="splash-screen fixed inset-0 z-50 flex items-center justify-center bg-black">
+      <div className="splash-grid absolute inset-0 opacity-35" />
+      <div className="relative flex flex-col items-center gap-6 px-6 text-center">
+        <div className="splash-logo-wrap relative">
+          <div className="absolute inset-0 rounded-full bg-[#f2b84a]/20 blur-3xl" />
+          <img
+            src="/tool-icon.svg"
+            alt="Leandro's Tournament Card Generator"
+            className="relative h-44 w-44 drop-shadow-[0_0_34px_rgba(242,184,74,0.55)] md:h-56 md:w-56"
+            draggable={false}
+          />
+        </div>
+        <div>
+          <div className="font-display text-5xl leading-none tracking-[0.12em] text-[#ffd76a] md:text-6xl">
+            LEANDRO'S
+          </div>
+          <div className="mt-2 font-condensed text-sm font-black uppercase tracking-[0.32em] text-white/60">
+            Tournament Card & Pub Mat Generator
+          </div>
+        </div>
+        <div className="h-1 w-52 overflow-hidden rounded-full bg-white/10">
+          <div className="splash-loader h-full rounded-full bg-gradient-to-r from-[#d89023] via-[#ffe07a] to-[#f52236]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PubMatEditor({
+  pubMat,
+  setPubMat,
+  theme,
+  setTheme,
+}: {
+  pubMat: PubMatState;
+  setPubMat: React.Dispatch<React.SetStateAction<PubMatState>>;
+  theme: PubMatThemeKey;
+  setTheme: (theme: PubMatThemeKey) => void;
+}) {
+  const setField = (patch: Partial<PubMatState>) =>
+    setPubMat((current) => ({ ...current, ...patch }));
+  const setList = (key: "guests" | "sponsors" | "notes", values: string[]) =>
+    setPubMat((current) => ({ ...current, [key]: values }));
+  const setImage = (key: ImageSlotKey, value: string) =>
+    setPubMat((current) => ({
+      ...current,
+      images: { ...current.images, [key]: value },
+    }));
+
+  return (
+    <>
+      <Section title="Poster Theme">
+        <div className="grid grid-cols-3 gap-2">
+          {(Object.keys(pubMatThemes) as PubMatThemeKey[]).map((key) => {
+            const item = pubMatThemes[key];
+            return (
+              <button
+                key={key}
+                onClick={() => setTheme(key)}
+                className={cn(
+                  "rounded-md border p-3 text-left transition",
+                  theme === key ? "border-primary bg-primary/10" : "bg-secondary",
+                )}
+              >
+                <div className="mb-2 flex gap-1">
+                  {[item.accent, item.accent2, item.ink].map((color) => (
+                    <span
+                      key={color}
+                      className="h-4 w-4 rounded-full border border-white/20"
+                      style={{ background: color }}
+                    />
+                  ))}
+                </div>
+                <div className="font-condensed text-sm font-bold uppercase tracking-[0.14em]">
+                  {item.label}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </Section>
+
+      <Section title="Event Details">
+        <Field label="Shop / Host">
+          <Input
+            value={pubMat.shopName}
+            onChange={(e) => setField({ shopName: e.target.value })}
+          />
+        </Field>
+        <Field label="Partners">
+          <Input
+            value={pubMat.partners}
+            onChange={(e) => setField({ partners: e.target.value })}
+          />
+        </Field>
+        <Field label="Game / Hobby">
+          <Input
+            value={pubMat.game}
+            onChange={(e) => setField({ game: e.target.value })}
+          />
+        </Field>
+        <Field label="Event Name">
+          <Input
+            value={pubMat.eventName}
+            onChange={(e) => setField({ eventName: e.target.value })}
+          />
+        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Event Type">
+            <Input
+              value={pubMat.eventType}
+              onChange={(e) => setField({ eventType: e.target.value })}
+            />
+          </Field>
+          <Field label="Date">
+            <Input
+              value={pubMat.date}
+              onChange={(e) => setField({ date: e.target.value })}
+            />
+          </Field>
+        </div>
+        <Field label="Venue">
+          <Input
+            value={pubMat.venue}
+            onChange={(e) => setField({ venue: e.target.value })}
+          />
+        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Prep Time">
+            <Input
+              value={pubMat.prepTime}
+              onChange={(e) => setField({ prepTime: e.target.value })}
+            />
+          </Field>
+          <Field label="Start Time">
+            <Input
+              value={pubMat.startTime}
+              onChange={(e) => setField({ startTime: e.target.value })}
+            />
+          </Field>
+        </div>
+      </Section>
+
+      <Section title="Prices & Callouts">
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Pre-registration">
+            <Input
+              value={pubMat.preRegPrice}
+              onChange={(e) => setField({ preRegPrice: e.target.value })}
+            />
+          </Field>
+          <Field label="Walk-in">
+            <Input
+              value={pubMat.walkInPrice}
+              onChange={(e) => setField({ walkInPrice: e.target.value })}
+            />
+          </Field>
+        </div>
+        <Field label="Prize Headline">
+          <Input
+            value={pubMat.prizeHeadline}
+            onChange={(e) => setField({ prizeHeadline: e.target.value })}
+          />
+        </Field>
+        <Field label="Guest Headline">
+          <Input
+            value={pubMat.guestHeadline}
+            onChange={(e) => setField({ guestHeadline: e.target.value })}
+          />
+        </Field>
+      </Section>
+
+      <Section title="Images">
+        <div className="grid grid-cols-2 gap-3">
+          {(
+            [
+              ["hero", "Main Visual"],
+              ["product", "Prize/Product"],
+              ["gallery1", "Gallery 1"],
+              ["gallery2", "Gallery 2"],
+              ["gallery3", "Gallery 3"],
+              ["gallery4", "Gallery 4"],
+            ] as [ImageSlotKey, string][]
+          ).map(([key, label]) => (
+            <ImagePicker
+              key={key}
+              label={label}
+              value={pubMat.images[key]}
+              onChange={(value) => setImage(key, value)}
+            />
+          ))}
+        </div>
+      </Section>
+
+      <EditableList
+        title="Guests"
+        values={pubMat.guests}
+        onChange={(values) => setList("guests", values)}
+        placeholder="Guest name"
+      />
+      <EditableList
+        title="Sponsors"
+        values={pubMat.sponsors}
+        onChange={(values) => setList("sponsors", values)}
+        placeholder="Sponsor / logo text"
+      />
+      <EditableList
+        title="Notes"
+        values={pubMat.notes}
+        onChange={(values) => setList("notes", values)}
+        placeholder="Event note"
+      />
+    </>
+  );
+}
+
+function ImagePicker({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="rounded-md border bg-secondary p-3">
+      <Label>{label}</Label>
+      <div className="mt-2 flex items-center gap-2">
+        <label className="inline-flex h-9 flex-1 cursor-pointer items-center justify-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90">
+          <ImagePlus className="h-4 w-4" />
+          Upload
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = () => onChange(String(reader.result || ""));
+              reader.readAsDataURL(file);
+              event.currentTarget.value = "";
+            }}
+          />
+        </label>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          aria-label={`Clear ${label}`}
+          onClick={() => onChange("")}
+          disabled={!value}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+      {value && (
+        <div
+          className="mt-2 h-16 rounded bg-cover bg-center"
+          style={{ backgroundImage: `url(${value})` }}
+        />
+      )}
+    </div>
+  );
+}
+
+function EditableList({
+  title,
+  values,
+  onChange,
+  placeholder,
+}: {
+  title: string;
+  values: string[];
+  onChange: (values: string[]) => void;
+  placeholder: string;
+}) {
+  return (
+    <Section title={title}>
+      <div className="space-y-2">
+        {values.map((value, index) => (
+          <div key={index} className="grid grid-cols-[1fr_40px] gap-2">
+            <Input
+              value={value}
+              placeholder={placeholder}
+              onChange={(e) => onChange(update(values, index, e.target.value))}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              aria-label={`Remove ${title} ${index + 1}`}
+              onClick={() => onChange(values.filter((_, i) => i !== index))}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+      </div>
+      <Button
+        type="button"
+        variant="outline"
+        className="mt-3 w-full"
+        onClick={() => onChange([...values, ""])}
+      >
+        <Plus className="h-4 w-4" /> Add {title.slice(0, -1)}
+      </Button>
+    </Section>
+  );
+}
+
+function PubMatPoster({
+  pubMat,
+  theme,
+}: {
+  pubMat: PubMatState;
+  theme: PubMatTheme;
+}) {
+  const gallery = [
+    pubMat.images.gallery1,
+    pubMat.images.gallery2,
+    pubMat.images.gallery3,
+    pubMat.images.gallery4,
+  ];
+  const visibleGuests = pubMat.guests.filter(Boolean);
+  const visibleSponsors = pubMat.sponsors.filter(Boolean);
+  const visibleNotes = pubMat.notes.filter(Boolean);
+
+  return (
+    <div
+      className="relative min-h-[1080px] overflow-hidden border-[10px] p-5"
+      style={{
+        background: theme.paper,
+        borderColor: theme.ink,
+        color: theme.ink,
+      }}
+    >
+      <div className="pubmat-paper-grain absolute inset-0 opacity-60" />
+      <div
+        className="absolute inset-4 pointer-events-none border-2"
+        style={{ borderColor: theme.ink }}
+      />
+
+      <div className="relative z-10">
+        <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-5 px-6 py-3">
+          <LogoWordmark
+            label={pubMat.shopName}
+            sublabel={pubMat.partners}
+            align="left"
+            theme={theme}
+          />
+          <div className="font-display text-6xl leading-none tracking-[0.08em]">
+            X
+          </div>
+          <LogoWordmark
+            label={pubMat.game}
+            sublabel={pubMat.eventType}
+            align="right"
+            theme={theme}
+          />
+        </header>
+
+        <section className="mt-2 text-center">
+          <div
+            className="font-display text-6xl leading-none tracking-[0.05em]"
+            style={{ color: theme.ink }}
+          >
+            {pubMat.game}
+          </div>
+          <div
+            className="font-display text-[92px] leading-[0.85] tracking-[0.03em]"
+            style={{ color: theme.ink }}
+          >
+            {pubMat.eventName}
+          </div>
+          <div
+            className="font-display text-[132px] leading-[0.78] tracking-[0.03em]"
+            style={{
+              color: theme.accent2,
+              WebkitTextStroke: `5px ${theme.accent}`,
+              textShadow: `5px 5px 0 ${theme.ink}`,
+            }}
+          >
+            {pubMat.eventType}
+          </div>
+        </section>
+
+        <div
+          className="mt-5 flex items-center justify-center gap-5 px-5 py-3 font-display text-5xl leading-none tracking-[0.08em] text-white"
+          style={{ background: theme.block }}
+        >
+          <Sparkles className="h-9 w-9" style={{ color: theme.accent }} />
+          <span className="truncate">{pubMat.venue}</span>
+          <Sparkles className="h-9 w-9" style={{ color: theme.accent }} />
+        </div>
+
+        <div className="mt-4 grid grid-cols-[1fr_0.9fr] gap-5">
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <PriceBlock
+                label="Pre Registration"
+                value={pubMat.preRegPrice}
+                theme={theme}
+              />
+              <PriceBlock
+                label="Walk In Registration"
+                value={pubMat.walkInPrice}
+                theme={theme}
+              />
+            </div>
+
+            <div className="grid grid-cols-[0.95fr_1fr] gap-4">
+              <PosterImage
+                src={pubMat.images.hero}
+                label="Main visual"
+                className="h-[480px]"
+                theme={theme}
+              />
+              <div className="grid grid-rows-2 gap-4">
+                {gallery.slice(0, 2).map((src, index) => (
+                  <PosterImage
+                    key={index}
+                    src={src}
+                    label={`Guest ${index + 1}`}
+                    className="h-[232px]"
+                    theme={theme}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {visibleGuests.length > 0 && (
+              <div className="grid grid-cols-2 gap-3">
+                {visibleGuests.slice(0, 8).map((guest, index) => (
+                  <div
+                    key={`${guest}-${index}`}
+                    className="border-4 bg-white px-3 py-2 text-center font-display text-3xl leading-none text-white"
+                    style={{
+                      borderColor: theme.ink,
+                      background: theme.accent,
+                      textShadow: `2px 2px 0 ${theme.ink}`,
+                    }}
+                  >
+                    {guest}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <PosterImage
+              src={pubMat.images.product}
+              label="Featured prize"
+              className="h-[454px]"
+              theme={theme}
+              accent
+            />
+            <div className="flex items-center gap-3">
+              <CalendarDays className="h-12 w-12 shrink-0" />
+              <div
+                className="font-display text-[74px] leading-none tracking-[0.05em]"
+                style={{ color: theme.ink }}
+              >
+                {pubMat.date}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <TimeBlock value={pubMat.prepTime} theme={theme} />
+              <TimeBlock value={pubMat.startTime} theme={theme} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {gallery.slice(2).map((src, index) => (
+                <PosterImage
+                  key={index}
+                  src={src}
+                  label={`Feature ${index + 1}`}
+                  className="h-[160px]"
+                  theme={theme}
+                />
+              ))}
+            </div>
+            {visibleNotes.length > 0 && (
+              <div className="space-y-2">
+                {visibleNotes.slice(0, 4).map((note, index) => (
+                  <div
+                    key={`${note}-${index}`}
+                    className="border-l-8 bg-white px-4 py-2 font-condensed text-2xl font-bold uppercase tracking-[0.08em]"
+                    style={{ borderColor: theme.accent, color: theme.ink }}
+                  >
+                    {note}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <footer className="mt-5 space-y-3">
+          <Banner text={pubMat.prizeHeadline} theme={theme} />
+          <Banner text={pubMat.guestHeadline} theme={theme} />
+          {visibleSponsors.length > 0 && (
+            <div className="grid grid-cols-6 gap-2 pt-1">
+              {visibleSponsors.slice(0, 18).map((sponsor, index) => (
+                <div
+                  key={`${sponsor}-${index}`}
+                  className="flex h-14 items-center justify-center border-2 bg-white px-2 text-center font-condensed text-sm font-black uppercase leading-tight"
+                  style={{ borderColor: theme.ink, color: theme.ink }}
+                >
+                  {sponsor}
+                </div>
+              ))}
+            </div>
+          )}
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+function LogoWordmark({
+  label,
+  sublabel,
+  align,
+  theme,
+}: {
+  label: string;
+  sublabel: string;
+  align: "left" | "right";
+  theme: PubMatTheme;
+}) {
+  return (
+    <div className={cn("min-w-0", align === "right" && "text-right")}>
+      <div
+        className="truncate font-display text-4xl leading-none tracking-[0.04em]"
+        style={{ color: theme.accent2 }}
+      >
+        {label}
+      </div>
+      <div
+        className="truncate font-condensed text-lg font-black uppercase tracking-[0.12em]"
+        style={{ color: theme.accent }}
+      >
+        {sublabel}
+      </div>
+    </div>
+  );
+}
+
+function PriceBlock({
+  label,
+  value,
+  theme,
+}: {
+  label: string;
+  value: string;
+  theme: PubMatTheme;
+}) {
+  return (
+    <div>
+      <div
+        className="font-display text-[64px] leading-none"
+        style={{
+          color: theme.accent,
+          WebkitTextStroke: `2px ${theme.accent2}`,
+          textShadow: `3px 3px 0 ${theme.ink}`,
+        }}
+      >
+        {value}
+      </div>
+      <div className="font-condensed text-lg font-black uppercase tracking-[0.08em]">
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function TimeBlock({ value, theme }: { value: string; theme: PubMatTheme }) {
+  return (
+    <div
+      className="border-4 px-3 py-2 text-center font-display text-4xl leading-none tracking-[0.05em]"
+      style={{ borderColor: theme.ink, background: theme.paper }}
+    >
+      {value}
+    </div>
+  );
+}
+
+function PosterImage({
+  src,
+  label,
+  className,
+  theme,
+  accent,
+}: {
+  src: string;
+  label: string;
+  className: string;
+  theme: PubMatTheme;
+  accent?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative overflow-hidden border-[6px] bg-white",
+        className,
+      )}
+      style={{
+        borderColor: theme.ink,
+        background: accent ? theme.accent : "#ffffff",
+      }}
+    >
+      {src ? (
+        <img
+          src={src}
+          alt=""
+          className="h-full w-full object-cover"
+          draggable={false}
+        />
+      ) : (
+        <div
+          className="flex h-full items-center justify-center p-6 text-center font-condensed text-2xl font-black uppercase tracking-[0.12em]"
+          style={{ color: accent ? "#ffffff" : theme.muted }}
+        >
+          {label}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Banner({ text, theme }: { text: string; theme: PubMatTheme }) {
+  return (
+    <div
+      className="px-5 py-3 text-center font-display text-5xl leading-none tracking-[0.08em] text-white"
+      style={{ background: theme.block }}
+    >
+      {text}
+    </div>
   );
 }
 

@@ -1,0 +1,47 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" fill="#020202"/>
+  <defs>
+    <linearGradient id="gold" x1="315" y1="147" x2="602" y2="808" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff3a9"/>
+      <stop offset=".24" stop-color="#e0a32e"/>
+      <stop offset=".52" stop-color="#ffe275"/>
+      <stop offset=".78" stop-color="#9f5b12"/>
+      <stop offset="1" stop-color="#ffd879"/>
+    </linearGradient>
+    <linearGradient id="red" x1="785" y1="184" x2="576" y2="822" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff542d"/>
+      <stop offset=".18" stop-color="#ff0808"/>
+      <stop offset=".58" stop-color="#b60000"/>
+      <stop offset="1" stop-color="#ff3636"/>
+    </linearGradient>
+    <filter id="glow" x="74" y="61" width="876" height="876" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 1 0 1 0 0 .58 0 0 1 0 .06 0 0 0 .38 0"/>
+      <feBlend in="SourceGraphic"/>
+    </filter>
+    <filter id="redGlow" x="512" y="168" width="346" height="652" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 1 0 0 0 0 .02 0 0 0 0 0 0 0 0 .5 0"/>
+      <feBlend in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g filter="url(#glow)">
+    <path d="M152 497c0-198 161-359 360-359 199 0 360 161 360 359" stroke="url(#gold)" stroke-width="23"/>
+    <path d="M872 527c0 198-161 359-360 359-199 0-360-161-360-359" stroke="url(#gold)" stroke-width="23"/>
+    <path d="M512 79l24 73-24 73-24-73 24-73ZM512 799l24 73-24 73-24-73 24-73ZM79 512l73-24 73 24-73 24-73-24ZM799 512l73-24 73 24-73 24-73-24Z" fill="url(#gold)"/>
+  </g>
+  <path d="M511 136c-26 72-62 138-108 198 43-24 86-43 129-56-12 88-50 167-115 237 46-23 91-43 134-58-27 101-80 197-158 287 121-51 214-137 278-259-53 25-102 44-148 56 76-80 130-176 162-288-54 15-105 36-153 62 8-57 1-116-21-179Z" fill="url(#gold)" stroke="#2f1a05" stroke-width="11" stroke-linejoin="round"/>
+  <path d="M377 553c-39 44-60 104-55 166l59-111 57 111c-2-67-22-121-61-166Z" fill="url(#gold)" stroke="#2f1a05" stroke-width="9" stroke-linejoin="round"/>
+  <path d="M331 572c-17 60-11 127 18 202l30-160-48-42Z" fill="url(#gold)" stroke="#2f1a05" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M442 737l-66-129 19 178 47-49Z" fill="#050505" stroke="url(#gold)" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M515 737l63-142-19 191-44-49Z" fill="#050505" stroke="url(#gold)" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M350 611l52 15 31 67-52-28-31-54ZM568 611l-52 15-31 67 52-28 31-54Z" fill="#030303" stroke="url(#gold)" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M386 648l36 17-31 14-38-19 33-12ZM533 648l-36 17 31 14 38-19-33-12Z" fill="#ffd772"/>
+  <path d="M386 648l36 17-31 14-38-19 33-12ZM533 648l-36 17 31 14 38-19-33-12Z" filter="url(#glow)"/>
+  <g filter="url(#redGlow)">
+    <path d="M795 177L573 487h103L539 789l241-326H672L795 177Z" fill="url(#red)" stroke="#ff786d" stroke-width="8" stroke-linejoin="round"/>
+    <path d="M660 360l141-103-100 149 107-42-138 120 61-107-71-17ZM662 578l141-103-100 149 107-42-138 120 61-107-71-17Z" fill="#f70a0a" opacity=".55"/>
+  </g>
+  <path d="M246 817c73 67 166 101 266 101s193-34 266-101" stroke="#f1b949" stroke-width="7" opacity=".38"/>
+  <path d="M246 207c73-67 166-101 266-101s193 34 266 101" stroke="#f1b949" stroke-width="7" opacity=".38"/>
+</svg>

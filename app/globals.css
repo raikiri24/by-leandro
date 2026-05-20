@@ -53,6 +53,12 @@
   position: relative;
 }
 
+.pubmat-stage {
+  width: min(780px, calc(100vw - 32px));
+  position: relative;
+  overflow: hidden;
+}
+
 .report-card::after {
   content: "";
   position: absolute;
@@ -63,6 +69,74 @@
 
 .diagonal-stripes {
   background: repeating-linear-gradient(-45deg, rgba(255,255,255,.035) 0 12px, transparent 12px 36px);
+}
+
+.pubmat-paper-grain {
+  background:
+    radial-gradient(circle at 20% 15%, rgba(0,0,0,.08) 0 1px, transparent 1px),
+    radial-gradient(circle at 70% 35%, rgba(255,255,255,.45) 0 1px, transparent 1px),
+    radial-gradient(circle at 45% 80%, rgba(0,0,0,.06) 0 1px, transparent 1px),
+    repeating-linear-gradient(8deg, rgba(0,0,0,.035) 0 1px, transparent 1px 9px);
+  background-size: 28px 28px, 34px 34px, 42px 42px, 100% 100%;
+}
+
+.splash-screen {
+  animation: splash-exit 3s ease forwards;
+}
+
+.splash-grid {
+  background:
+    linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px),
+    radial-gradient(circle at center, rgba(245,34,54,.2), transparent 48%);
+  background-size: 44px 44px, 44px 44px, 100% 100%;
+}
+
+.splash-logo-wrap {
+  animation: splash-mark 3s ease forwards;
+}
+
+.splash-loader {
+  animation: splash-load 3s ease forwards;
+  transform-origin: left;
+}
+
+@keyframes splash-exit {
+  0%,
+  82% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes splash-mark {
+  0% {
+    opacity: 0;
+    transform: scale(.86);
+  }
+  22%,
+  82% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes splash-load {
+  0% {
+    transform: scaleX(0);
+  }
+  82%,
+  100% {
+    transform: scaleX(1);
+  }
 }
 
 aside::-webkit-scrollbar {
