@@ -12,7 +12,12 @@ export function getMongoClient() {
   }
 
   if (!clientPromise) {
-    clientPromise = new MongoClient(mongoUri).connect().then((client) => {
+    clientPromise = new MongoClient(mongoUri, {
+      appName: "byleandro",
+      connectTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 10000,
+      tls: true,
+    }).connect().then((client) => {
       cachedClient = client;
       return client;
     });
