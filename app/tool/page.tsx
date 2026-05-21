@@ -11,13 +11,16 @@ import {
   Download,
   Gift,
   ImagePlus,
+  Layers,
   Lightbulb,
   Loader2,
   MapPin,
   MessageSquare,
+  Paintbrush,
   Plus,
   Search,
   Send,
+  SlidersHorizontal,
   Sparkles,
   Target,
   Trash2,
@@ -709,9 +712,9 @@ export default function ToolPage() {
   }
 
   return (
-    <main className="grid min-h-screen grid-cols-1 bg-background text-foreground lg:grid-cols-[440px_1fr]">
+    <main className="flex min-h-dvh flex-col bg-background text-foreground lg:grid lg:min-h-screen lg:grid-cols-[440px_1fr]">
       {showSplash && <SplashScreen />}
-      <aside className="bg-card lg:h-screen lg:overflow-y-auto">
+      <aside className="hidden bg-card lg:block lg:h-screen lg:overflow-y-auto">
         <div className="sticky top-0 z-20 border-b bg-card/95 px-6 py-5 backdrop-blur">
           <div className="mb-4 flex items-center justify-between gap-3">
             <a
@@ -1189,14 +1192,20 @@ export default function ToolPage() {
         </div>
       </aside>
 
-      <section className="card-stage flex min-h-screen flex-col items-center gap-6 overflow-auto p-4 sm:p-6 lg:p-10">
+      <section className="card-stage flex flex-1 flex-col items-center gap-4 overflow-auto p-4 pb-28 sm:gap-6 sm:p-5 sm:pb-28 lg:min-h-screen lg:gap-6 lg:p-10 lg:pb-10">
         <div
           className={cn(
-            "w-full font-condensed text-xs font-bold uppercase tracking-[0.28em] text-muted-foreground",
+            "flex w-full items-center justify-between gap-3",
             generatorMode === "pubmat" ? "max-w-[780px]" : "max-w-[680px]",
           )}
         >
-          Live Preview
+          <span className="font-condensed text-xs font-bold uppercase tracking-[0.28em] text-muted-foreground">
+            Live Preview
+          </span>
+          {/* Mobile-only: quick mode indicator */}
+          <span className="rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 font-condensed text-[10px] font-black uppercase tracking-[0.18em] text-primary lg:hidden">
+            {generatorMode === "pubmat" ? "Pub Mat" : cardType === "swiss" ? "Swiss" : "Top Cut"}
+          </span>
         </div>
         <div
           ref={previewViewportRef}
@@ -1248,6 +1257,39 @@ export default function ToolPage() {
             </div>
         </div>
       </section>
+      <MobileToolbox
+        generatorMode={generatorMode}
+        setGeneratorMode={setGeneratorMode}
+        mode={mode}
+        setMode={setMode}
+        cardType={cardType}
+        setCardType={setCardType}
+        design={design}
+        setDesign={setDesign}
+        form={form}
+        setForm={setForm}
+        rounds={rounds}
+        setRounds={setRounds}
+        topCut={topCut}
+        setTopCut={setTopCut}
+        pubMat={pubMat}
+        setPubMat={setPubMat}
+        pubTheme={pubTheme}
+        setPubTheme={setPubTheme}
+        scrapeUrl={scrapeUrl}
+        setScrapeUrl={setScrapeUrl}
+        scrapePlayer={scrapePlayer}
+        setScrapePlayer={setScrapePlayer}
+        scraped={scraped}
+        logs={logs}
+        scrapeError={scrapeError}
+        loading={loading}
+        playerMatches={playerMatches}
+        runScraper={runScraper}
+        applyScrape={applyScrape}
+        downloadCard={downloadCard}
+        exporting={exporting}
+      />
       <FloatingFeedbackTool
         open={feedbackOpen}
         onOpenChange={setFeedbackOpen}
@@ -1648,6 +1690,651 @@ function FeedbackEditor({
   );
 }
 
+type MobileTab = "style" | "event" | "rounds" | null;
+
+function MobileToolbox({
+  generatorMode,
+  setGeneratorMode,
+  mode,
+  setMode,
+  cardType,
+  setCardType,
+  design,
+  setDesign,
+  form,
+  setForm,
+  rounds,
+  setRounds,
+  topCut,
+  setTopCut,
+  pubMat,
+  setPubMat,
+  pubTheme,
+  setPubTheme,
+  scrapeUrl,
+  setScrapeUrl,
+  scrapePlayer,
+  setScrapePlayer,
+  scraped,
+  logs,
+  scrapeError,
+  loading,
+  playerMatches,
+  runScraper,
+  applyScrape,
+  downloadCard,
+  exporting,
+}: {
+  generatorMode: GeneratorMode;
+  setGeneratorMode: (m: GeneratorMode) => void;
+  mode: "manual" | "scrape";
+  setMode: (m: "manual" | "scrape") => void;
+  cardType: CardType;
+  setCardType: (t: CardType) => void;
+  design: DesignKey;
+  setDesign: (d: DesignKey) => void;
+  form: FormState;
+  setForm: React.Dispatch<React.SetStateAction<FormState>>;
+  rounds: Round[];
+  setRounds: React.Dispatch<React.SetStateAction<Round[]>>;
+  topCut: TopCutMatch[];
+  setTopCut: React.Dispatch<React.SetStateAction<TopCutMatch[]>>;
+  pubMat: PubMatState;
+  setPubMat: React.Dispatch<React.SetStateAction<PubMatState>>;
+  pubTheme: PubMatThemeKey;
+  setPubTheme: (t: PubMatThemeKey) => void;
+  scrapeUrl: string;
+  setScrapeUrl: (u: string) => void;
+  scrapePlayer: string;
+  setScrapePlayer: (p: string) => void;
+  scraped: ScrapedData | null;
+  logs: string[];
+  scrapeError: string;
+  loading: boolean;
+  playerMatches: { round: number; opp: string; mySc: number; oppSc: number; result: Round["result"]; stage: string }[];
+  runScraper: () => void;
+  applyScrape: () => void;
+  downloadCard: () => void;
+  exporting: boolean;
+}) {
+  const [activeTab, setActiveTab] = useState<MobileTab>(null);
+
+  function toggle(tab: MobileTab) {
+    setActiveTab((prev) => (prev === tab ? null : tab));
+  }
+
+  const isCards = generatorMode === "cards";
+
+  const tabs = isCards
+    ? [
+        { id: "style" as MobileTab, icon: Paintbrush, label: "Style" },
+        { id: "event" as MobileTab, icon: Users, label: "Event" },
+        { id: "rounds" as MobileTab, icon: Trophy, label: "Rounds" },
+      ]
+    : [
+        { id: "style" as MobileTab, icon: Paintbrush, label: "Theme" },
+        { id: "event" as MobileTab, icon: SlidersHorizontal, label: "Details" },
+        { id: "rounds" as MobileTab, icon: ImagePlus, label: "Media" },
+      ];
+
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-40 lg:hidden">
+      {activeTab && (
+        <button
+          type="button"
+          aria-label="Close panel"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+          onClick={() => setActiveTab(null)}
+        />
+      )}
+
+      {activeTab && (
+        <div className="relative z-10 max-h-[74vh] overflow-y-auto rounded-t-2xl border-x border-t border-white/10 bg-card shadow-2xl">
+          <div className="flex justify-center pb-1 pt-3">
+            <div className="h-1 w-10 rounded-full bg-white/20" />
+          </div>
+          <div className="sticky top-0 z-20 flex items-center justify-between border-b border-white/10 bg-card/95 px-5 py-3 backdrop-blur">
+            <span className="font-condensed text-sm font-black uppercase tracking-widest text-primary">
+              {tabs.find((t) => t.id === activeTab)?.label}
+            </span>
+            <Button variant="ghost" size="icon" onClick={() => setActiveTab(null)}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Module toggle always at top of every panel */}
+          <div className="border-b border-white/10 px-5 py-3">
+            <div className="grid grid-cols-2 rounded-md border bg-secondary p-1">
+              {(
+                [
+                  ["cards", "Cards"],
+                  ["pubmat", "Pub Mat"],
+                ] as [GeneratorMode, string][]
+              ).map(([key, label]) => (
+                <Button
+                  key={key}
+                  variant={generatorMode === key ? "default" : "ghost"}
+                  onClick={() => setGeneratorMode(key)}
+                  className="font-condensed uppercase tracking-[0.14em]"
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Style / Theme ── */}
+          {activeTab === "style" && isCards && (
+            <div className="px-5 py-4">
+              <DesignCarousel designs={designs} selected={design} onSelect={setDesign} />
+            </div>
+          )}
+
+          {activeTab === "style" && !isCards && (
+            <div className="px-5 py-4">
+              <div className="grid grid-cols-3 gap-2">
+                {(Object.keys(pubMatThemes) as PubMatThemeKey[]).map((key) => {
+                  const item = pubMatThemes[key];
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => setPubTheme(key)}
+                      className={cn(
+                        "rounded-md border p-3 text-left transition",
+                        pubTheme === key ? "border-primary bg-primary/10" : "bg-secondary",
+                      )}
+                    >
+                      <div className="mb-2 flex gap-1">
+                        {[item.accent, item.accent2, item.ink].map((color) => (
+                          <span
+                            key={color}
+                            className="h-4 w-4 rounded-full border border-white/20"
+                            style={{ background: color }}
+                          />
+                        ))}
+                      </div>
+                      <div className="font-condensed text-sm font-bold uppercase tracking-[0.14em]">
+                        {item.label}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* ── Event (Cards) ── */}
+          {activeTab === "event" && isCards && (
+            <div className="space-y-0 pb-4">
+              <div className="border-b border-white/10 px-5 py-4">
+                <div className="mb-2 font-condensed text-xs font-bold uppercase tracking-[0.28em] text-muted-foreground">
+                  Input Mode
+                </div>
+                <div className="grid grid-cols-2 rounded-md border bg-secondary p-1">
+                  {(["manual", "scrape"] as const).map((item) => (
+                    <Button
+                      key={item}
+                      variant={mode === item ? "default" : "ghost"}
+                      onClick={() => setMode(item)}
+                      className="font-condensed uppercase tracking-[0.18em]"
+                    >
+                      {item}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {mode === "scrape" && (
+                <div className="border-b border-white/10 px-5 py-4">
+                  <div className="space-y-3 rounded-lg border border-primary/25 bg-primary/5 p-4">
+                    <p className="text-xs leading-6 text-muted-foreground">
+                      Server-side Challonge scraping.
+                    </p>
+                    <div className="flex gap-2">
+                      <Input
+                        value={scrapeUrl}
+                        onChange={(e) => setScrapeUrl(e.target.value)}
+                        className="font-mono text-xs"
+                      />
+                      <Button onClick={runScraper} disabled={loading} size="icon" aria-label="Fetch">
+                        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                    {logs.length > 0 && (
+                      <pre className="max-h-24 overflow-auto rounded-md bg-black/30 p-3 font-mono text-[10px] leading-5 text-muted-foreground">
+                        {logs.join("\n")}
+                      </pre>
+                    )}
+                    {scrapeError && (
+                      <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
+                        {scrapeError}
+                      </div>
+                    )}
+                    {scraped && (
+                      <div className="space-y-3">
+                        <div className="text-xs text-muted-foreground">
+                          {scraped.participants.length} players, {scraped.matches.length} matches
+                        </div>
+                        <Input
+                          value={scrapePlayer}
+                          onChange={(e) => setScrapePlayer(e.target.value)}
+                          placeholder="Type or choose player"
+                        />
+                        <div className="flex max-h-20 flex-wrap gap-2 overflow-auto">
+                          {scraped.participants.map((name) => (
+                            <button
+                              key={name}
+                              onClick={() => setScrapePlayer(name)}
+                              className={cn(
+                                "rounded-full border px-3 py-1 font-condensed text-sm font-bold",
+                                scrapePlayer === name
+                                  ? "border-primary bg-primary/15 text-primary"
+                                  : "text-muted-foreground",
+                              )}
+                            >
+                              {name}
+                            </button>
+                          ))}
+                        </div>
+                        {scrapePlayer && playerMatches.length > 0 && (
+                          <Button onClick={applyScrape} className="w-full">
+                            <Wand2 className="h-4 w-4" /> Apply to Card
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-3 px-5 pt-4">
+                <Field label="Player">
+                  <Input
+                    value={form.player}
+                    onChange={(e) => setForm((f) => ({ ...f, player: e.target.value }))}
+                  />
+                </Field>
+                <Field label="Tournament">
+                  <Input
+                    value={form.tournament}
+                    onChange={(e) => setForm((f) => ({ ...f, tournament: e.target.value }))}
+                  />
+                </Field>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Organizer">
+                    <Input
+                      value={form.organizer}
+                      onChange={(e) => setForm((f) => ({ ...f, organizer: e.target.value }))}
+                    />
+                  </Field>
+                  <Field label="Date">
+                    <Input
+                      value={form.date}
+                      onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+                    />
+                  </Field>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Game">
+                    <Input
+                      value={form.game}
+                      onChange={(e) => setForm((f) => ({ ...f, game: e.target.value }))}
+                    />
+                  </Field>
+                  <Field label="Card #">
+                    <Input
+                      value={form.cardNum}
+                      onChange={(e) => setForm((f) => ({ ...f, cardNum: e.target.value }))}
+                    />
+                  </Field>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Details (PubMat) ── */}
+          {activeTab === "event" && !isCards && (
+            <div className="space-y-3 px-5 py-4">
+              <Field label="Shop / Host">
+                <Input value={pubMat.shopName} onChange={(e) => setPubMat((p) => ({ ...p, shopName: e.target.value }))} />
+              </Field>
+              <Field label="Partners">
+                <Input value={pubMat.partners} onChange={(e) => setPubMat((p) => ({ ...p, partners: e.target.value }))} />
+              </Field>
+              <Field label="Game / Hobby">
+                <Input value={pubMat.game} onChange={(e) => setPubMat((p) => ({ ...p, game: e.target.value }))} />
+              </Field>
+              <Field label="Event Name">
+                <Input value={pubMat.eventName} onChange={(e) => setPubMat((p) => ({ ...p, eventName: e.target.value }))} />
+              </Field>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Event Type">
+                  <Input value={pubMat.eventType} onChange={(e) => setPubMat((p) => ({ ...p, eventType: e.target.value }))} />
+                </Field>
+                <Field label="Date">
+                  <Input value={pubMat.date} onChange={(e) => setPubMat((p) => ({ ...p, date: e.target.value }))} />
+                </Field>
+              </div>
+              <Field label="Venue">
+                <Input value={pubMat.venue} onChange={(e) => setPubMat((p) => ({ ...p, venue: e.target.value }))} />
+              </Field>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Prep Time">
+                  <Input value={pubMat.prepTime} onChange={(e) => setPubMat((p) => ({ ...p, prepTime: e.target.value }))} />
+                </Field>
+                <Field label="Start Time">
+                  <Input value={pubMat.startTime} onChange={(e) => setPubMat((p) => ({ ...p, startTime: e.target.value }))} />
+                </Field>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Pre-reg Price">
+                  <Input value={pubMat.preRegPrice} onChange={(e) => setPubMat((p) => ({ ...p, preRegPrice: e.target.value }))} />
+                </Field>
+                <Field label="Walk-in Price">
+                  <Input value={pubMat.walkInPrice} onChange={(e) => setPubMat((p) => ({ ...p, walkInPrice: e.target.value }))} />
+                </Field>
+              </div>
+              <Field label="Prize Headline">
+                <Input value={pubMat.prizeHeadline} onChange={(e) => setPubMat((p) => ({ ...p, prizeHeadline: e.target.value }))} />
+              </Field>
+              <Field label="Guest Headline">
+                <Input value={pubMat.guestHeadline} onChange={(e) => setPubMat((p) => ({ ...p, guestHeadline: e.target.value }))} />
+              </Field>
+            </div>
+          )}
+
+          {/* ── Rounds (Cards) ── */}
+          {activeTab === "rounds" && isCards && (
+            <div className="pb-4">
+              <div className="border-b border-white/10 px-5 py-4">
+                <div className="grid grid-cols-2 rounded-md border bg-secondary p-1">
+                  <Button
+                    variant={cardType === "swiss" ? "default" : "ghost"}
+                    onClick={() => setCardType("swiss")}
+                    className="font-condensed uppercase tracking-[0.18em]"
+                  >
+                    Swiss
+                  </Button>
+                  <Button
+                    variant={cardType === "topcut" ? "default" : "ghost"}
+                    onClick={() => setCardType("topcut")}
+                    className="font-condensed uppercase tracking-[0.18em]"
+                  >
+                    Top Cut
+                  </Button>
+                </div>
+              </div>
+
+              {cardType === "swiss" ? (
+                <div className="px-5 pt-4">
+                  <div className="space-y-2">
+                    {rounds.map((round, i) => (
+                      <div key={i} className="grid grid-cols-[44px_1fr_68px_52px] gap-2">
+                        <Input
+                          value={round.rnd}
+                          onChange={(e) => setRounds(update(rounds, i, { rnd: e.target.value }))}
+                          className="px-2 text-center font-mono text-xs"
+                        />
+                        <Input
+                          value={round.opp}
+                          onChange={(e) => setRounds(update(rounds, i, { opp: e.target.value }))}
+                          placeholder="Opponent"
+                        />
+                        <Input
+                          value={round.score}
+                          onChange={(e) => setRounds(update(rounds, i, { score: e.target.value }))}
+                          className="px-1 text-center font-mono text-xs"
+                          placeholder="4-1"
+                        />
+                        <Button
+                          variant={round.result === "win" ? "default" : "destructive"}
+                          onClick={() =>
+                            setRounds(update(rounds, i, { result: round.result === "win" ? "loss" : "win" }))
+                          }
+                          className="px-2"
+                        >
+                          {round.result === "win" ? "W" : "L"}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="mt-3 w-full"
+                    onClick={() =>
+                      setRounds([...rounds, { rnd: `R${rounds.length + 1}`, opp: "", score: "", result: "win" }])
+                    }
+                  >
+                    <Plus className="h-4 w-4" /> Add Round
+                  </Button>
+                  <Field label="Advancement Message" className="mt-3">
+                    <Input
+                      value={form.advMsg}
+                      onChange={(e) => setForm((f) => ({ ...f, advMsg: e.target.value }))}
+                    />
+                  </Field>
+                </div>
+              ) : (
+                <div className="px-5 pt-4">
+                  <div className="space-y-2">
+                    {topCut.map((match, i) => (
+                      <div key={i} className="grid grid-cols-[88px_1fr_60px_52px] gap-2">
+                        <Input
+                          value={match.stage}
+                          onChange={(e) => setTopCut(update(topCut, i, { stage: e.target.value }))}
+                          className="text-xs"
+                        />
+                        <Input
+                          value={match.opp}
+                          onChange={(e) => setTopCut(update(topCut, i, { opp: e.target.value }))}
+                          placeholder="Opponent"
+                        />
+                        <Input
+                          value={match.score}
+                          onChange={(e) => setTopCut(update(topCut, i, { score: e.target.value }))}
+                          className="px-1 text-center font-mono text-xs"
+                        />
+                        <Button
+                          variant={match.result === "win" ? "default" : "destructive"}
+                          onClick={() => {
+                            const next = match.result === "win" ? "loss" : "win";
+                            setTopCut(update(topCut, i, { result: next }));
+                            if (next === "loss") setForm((f) => ({ ...f, champTitle: "ELIMINATED" }));
+                          }}
+                          className="px-2"
+                        >
+                          {match.result === "win" ? "W" : "L"}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="mt-3 w-full"
+                    onClick={() =>
+                      setTopCut([...topCut, { stage: `Match ${topCut.length + 1}`, opp: "", score: "1 - 0", result: "win" }])
+                    }
+                  >
+                    <Plus className="h-4 w-4" /> Add Match
+                  </Button>
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    <Field label="Finals Opponent">
+                      <Input
+                        value={form.finalsOpp}
+                        onChange={(e) => setForm((f) => ({ ...f, finalsOpp: e.target.value }))}
+                      />
+                    </Field>
+                    <Field label="Finals Score">
+                      <Input
+                        value={form.finalsSc}
+                        onChange={(e) => setForm((f) => ({ ...f, finalsSc: e.target.value }))}
+                      />
+                    </Field>
+                  </div>
+                  <div className="mb-3 grid grid-cols-2 gap-2">
+                    <Button
+                      variant={form.finalsResult === "win" ? "default" : "outline"}
+                      onClick={() =>
+                        setForm((f) => ({
+                          ...f,
+                          finalsResult: "win",
+                          champTitle: ["FINALIST", "ELIMINATED"].includes(f.champTitle) ? "CHAMPION" : f.champTitle,
+                        }))
+                      }
+                    >
+                      Finals Win
+                    </Button>
+                    <Button
+                      variant={form.finalsResult === "loss" ? "destructive" : "outline"}
+                      onClick={() => setForm((f) => ({ ...f, finalsResult: "loss", champTitle: "FINALIST" }))}
+                    >
+                      Finals Loss
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field label="Title">
+                      <Input
+                        value={form.champTitle}
+                        onChange={(e) => setForm((f) => ({ ...f, champTitle: e.target.value }))}
+                      />
+                    </Field>
+                    <Field label="Record">
+                      <Input
+                        value={form.tcRecord}
+                        onChange={(e) => setForm((f) => ({ ...f, tcRecord: e.target.value }))}
+                      />
+                    </Field>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Media (PubMat) ── */}
+          {activeTab === "rounds" && !isCards && (
+            <div className="pb-4">
+              <div className="grid grid-cols-2 gap-3 px-5 pt-4">
+                {(
+                  [
+                    ["hero", "Main Visual"],
+                    ["product", "Prize/Product"],
+                    ["gallery1", "Gallery 1"],
+                    ["gallery2", "Gallery 2"],
+                    ["gallery3", "Gallery 3"],
+                    ["gallery4", "Gallery 4"],
+                  ] as [ImageSlotKey, string][]
+                ).map(([key, label]) => (
+                  <ImagePicker
+                    key={key}
+                    label={label}
+                    value={pubMat.images[key]}
+                    onChange={(value) =>
+                      setPubMat((p) => ({ ...p, images: { ...p.images, [key]: value } }))
+                    }
+                  />
+                ))}
+              </div>
+              <div className="mt-4 space-y-2 px-5">
+                <div className="mb-1 font-condensed text-xs font-bold uppercase tracking-[0.28em] text-muted-foreground">
+                  Guests
+                </div>
+                {pubMat.guests.map((v, i) => (
+                  <div key={i} className="grid grid-cols-[1fr_40px] gap-2">
+                    <Input
+                      value={v}
+                      placeholder="Guest name"
+                      onChange={(e) =>
+                        setPubMat((p) => ({ ...p, guests: p.guests.map((g, j) => j === i ? e.target.value : g) }))
+                      }
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setPubMat((p) => ({ ...p, guests: p.guests.filter((_, j) => j !== i) }))}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setPubMat((p) => ({ ...p, guests: [...p.guests, ""] }))}
+                >
+                  <Plus className="h-4 w-4" /> Add Guest
+                </Button>
+              </div>
+              <div className="mt-4 space-y-2 px-5">
+                <div className="mb-1 font-condensed text-xs font-bold uppercase tracking-[0.28em] text-muted-foreground">
+                  Notes
+                </div>
+                {pubMat.notes.map((v, i) => (
+                  <div key={i} className="grid grid-cols-[1fr_40px] gap-2">
+                    <Input
+                      value={v}
+                      placeholder="Event note"
+                      onChange={(e) =>
+                        setPubMat((p) => ({ ...p, notes: p.notes.map((n, j) => j === i ? e.target.value : n) }))
+                      }
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setPubMat((p) => ({ ...p, notes: p.notes.filter((_, j) => j !== i) }))}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setPubMat((p) => ({ ...p, notes: [...p.notes, ""] }))}
+                >
+                  <Plus className="h-4 w-4" /> Add Note
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Bottom toolbar */}
+      <div className="flex items-stretch border-t border-white/10 bg-card/95 backdrop-blur safe-area-inset-bottom">
+        {tabs.map(({ id, icon: Icon, label }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => toggle(id)}
+            className={cn(
+              "flex flex-1 flex-col items-center justify-center gap-1 py-3 transition-colors active:bg-white/5",
+              activeTab === id ? "text-primary" : "text-muted-foreground",
+            )}
+          >
+            <Icon className="h-5 w-5" />
+            <span className="font-condensed text-[10px] font-black uppercase tracking-wide">{label}</span>
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={downloadCard}
+          disabled={exporting}
+          className="flex flex-1 flex-col items-center justify-center gap-1 py-3 text-primary transition-colors active:bg-white/5 disabled:opacity-50"
+        >
+          {exporting ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <Download className="h-5 w-5" />
+          )}
+          <span className="font-condensed text-[10px] font-black uppercase tracking-wide">Save</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function FloatingFeedbackTool({
   open,
   onOpenChange,
@@ -1672,7 +2359,7 @@ function FloatingFeedbackTool({
       <Button
         type="button"
         onClick={() => onOpenChange(true)}
-        className="fixed bottom-5 right-5 z-40 h-14 rounded-full px-5 font-condensed text-base font-black uppercase tracking-[0.14em] shadow-2xl shadow-primary/20"
+        className="fixed bottom-24 right-4 z-40 h-12 rounded-full px-4 font-condensed text-sm font-black uppercase tracking-[0.14em] shadow-2xl shadow-primary/20 lg:bottom-5 lg:right-5 lg:h-14 lg:px-5 lg:text-base"
       >
         <MessageSquare className="h-5 w-5" />
         Feedback

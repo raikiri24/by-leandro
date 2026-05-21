@@ -240,6 +240,18 @@
   }
 }
 
+/* Mobile safe area for bottom toolbar */
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Mobile-friendly touch targets */
+@media (max-width: 1023px) {
+  input, button, select, textarea {
+    font-size: 16px; /* prevent iOS zoom on focus */
+  }
+}
+
 aside::-webkit-scrollbar {
   width: 4px;
 }
