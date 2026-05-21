@@ -15,6 +15,7 @@ export function getMongoClient() {
     clientPromise = new MongoClient(mongoUri, {
       appName: "byleandro",
       connectTimeoutMS: 10000,
+      family: 4,
       serverSelectionTimeoutMS: 10000,
       tls: true,
     }).connect().then((client) => {
