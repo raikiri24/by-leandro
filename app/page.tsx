@@ -2,6 +2,7 @@ import {
   ArrowRight,
   CalendarDays,
   Download,
+  Eraser,
   Gift,
   ImagePlus,
   Sparkles,
@@ -25,6 +26,12 @@ const features = [
     title: "Organizer Workflow",
     copy: "Use manual entry, Challonge imports, live previews, quick edits, feedback, and one-click JPG downloads.",
     icon: Target,
+  },
+  {
+    title: "Background Remover",
+    copy: "Remove image backgrounds instantly in your browser — no upload, no account, no API key. Download a clean transparent PNG.",
+    icon: Eraser,
+    href: "/bg-remover",
   },
 ];
 
@@ -50,6 +57,12 @@ export default function HomePage() {
               className="hidden px-3 py-2 font-condensed text-xs font-black uppercase tracking-[0.18em] text-white/60 transition hover:text-primary sm:inline-flex"
             >
               Features
+            </a>
+            <a
+              href="/bg-remover"
+              className="hidden px-3 py-2 font-condensed text-xs font-black uppercase tracking-[0.18em] text-white/60 transition hover:text-primary sm:inline-flex"
+            >
+              BG Remover
             </a>
             <Button asChild className="font-condensed uppercase tracking-[0.12em]">
               <a href="/tool">
@@ -188,13 +201,13 @@ export default function HomePage() {
             event recaps.
           </p>
         </div>
-        <div className="grid gap-3 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
               <div
                 key={feature.title}
-                className="rounded-lg border border-white/10 bg-white/[0.04] p-5"
+                className="flex flex-col rounded-lg border border-white/10 bg-white/[0.04] p-5"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/12 text-primary">
                   <Icon className="h-5 w-5" />
@@ -202,9 +215,18 @@ export default function HomePage() {
                 <h3 className="mt-4 font-condensed text-2xl font-black uppercase text-white">
                   {feature.title}
                 </h3>
-                <p className="mt-2 text-sm leading-6 text-white/60">
+                <p className="mt-2 flex-1 text-sm leading-6 text-white/60">
                   {feature.copy}
                 </p>
+                {"href" in feature && feature.href && (
+                  <a
+                    href={feature.href}
+                    className="mt-4 inline-flex items-center gap-1 font-condensed text-xs font-black uppercase tracking-[0.12em] text-primary transition hover:text-primary/80"
+                  >
+                    Try it
+                    <ArrowRight className="h-3 w-3" />
+                  </a>
+                )}
               </div>
             );
           })}

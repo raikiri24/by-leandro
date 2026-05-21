@@ -48,7 +48,13 @@ type PubMatThemeKey =
   | "cup"
   | "deadly"
   | "pop"
-  | "clean";
+  | "clean"
+  | "neon"
+  | "manga"
+  | "gold"
+  | "street"
+  | "cosmic"
+  | "volcanic";
 type DesignKey =
   | "signal"
   | "ember"
@@ -59,7 +65,13 @@ type DesignKey =
   | "prestige"
   | "solar"
   | "ghost"
-  | "jade";
+  | "jade"
+  | "abyss"
+  | "toxic"
+  | "sakura"
+  | "dawn"
+  | "ice"
+  | "ocean";
 
 type Design = {
   label: string;
@@ -120,6 +132,7 @@ type CardProps = {
   cardType: CardType;
   palette: Design;
 };
+type Sponsor = { text: string; image: string };
 type ImageSlotKey =
   | "hero"
   | "product"
@@ -142,13 +155,13 @@ type PubMatState = {
   prizeHeadline: string;
   guestHeadline: string;
   guests: string[];
-  sponsors: string[];
+  sponsors: Sponsor[];
   notes: string[];
   images: Record<ImageSlotKey, string>;
 };
 type PubMatTheme = {
   label: string;
-  template?: "classic" | "futuristic" | "arena" | "tribe" | "catchup" | "cup";
+  template?: "classic" | "futuristic" | "arena" | "tribe" | "catchup" | "cup" | "neon" | "manga" | "gold" | "street" | "cosmic" | "volcanic";
   bg: string;
   paper: string;
   ink: string;
@@ -276,6 +289,66 @@ const designs: Record<DesignKey, Design> = {
     panel: "rgba(0,255,136,.08)",
     text: "#edfff6",
   },
+  abyss: {
+    label: "Abyss",
+    tagline: "Dark Matter",
+    layout: "report",
+    a: "#8b5cf6",
+    b: "#3b0764",
+    bg: "#05001a",
+    panel: "rgba(139,92,246,.09)",
+    text: "#ede9ff",
+  },
+  toxic: {
+    label: "Toxic",
+    tagline: "Acid Strike",
+    layout: "arcade",
+    a: "#a3e635",
+    b: "#365314",
+    bg: "#040a00",
+    panel: "rgba(163,230,53,.08)",
+    text: "#f0ffe4",
+  },
+  sakura: {
+    label: "Sakura",
+    tagline: "Petal Storm",
+    layout: "blade",
+    a: "#f472b6",
+    b: "#831843",
+    bg: "#130008",
+    panel: "rgba(244,114,182,.09)",
+    text: "#ffe8f4",
+  },
+  dawn: {
+    label: "Dawn",
+    tagline: "Radiant Break",
+    layout: "award",
+    a: "#fb923c",
+    b: "#7c2d12",
+    bg: "#0f0500",
+    panel: "rgba(251,146,60,.09)",
+    text: "#fff5eb",
+  },
+  ice: {
+    label: "Ice",
+    tagline: "Frozen Edge",
+    layout: "minimal",
+    a: "#bae6fd",
+    b: "#0c4a6e",
+    bg: "#00080f",
+    panel: "rgba(186,230,253,.06)",
+    text: "#f0f9ff",
+  },
+  ocean: {
+    label: "Ocean",
+    tagline: "Deep Current",
+    layout: "report",
+    a: "#22d3ee",
+    b: "#164e63",
+    bg: "#020b10",
+    panel: "rgba(34,211,238,.08)",
+    text: "#ecfeff",
+  },
 };
 
 const initialRounds: Round[] = [
@@ -373,6 +446,72 @@ const pubMatThemes: Record<PubMatThemeKey, PubMatTheme> = {
     accent2: "#f4b942",
     block: "#181a1c",
   },
+  neon: {
+    label: "Neon Festival",
+    template: "neon",
+    bg: "#030007",
+    paper: "#040009",
+    ink: "#f0e8ff",
+    muted: "#9880c0",
+    accent: "#ff00ff",
+    accent2: "#00ffcc",
+    block: "#0a0012",
+  },
+  manga: {
+    label: "Manga Panel",
+    template: "manga",
+    bg: "#f0ede8",
+    paper: "#f5f2ec",
+    ink: "#0a0a0a",
+    muted: "#5a5a5a",
+    accent: "#e81c24",
+    accent2: "#1a1a1a",
+    block: "#0a0a0a",
+  },
+  gold: {
+    label: "Gold League",
+    template: "gold",
+    bg: "#050400",
+    paper: "#070600",
+    ink: "#f0d060",
+    muted: "#80681a",
+    accent: "#d4a017",
+    accent2: "#fffbe0",
+    block: "#130f00",
+  },
+  street: {
+    label: "Street Battle",
+    template: "street",
+    bg: "#04000a",
+    paper: "#04000a",
+    ink: "#f5f0ff",
+    muted: "#8070a8",
+    accent: "#ff6600",
+    accent2: "#ffd700",
+    block: "#0e0018",
+  },
+  cosmic: {
+    label: "Cosmic Arena",
+    template: "cosmic",
+    bg: "#010012",
+    paper: "#01001a",
+    ink: "#ddd0ff",
+    muted: "#7060a0",
+    accent: "#9d4edd",
+    accent2: "#00d4ff",
+    block: "#080030",
+  },
+  volcanic: {
+    label: "Volcanic",
+    template: "volcanic",
+    bg: "#040000",
+    paper: "#060000",
+    ink: "#fff0e0",
+    muted: "#9a5030",
+    accent: "#ff4500",
+    accent2: "#ffaa00",
+    block: "#110000",
+  },
 };
 
 const initialPubMat: PubMatState = {
@@ -390,7 +529,14 @@ const initialPubMat: PubMatState = {
   prizeHeadline: "Progressive Prizes",
   guestHeadline: "With Special Guests",
   guests: ["Guest One", "Guest Two", "Guest Three", "Guest Four"],
-  sponsors: ["Shop", "Team", "Cafe", "League", "Brand", "Club"],
+  sponsors: [
+    { text: "Shop", image: "" },
+    { text: "Team", image: "" },
+    { text: "Cafe", image: "" },
+    { text: "League", image: "" },
+    { text: "Brand", image: "" },
+    { text: "Club", image: "" },
+  ],
   notes: ["Limited slots", "Bring legal deck", "On-site registration"],
   images: {
     hero: "",
@@ -2426,8 +2572,10 @@ function PubMatEditor({
 }) {
   const setField = (patch: Partial<PubMatState>) =>
     setPubMat((current) => ({ ...current, ...patch }));
-  const setList = (key: "guests" | "sponsors" | "notes", values: string[]) =>
+  const setList = (key: "guests" | "notes", values: string[]) =>
     setPubMat((current) => ({ ...current, [key]: values }));
+  const setSponsors = (values: Sponsor[]) =>
+    setPubMat((current) => ({ ...current, sponsors: values }));
   const setImage = (key: ImageSlotKey, value: string) =>
     setPubMat((current) => ({
       ...current,
@@ -2585,12 +2733,7 @@ function PubMatEditor({
         onChange={(values) => setList("guests", values)}
         placeholder="Guest name"
       />
-      <EditableList
-        title="Sponsors"
-        values={pubMat.sponsors}
-        onChange={(values) => setList("sponsors", values)}
-        placeholder="Sponsor / logo text"
-      />
+      <SponsorList values={pubMat.sponsors} onChange={setSponsors} />
       <EditableList
         title="Notes"
         values={pubMat.notes}
@@ -2649,6 +2792,89 @@ function ImagePicker({
         />
       )}
     </div>
+  );
+}
+
+function SponsorList({
+  values,
+  onChange,
+}: {
+  values: Sponsor[];
+  onChange: (values: Sponsor[]) => void;
+}) {
+  return (
+    <Section title="Sponsors">
+      <div className="space-y-3">
+        {values.map((s, i) => (
+          <div key={i} className="rounded-md border bg-secondary p-3">
+            <div className="flex gap-2">
+              <Input
+                value={s.text}
+                placeholder="Sponsor name"
+                onChange={(e) =>
+                  onChange(values.map((v, j) => (j === i ? { ...v, text: e.target.value } : v)))
+                }
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label={`Remove sponsor ${i + 1}`}
+                onClick={() => onChange(values.filter((_, j) => j !== i))}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="mt-2 flex items-center gap-2">
+              <label className="inline-flex h-8 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md border bg-background px-3 font-condensed text-xs font-bold uppercase tracking-[0.12em] transition hover:bg-secondary">
+                <ImagePlus className="h-3.5 w-3.5" />
+                {s.image ? "Change Logo" : "Upload Logo"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = () =>
+                      onChange(values.map((v, j) => (j === i ? { ...v, image: String(reader.result || "") } : v)));
+                    reader.readAsDataURL(file);
+                    e.currentTarget.value = "";
+                  }}
+                />
+              </label>
+              {s.image && (
+                <>
+                  <div
+                    className="h-8 w-16 rounded border bg-cover bg-center bg-white"
+                    style={{ backgroundImage: `url(${s.image})` }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() =>
+                      onChange(values.map((v, j) => (j === i ? { ...v, image: "" } : v)))
+                    }
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+      <Button
+        type="button"
+        variant="outline"
+        className="mt-3 w-full"
+        onClick={() => onChange([...values, { text: "", image: "" }])}
+      >
+        <Plus className="h-4 w-4" /> Add Sponsor
+      </Button>
+    </Section>
   );
 }
 
@@ -2715,6 +2941,18 @@ function PubMatPoster({
       return <VelocityPopPubMatPoster pubMat={pubMat} theme={theme} />;
     case "cup":
       return <BladeCupPubMatPoster pubMat={pubMat} theme={theme} />;
+    case "neon":
+      return <NeonFestivalPubMatPoster pubMat={pubMat} theme={theme} />;
+    case "manga":
+      return <MangaPanelPubMatPoster pubMat={pubMat} theme={theme} />;
+    case "gold":
+      return <GoldLeaguePubMatPoster pubMat={pubMat} theme={theme} />;
+    case "street":
+      return <StreetBattlePubMatPoster pubMat={pubMat} theme={theme} />;
+    case "cosmic":
+      return <CosmicArenaPubMatPoster pubMat={pubMat} theme={theme} />;
+    case "volcanic":
+      return <VolcanicPubMatPoster pubMat={pubMat} theme={theme} />;
     default:
       break;
   }
@@ -2726,7 +2964,7 @@ function PubMatPoster({
     pubMat.images.gallery4,
   ];
   const visibleGuests = pubMat.guests.filter(Boolean);
-  const visibleSponsors = pubMat.sponsors.filter(Boolean);
+  const visibleSponsors = pubMat.sponsors.filter((s) => s.text || s.image);
   const visibleNotes = pubMat.notes.filter(Boolean);
 
   return (
@@ -2904,13 +3142,15 @@ function PubMatPoster({
           <Banner text={pubMat.guestHeadline} theme={theme} />
           {visibleSponsors.length > 0 && (
             <div className="grid grid-cols-6 gap-2 pt-1">
-              {visibleSponsors.slice(0, 18).map((sponsor, index) => (
+              {visibleSponsors.slice(0, 18).map((s, i) => (
                 <div
-                  key={`${sponsor}-${index}`}
+                  key={`${s.text}-${i}`}
                   className="pubmat-cell-lock flex h-14 items-center justify-center border-2 bg-white px-2 text-center font-condensed text-xs font-black uppercase leading-tight"
                   style={{ borderColor: theme.ink, color: theme.ink }}
                 >
-                  {sponsor}
+                  {s.image
+                    ? <img src={s.image} alt={s.text || "Sponsor"} className="max-h-full max-w-full object-contain p-1" draggable={false} />
+                    : s.text}
                 </div>
               ))}
             </div>
@@ -2935,7 +3175,7 @@ function FuturisticPubMatPoster({
     pubMat.images.gallery4,
   ];
   const visibleNotes = pubMat.notes.filter(Boolean);
-  const visibleSponsors = pubMat.sponsors.filter(Boolean);
+  const visibleSponsors = pubMat.sponsors.filter((s) => s.text || s.image);
   const visibleGuests = pubMat.guests.filter(Boolean);
 
   return (
@@ -3131,9 +3371,9 @@ function FuturisticPubMatPoster({
           </div>
           {visibleSponsors.length > 0 && (
             <div className="mt-3 grid grid-cols-6 gap-2">
-              {visibleSponsors.slice(0, 12).map((sponsor, index) => (
+              {visibleSponsors.slice(0, 12).map((s, i) => (
                 <div
-                  key={`${sponsor}-${index}`}
+                  key={`${s.text}-${i}`}
                   className="flex h-11 items-center justify-center border px-2 text-center font-condensed text-xs font-black uppercase leading-tight tracking-[0.08em]"
                   style={{
                     borderColor: `${theme.accent2}70`,
@@ -3141,7 +3381,9 @@ function FuturisticPubMatPoster({
                     color: theme.ink,
                   }}
                 >
-                  {sponsor}
+                  {s.image
+                    ? <img src={s.image} alt={s.text || "Sponsor"} className="max-h-full max-w-full object-contain p-1" draggable={false} />
+                    : s.text}
                 </div>
               ))}
             </div>
@@ -3166,7 +3408,7 @@ function ArenaClashPubMatPoster({
     pubMat.images.gallery3,
     pubMat.images.gallery4,
   ];
-  const visibleSponsors = pubMat.sponsors.filter(Boolean);
+  const visibleSponsors = pubMat.sponsors.filter((s) => s.text || s.image);
   const visibleNotes = pubMat.notes.filter(Boolean);
 
   return (
@@ -3175,9 +3417,11 @@ function ArenaClashPubMatPoster({
       <div className="pubmat-red-scratch absolute inset-0" />
       <div className="relative z-10">
         <header className="grid grid-cols-4 items-center gap-4">
-          {visibleSponsors.slice(0, 4).map((sponsor, index) => (
-            <CyberPanel key={`${sponsor}-${index}`} className="flex h-24 items-center justify-center p-3 text-center" theme={theme}>
-              <div className="pubmat-small-lock font-display text-2xl leading-none tracking-[0.04em]">{sponsor}</div>
+          {visibleSponsors.slice(0, 4).map((s, i) => (
+            <CyberPanel key={`${s.text}-${i}`} className="flex h-24 items-center justify-center p-3 text-center" theme={theme}>
+              {s.image
+                ? <img src={s.image} alt={s.text || "Sponsor"} className="max-h-full max-w-full object-contain" draggable={false} />
+                : <div className="pubmat-small-lock font-display text-2xl leading-none tracking-[0.04em]">{s.text}</div>}
             </CyberPanel>
           ))}
         </header>
@@ -3488,6 +3732,803 @@ function BladeCupPubMatPoster({
 
         <footer className="pubmat-title-lock mt-4 text-center font-display text-4xl leading-none" style={{ color: theme.accent }}>
           SHOW YOUR SKILLS. DOMINATE THE ARENA.
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+// ─── layout: neon festival ────────────────────────────────────────────────────
+function NeonFestivalPubMatPoster({ pubMat, theme }: { pubMat: PubMatState; theme: PubMatTheme }) {
+  const gallery = [pubMat.images.gallery1, pubMat.images.gallery2, pubMat.images.gallery3, pubMat.images.gallery4];
+  const visibleGuests = pubMat.guests.filter(Boolean);
+  const visibleSponsors = pubMat.sponsors.filter((s) => s.text || s.image);
+  const visibleNotes = pubMat.notes.filter(Boolean);
+
+  return (
+    <div className="relative min-h-[1080px] overflow-hidden" style={{ background: theme.paper, color: theme.ink }}>
+      <div className="pubmat-neon-grid absolute inset-0" />
+      <div className="absolute -left-48 top-10 h-[560px] w-[560px] rounded-full blur-3xl" style={{ background: `${theme.accent}28` }} />
+      <div className="absolute -right-48 bottom-20 h-[480px] w-[480px] rounded-full blur-3xl" style={{ background: `${theme.accent2}22` }} />
+      <div className="absolute inset-x-0 top-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${theme.accent}, ${theme.accent2}, transparent)` }} />
+
+      <div className="relative z-10 flex flex-col px-6 py-5">
+        {/* Header */}
+        <header className="flex items-center justify-between">
+          <div>
+            <div className="pubmat-line-lock font-display text-4xl leading-none" style={{ color: theme.accent, textShadow: `0 0 18px ${theme.accent}` }}>
+              {pubMat.shopName}
+            </div>
+            <div className="font-condensed text-sm font-black uppercase tracking-[0.22em]" style={{ color: theme.muted }}>
+              {pubMat.partners}
+            </div>
+          </div>
+          <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 font-display text-4xl leading-none" style={{ borderColor: theme.accent2, color: theme.accent2, boxShadow: `0 0 24px ${theme.accent2}66, inset 0 0 16px ${theme.accent2}22` }}>
+            ×
+          </div>
+          <div className="text-right">
+            <div className="pubmat-line-lock font-display text-4xl leading-none" style={{ color: theme.accent2, textShadow: `0 0 18px ${theme.accent2}` }}>
+              {pubMat.game}
+            </div>
+            <div className="font-condensed text-sm font-black uppercase tracking-[0.22em]" style={{ color: theme.muted }}>
+              {pubMat.eventType}
+            </div>
+          </div>
+        </header>
+
+        {/* Giant title */}
+        <section className="mt-5 text-center">
+          <div className="pubmat-title-lock font-display text-[88px] leading-[0.84]" style={{ color: theme.ink, textShadow: `0 0 40px ${theme.accent}88, 4px 4px 0 ${theme.accent}66` }}>
+            {pubMat.eventName}
+          </div>
+          <div className="mt-3 inline-flex items-center gap-3 rounded-full border px-6 py-1.5 font-condensed text-lg font-black uppercase tracking-[0.2em]" style={{ borderColor: theme.accent2, color: theme.accent2, boxShadow: `0 0 14px ${theme.accent2}44` }}>
+            <span style={{ color: theme.accent }}>★</span> {pubMat.eventType} <span style={{ color: theme.accent }}>★</span>
+          </div>
+        </section>
+
+        {/* Hero image */}
+        <section className="relative mt-5 h-[320px] overflow-hidden rounded-xl border-2" style={{ borderColor: `${theme.accent}80`, boxShadow: `0 0 32px ${theme.accent}40` }}>
+          {pubMat.images.hero
+            ? <img src={pubMat.images.hero} alt="" className="h-full w-full object-cover" draggable={false} />
+            : <PosterHeroImage src="" label="Main Visual" theme={theme} />}
+          <div className="absolute inset-x-0 bottom-0 h-20" style={{ background: `linear-gradient(to top, ${theme.paper}, transparent)` }} />
+        </section>
+
+        {/* Info row */}
+        <section className="mt-4 grid grid-cols-3 gap-3">
+          {[
+            { icon: <CalendarDays className="h-6 w-6" />, label: "Date", val: pubMat.date },
+            { icon: <MapPin className="h-6 w-6" />, label: "Venue", val: pubMat.venue },
+            { icon: <Clock className="h-6 w-6" />, label: "Start", val: pubMat.startTime },
+          ].map(({ icon, label, val }) => (
+            <div key={label} className="rounded-xl border p-3 text-center" style={{ borderColor: `${theme.accent2}35`, background: `${theme.accent2}08` }}>
+              <div className="flex justify-center mb-1" style={{ color: theme.accent2 }}>{icon}</div>
+              <div className="font-condensed text-[10px] uppercase tracking-[0.28em]" style={{ color: theme.muted }}>{label}</div>
+              <div className="pubmat-small-lock mt-1 font-condensed text-xl font-black leading-tight">{val}</div>
+            </div>
+          ))}
+        </section>
+
+        {/* Price bar */}
+        <section className="mt-3 flex items-center gap-4 rounded-xl border px-5 py-3" style={{ borderColor: `${theme.accent}40`, background: `${theme.accent}10` }}>
+          <Gift className="h-7 w-7 shrink-0" style={{ color: theme.accent }} />
+          <div className="flex-1">
+            <div className="font-condensed text-xs uppercase tracking-[0.24em]" style={{ color: theme.muted }}>Entry Fee</div>
+            <div className="font-display text-3xl leading-none" style={{ color: theme.accent, textShadow: `0 0 10px ${theme.accent}` }}>
+              {pubMat.preRegPrice} <span className="font-condensed text-lg" style={{ color: theme.muted }}>pre</span>
+              {"  "}
+              {pubMat.walkInPrice} <span className="font-condensed text-lg" style={{ color: theme.muted }}>door</span>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="font-condensed text-xs uppercase tracking-[0.24em]" style={{ color: theme.muted }}>Prep</div>
+            <div className="font-condensed text-xl font-black uppercase" style={{ color: theme.accent2 }}>{pubMat.prepTime}</div>
+          </div>
+        </section>
+
+        {/* Guests */}
+        {visibleGuests.length > 0 && (
+          <section className="mt-4">
+            <div className="mb-2 text-center font-condensed text-xs uppercase tracking-[0.32em]" style={{ color: theme.muted }}>— {pubMat.guestHeadline} —</div>
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-1">
+              {visibleGuests.slice(0, 6).map((g, i) => (
+                <span key={`${g}-${i}`} className="font-display text-3xl leading-none" style={{ color: i % 2 === 0 ? theme.accent : theme.accent2, textShadow: `0 0 12px ${i % 2 === 0 ? theme.accent : theme.accent2}` }}>
+                  {g}
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Prize tiles */}
+        <section className="mt-4">
+          <div className="mb-2 flex items-center gap-3">
+            <div className="font-condensed text-sm font-black uppercase tracking-[0.28em]" style={{ color: theme.accent }}>{pubMat.prizeHeadline}</div>
+            <div className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${theme.accent}, transparent)` }} />
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {gallery.map((src, i) => <PrizeTile key={i} src={src} label={pubMat.guests[i] || `Prize ${i + 1}`} theme={theme} />)}
+          </div>
+        </section>
+
+        {/* Notes */}
+        {visibleNotes.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {visibleNotes.slice(0, 4).map((n, i) => (
+              <span key={`${n}-${i}`} className="rounded-full border px-3 py-1 font-condensed text-sm font-bold uppercase tracking-[0.1em]" style={{ borderColor: `${theme.accent2}40`, color: theme.muted }}>{n}</span>
+            ))}
+          </div>
+        )}
+
+        {/* Sponsors */}
+        {visibleSponsors.length > 0 && (
+          <footer className="mt-4 grid grid-cols-6 gap-2 border-t pt-4" style={{ borderColor: `${theme.accent}25` }}>
+            {visibleSponsors.slice(0, 12).map((s, i) => (
+              <div key={`${s.text}-${i}`} className="flex h-10 items-center justify-center rounded border px-2 text-center font-condensed text-xs font-black uppercase leading-tight" style={{ borderColor: `${theme.accent}30`, color: theme.muted }}>
+                {s.image
+                  ? <img src={s.image} alt={s.text || "Sponsor"} className="max-h-full max-w-full object-contain p-1" draggable={false} />
+                  : s.text}
+              </div>
+            ))}
+          </footer>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── layout: manga panel ──────────────────────────────────────────────────────
+function MangaPanelPubMatPoster({ pubMat, theme }: { pubMat: PubMatState; theme: PubMatTheme }) {
+  const gallery = [pubMat.images.gallery1, pubMat.images.gallery2, pubMat.images.gallery3, pubMat.images.gallery4];
+  const visibleGuests = pubMat.guests.filter(Boolean);
+  const visibleSponsors = pubMat.sponsors.filter((s) => s.text || s.image);
+  const visibleNotes = pubMat.notes.filter(Boolean);
+  const slashLine = `repeating-linear-gradient(-55deg, ${theme.accent}18 0 1px, transparent 1px 10px)`;
+
+  return (
+    <div className="relative min-h-[1080px] overflow-hidden" style={{ background: theme.paper, color: theme.ink }}>
+      <div className="pubmat-manga-dots absolute inset-0 opacity-30" />
+
+      {/* Top speed-lines header */}
+      <header className="relative overflow-hidden border-b-4 px-5 pt-5 pb-4" style={{ borderColor: theme.ink, background: slashLine }}>
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+          <div>
+            <div className="font-condensed text-2xl font-black uppercase tracking-[0.08em]">{pubMat.shopName}</div>
+            <div className="font-condensed text-sm uppercase tracking-[0.16em]" style={{ color: theme.muted }}>{pubMat.partners}</div>
+          </div>
+          <div className="border-4 px-4 py-1 font-display text-5xl leading-none" style={{ borderColor: theme.accent, color: theme.accent }}>
+            ×
+          </div>
+          <div className="text-right">
+            <div className="font-condensed text-2xl font-black uppercase tracking-[0.08em]">{pubMat.game}</div>
+            <div className="font-condensed text-sm uppercase tracking-[0.16em]" style={{ color: theme.muted }}>{pubMat.eventType}</div>
+          </div>
+        </div>
+      </header>
+
+      {/* Giant title panel */}
+      <section className="relative border-b-4 px-5 py-4" style={{ borderColor: theme.ink }}>
+        <div className="absolute inset-0" style={{ background: slashLine }} />
+        <div className="relative pubmat-title-lock font-display text-[84px] leading-[0.86]" style={{ color: theme.ink, WebkitTextStroke: `3px ${theme.ink}` }}>
+          {pubMat.eventName}
+        </div>
+        <div className="relative mt-2 inline-flex items-center gap-2 border-4 px-4 py-1 font-display text-3xl leading-none" style={{ borderColor: theme.ink, background: theme.accent, color: "#fff", textShadow: `2px 2px 0 ${theme.ink}` }}>
+          {pubMat.eventType}
+        </div>
+      </section>
+
+      {/* Main content: 2-column manga split */}
+      <section className="grid grid-cols-[1.1fr_0.9fr] border-b-4" style={{ borderColor: theme.ink }}>
+        {/* Left: hero panel */}
+        <div className="relative border-r-4 overflow-hidden" style={{ minHeight: 420, borderColor: theme.ink }}>
+          {pubMat.images.hero
+            ? <img src={pubMat.images.hero} alt="" className="h-full w-full object-cover" style={{ minHeight: 420 }} draggable={false} />
+            : <PosterHeroImage src="" label="Main Visual" theme={theme} />}
+          {/* Action lines overlay */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: `repeating-linear-gradient(-38deg, ${theme.accent}10 0 1px, transparent 1px 8px)` }} />
+        </div>
+
+        {/* Right: stacked info panels */}
+        <div className="flex flex-col">
+          {/* Date panel */}
+          <div className="border-b-4 px-4 py-3" style={{ borderColor: theme.ink }}>
+            <div className="font-condensed text-xs font-black uppercase tracking-[0.26em]" style={{ color: theme.muted }}>Date</div>
+            <div className="font-display text-4xl leading-none" style={{ color: theme.accent }}>{pubMat.date}</div>
+          </div>
+          {/* Time panel */}
+          <div className="border-b-4 px-4 py-3" style={{ borderColor: theme.ink }}>
+            <div className="font-condensed text-xs font-black uppercase tracking-[0.26em]" style={{ color: theme.muted }}>Schedule</div>
+            <div className="font-condensed text-xl font-black uppercase">{pubMat.prepTime} <span style={{ color: theme.muted }}>→</span> {pubMat.startTime}</div>
+          </div>
+          {/* Price panel */}
+          <div className="border-b-4 px-4 py-3" style={{ borderColor: theme.ink, background: theme.accent }}>
+            <div className="font-condensed text-xs font-black uppercase tracking-[0.26em] text-white/70">Entry Fee</div>
+            <div className="font-display text-4xl leading-none text-white" style={{ textShadow: `2px 2px 0 ${theme.ink}` }}>{pubMat.preRegPrice}</div>
+            <div className="font-condensed text-sm font-black text-white/80">Pre-reg · {pubMat.walkInPrice} door</div>
+          </div>
+          {/* Venue panel */}
+          <div className="border-b-4 px-4 py-3" style={{ borderColor: theme.ink }}>
+            <div className="font-condensed text-xs font-black uppercase tracking-[0.26em]" style={{ color: theme.muted }}>Venue</div>
+            <div className="pubmat-small-lock font-condensed text-xl font-black uppercase leading-tight">{pubMat.venue}</div>
+          </div>
+          {/* Guests panel */}
+          {visibleGuests.length > 0 && (
+            <div className="flex-1 px-4 py-3">
+              <div className="font-condensed text-xs font-black uppercase tracking-[0.26em]" style={{ color: theme.muted }}>{pubMat.guestHeadline}</div>
+              <div className="mt-1 space-y-1">
+                {visibleGuests.slice(0, 3).map((g, i) => (
+                  <div key={`${g}-${i}`} className="font-condensed text-xl font-black uppercase" style={{ color: i === 0 ? theme.accent : theme.ink }}>{g}</div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Prize row */}
+      <section className="border-b-4 px-5 py-4" style={{ borderColor: theme.ink }}>
+        <div className="mb-3 flex items-center gap-3">
+          <div className="border-l-4 pl-3 font-condensed text-2xl font-black uppercase tracking-[0.1em]" style={{ borderColor: theme.accent, color: theme.ink }}>
+            {pubMat.prizeHeadline}
+          </div>
+        </div>
+        <div className="grid grid-cols-4 gap-3">
+          {gallery.map((src, i) => (
+            <div key={i} className="overflow-hidden border-4" style={{ borderColor: theme.ink }}>
+              <div className="relative h-[130px]">
+                {src
+                  ? <img src={src} alt="" className="h-full w-full object-cover" draggable={false} />
+                  : <div className="flex h-full items-center justify-center" style={{ background: i === 0 ? theme.accent : `${theme.accent}18` }}>
+                      <Trophy className="h-10 w-10" style={{ color: i === 0 ? "#fff" : theme.accent }} />
+                    </div>}
+              </div>
+              <div className="border-t-4 px-2 py-1 text-center font-condensed text-sm font-black uppercase leading-tight" style={{ borderColor: theme.ink, background: i === 0 ? theme.accent : theme.paper, color: i === 0 ? "#fff" : theme.ink }}>
+                {pubMat.guests[i] || `${["Champion", "2nd", "3rd", "4th"][i]} Place`}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Notes + sponsors */}
+      <footer className="px-5 py-4">
+        {visibleNotes.length > 0 && (
+          <div className="mb-3 flex flex-wrap gap-2">
+            {visibleNotes.slice(0, 4).map((n, i) => (
+              <span key={`${n}-${i}`} className="border-2 px-3 py-1 font-condensed text-sm font-black uppercase" style={{ borderColor: theme.ink }}>{n}</span>
+            ))}
+          </div>
+        )}
+        {visibleSponsors.length > 0 && (
+          <div className="grid grid-cols-6 gap-2 border-t-4" style={{ borderColor: theme.ink }}>
+            {visibleSponsors.slice(0, 12).map((s, i) => (
+              <div key={`${s.text}-${i}`} className="flex h-10 items-center justify-center border-r-4 px-2 text-center font-condensed text-xs font-black uppercase last:border-r-0" style={{ borderColor: theme.ink }}>
+                {s.image
+                  ? <img src={s.image} alt={s.text || "Sponsor"} className="max-h-full max-w-full object-contain p-1" draggable={false} />
+                  : s.text}
+              </div>
+            ))}
+          </div>
+        )}
+      </footer>
+    </div>
+  );
+}
+
+// ─── layout: gold league ──────────────────────────────────────────────────────
+function GoldLeaguePubMatPoster({ pubMat, theme }: { pubMat: PubMatState; theme: PubMatTheme }) {
+  const gallery = [pubMat.images.gallery1, pubMat.images.gallery2, pubMat.images.gallery3, pubMat.images.gallery4];
+  const visibleGuests = pubMat.guests.filter(Boolean);
+  const visibleSponsors = pubMat.sponsors.filter((s) => s.text || s.image);
+  const visibleNotes = pubMat.notes.filter(Boolean);
+
+  const GoldDivider = () => (
+    <div className="flex items-center justify-center gap-3 py-2">
+      {[0, 1, 2, 3, 4].map((i) => (
+        <div key={i} className="h-1.5 w-1.5 rotate-45" style={{ background: i === 2 ? theme.accent : `${theme.accent}50` }} />
+      ))}
+    </div>
+  );
+
+  return (
+    <div className="relative min-h-[1080px] overflow-hidden" style={{ background: theme.paper, color: theme.ink }}>
+      <div className="pubmat-gold-shimmer absolute inset-0" />
+      <div className="absolute left-1/2 top-1/3 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl" style={{ background: `${theme.accent}18` }} />
+
+      <div className="relative z-10 px-8 py-6">
+        {/* Ornate header */}
+        <header>
+          <div className="border-2 border-b-0 px-6 py-3" style={{ borderColor: theme.accent }}>
+            <div className="border-b px-4 py-2 text-center" style={{ borderColor: `${theme.accent}50` }}>
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+                <div>
+                  <div className="pubmat-line-lock font-display text-3xl leading-none" style={{ color: theme.ink }}>{pubMat.shopName}</div>
+                  <div className="font-condensed text-xs uppercase tracking-[0.2em]" style={{ color: theme.muted }}>{pubMat.partners}</div>
+                </div>
+                <Trophy className="h-12 w-12" style={{ color: theme.accent, filter: `drop-shadow(0 0 10px ${theme.accent})` }} />
+                <div className="text-right">
+                  <div className="pubmat-line-lock font-display text-3xl leading-none" style={{ color: theme.ink }}>{pubMat.game}</div>
+                  <div className="font-condensed text-xs uppercase tracking-[0.2em]" style={{ color: theme.muted }}>{pubMat.eventType}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="border-2 border-t-0 px-4 py-1 text-center" style={{ borderColor: theme.accent, background: theme.accent }}>
+            <div className="font-condensed text-sm font-black uppercase tracking-[0.3em]" style={{ color: theme.paper }}>
+              Championship Series
+            </div>
+          </div>
+        </header>
+
+        <GoldDivider />
+
+        {/* Title */}
+        <section className="text-center">
+          <div className="pubmat-title-lock font-display text-[80px] leading-[0.86]" style={{ color: theme.accent, textShadow: `0 0 28px ${theme.accent}60, 3px 3px 0 ${theme.muted}` }}>
+            {pubMat.eventName}
+          </div>
+          <div className="mt-2 inline-block border-2 px-6 py-1 font-condensed text-xl font-black uppercase tracking-[0.22em]" style={{ borderColor: theme.accent, color: theme.ink }}>
+            {pubMat.eventType}
+          </div>
+        </section>
+
+        <GoldDivider />
+
+        {/* Hero + info split */}
+        <section className="grid grid-cols-[1fr_0.8fr] gap-5">
+          <div className="relative h-[380px] overflow-hidden border-2" style={{ borderColor: theme.accent, boxShadow: `0 0 24px ${theme.accent}30` }}>
+            {pubMat.images.hero
+              ? <img src={pubMat.images.hero} alt="" className="h-full w-full object-cover" draggable={false} />
+              : <PosterHeroImage src="" label="Main Visual" theme={theme} />}
+          </div>
+          <div className="flex flex-col gap-3">
+            {[
+              { label: "Date", val: pubMat.date, large: true },
+              { label: "Venue", val: pubMat.venue, large: false },
+              { label: "Pre-reg", val: pubMat.preRegPrice, large: true },
+              { label: "Walk-in", val: pubMat.walkInPrice, large: false },
+              { label: "Start Time", val: pubMat.startTime, large: false },
+            ].map(({ label, val, large }) => (
+              <div key={label} className="border px-3 py-2" style={{ borderColor: `${theme.accent}50` }}>
+                <div className="font-condensed text-[10px] uppercase tracking-[0.3em]" style={{ color: theme.muted }}>{label}</div>
+                <div className={cn("pubmat-line-lock font-display leading-none", large ? "text-3xl" : "text-xl")} style={{ color: theme.accent }}>{val}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <GoldDivider />
+
+        {/* Prize headline + tiles */}
+        <section>
+          <div className="mb-3 border-2 px-4 py-2 text-center" style={{ borderColor: theme.accent }}>
+            <div className="font-condensed text-sm font-black uppercase tracking-[0.3em]" style={{ color: theme.muted }}>Prize Pool</div>
+            <div className="pubmat-line-lock font-display text-4xl leading-none" style={{ color: theme.accent }}>{pubMat.prizeHeadline}</div>
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            {gallery.map((src, i) => (
+              <div key={i} className="border-2 overflow-hidden" style={{ borderColor: i === 0 ? theme.accent : `${theme.accent}40` }}>
+                <div className="relative h-[130px]">
+                  {src
+                    ? <img src={src} alt="" className="h-full w-full object-cover" draggable={false} />
+                    : <div className="flex h-full flex-col items-center justify-center gap-2" style={{ background: `${theme.accent}10` }}>
+                        <div className="font-display text-4xl leading-none" style={{ color: theme.accent }}>{["1st", "2nd", "3rd", "4th"][i]}</div>
+                      </div>}
+                </div>
+                <div className="px-2 py-1 text-center font-condensed text-xs font-black uppercase" style={{ background: i === 0 ? theme.accent : `${theme.accent}15`, color: i === 0 ? theme.paper : theme.accent }}>
+                  {pubMat.guests[i] || ["Champion", "Runner Up", "3rd Place", "4th Place"][i]}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Notes */}
+        {visibleNotes.length > 0 && (
+          <>
+            <GoldDivider />
+            <div className="flex flex-wrap justify-center gap-3">
+              {visibleNotes.slice(0, 4).map((n, i) => (
+                <span key={`${n}-${i}`} className="border px-4 py-1 font-condensed text-sm font-bold uppercase tracking-[0.12em]" style={{ borderColor: `${theme.accent}50`, color: theme.muted }}>{n}</span>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Footer */}
+        {(visibleGuests.length > 0 || visibleSponsors.length > 0) && (
+          <footer className="mt-4 border-t-2 pt-3" style={{ borderColor: `${theme.accent}50` }}>
+            {visibleGuests.length > 0 && (
+              <div className="mb-2 text-center font-condensed text-xs uppercase tracking-[0.24em]" style={{ color: theme.muted }}>
+                {pubMat.guestHeadline}: {visibleGuests.slice(0, 4).join("  ·  ")}
+              </div>
+            )}
+            {visibleSponsors.length > 0 && (
+              <div className="grid grid-cols-6 gap-2">
+                {visibleSponsors.slice(0, 12).map((s, i) => (
+                  <div key={`${s.text}-${i}`} className="flex h-9 items-center justify-center border px-1 text-center font-condensed text-xs font-black uppercase" style={{ borderColor: `${theme.accent}30`, color: theme.muted }}>
+                    {s.image
+                      ? <img src={s.image} alt={s.text || "Sponsor"} className="max-h-full max-w-full object-contain p-1" draggable={false} />
+                      : s.text}
+                  </div>
+                ))}
+              </div>
+            )}
+          </footer>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── layout: street battle ────────────────────────────────────────────────────
+function StreetBattlePubMatPoster({ pubMat, theme }: { pubMat: PubMatState; theme: PubMatTheme }) {
+  const gallery = [pubMat.images.gallery1, pubMat.images.gallery2, pubMat.images.gallery3, pubMat.images.gallery4];
+  const visibleSponsors = pubMat.sponsors.filter((s) => s.text || s.image);
+  const visibleNotes = pubMat.notes.filter(Boolean);
+
+  return (
+    <div className="relative min-h-[1080px] overflow-hidden" style={{ background: theme.paper, color: theme.ink }}>
+      <div className="pubmat-street-grid absolute inset-0 opacity-60" />
+      <div className="absolute left-0 top-0 h-full w-1/2" style={{ background: `radial-gradient(ellipse at 20% 40%, ${theme.accent}22, transparent 60%)` }} />
+      <div className="absolute right-0 top-0 h-full w-1/2" style={{ background: `radial-gradient(ellipse at 80% 40%, ${theme.accent2}18, transparent 60%)` }} />
+
+      <div className="relative z-10">
+        {/* Health-bar style top header */}
+        <header className="flex items-center justify-between border-b-2 px-5 py-3" style={{ borderColor: `${theme.accent}60` }}>
+          <div>
+            <div className="font-condensed text-xs font-black uppercase tracking-[0.3em]" style={{ color: theme.muted }}>Hosted by</div>
+            <div className="pubmat-line-lock font-display text-3xl leading-none" style={{ color: theme.ink }}>{pubMat.shopName}</div>
+          </div>
+          <div className="px-4 py-1 font-condensed text-xs font-black uppercase tracking-[0.4em]" style={{ background: theme.accent, color: theme.paper }}>
+            PRESENTS
+          </div>
+          <div className="text-right">
+            <div className="font-condensed text-xs font-black uppercase tracking-[0.3em]" style={{ color: theme.muted }}>Game</div>
+            <div className="pubmat-line-lock font-display text-3xl leading-none" style={{ color: theme.ink }}>{pubMat.game}</div>
+          </div>
+        </header>
+
+        {/* VS battle visual */}
+        <section className="relative h-[360px] overflow-hidden">
+          {/* Left fighter */}
+          <div className="absolute inset-y-0 left-0 w-[48%] overflow-hidden" style={{ clipPath: "polygon(0 0, 100% 0, 88% 100%, 0 100%)" }}>
+            {pubMat.images.hero
+              ? <img src={pubMat.images.hero} alt="" className="h-full w-full object-cover" draggable={false} />
+              : <div className="flex h-full items-center justify-center" style={{ background: `${theme.accent}15` }}><PosterHeroImage src="" label="Player" theme={theme} /></div>}
+            <div className="absolute bottom-0 inset-x-0 px-3 py-2 font-condensed text-xs font-black uppercase tracking-[0.22em]" style={{ background: `${theme.accent}dd`, color: theme.paper }}>
+              Player 1
+            </div>
+          </div>
+          {/* Right fighter */}
+          <div className="absolute inset-y-0 right-0 w-[48%] overflow-hidden" style={{ clipPath: "polygon(12% 0, 100% 0, 100% 100%, 0 100%)" }}>
+            {pubMat.images.product
+              ? <img src={pubMat.images.product} alt="" className="h-full w-full object-cover" draggable={false} />
+              : <div className="flex h-full items-center justify-center" style={{ background: `${theme.accent2}15` }}><PosterHeroImage src="" label="Prize" theme={theme} /></div>}
+            <div className="absolute bottom-0 inset-x-0 px-3 py-2 text-right font-condensed text-xs font-black uppercase tracking-[0.22em]" style={{ background: `${theme.accent2}dd`, color: "#000" }}>
+              Player 2
+            </div>
+          </div>
+          {/* VS badge center */}
+          <div className="absolute left-1/2 top-1/2 z-10 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-4 font-display text-2xl leading-none" style={{ borderColor: theme.accent2, background: theme.paper, color: theme.accent2, boxShadow: `0 0 20px ${theme.accent2}88` }}>
+            VS
+          </div>
+          {/* HP bars */}
+          <div className="absolute bottom-8 left-3 right-3 flex gap-3 items-center">
+            <div className="flex-1 h-3 rounded-full overflow-hidden border" style={{ borderColor: `${theme.accent}60` }}>
+              <div className="h-full rounded-full" style={{ width: "75%", background: `linear-gradient(90deg, ${theme.accent}, ${theme.accent2})` }} />
+            </div>
+            <div className="font-condensed text-xs font-black uppercase tracking-widest" style={{ color: theme.muted }}>★</div>
+            <div className="flex-1 h-3 rounded-full overflow-hidden border" style={{ borderColor: `${theme.accent2}60` }}>
+              <div className="h-full rounded-full" style={{ width: "60%", background: `linear-gradient(90deg, ${theme.accent2}, ${theme.accent})` }} />
+            </div>
+          </div>
+        </section>
+
+        {/* Giant title */}
+        <section className="px-5 pb-3 pt-4 text-center">
+          <div className="pubmat-title-lock font-display text-[80px] leading-[0.86]" style={{ color: theme.ink, textShadow: `4px 4px 0 ${theme.accent}, 8px 8px 0 ${theme.accent}60` }}>
+            {pubMat.eventName}
+          </div>
+          <div className="mt-2 inline-flex items-center gap-2 px-4 py-1 font-condensed text-base font-black uppercase tracking-[0.3em]" style={{ background: theme.accent, color: theme.paper }}>
+            {pubMat.eventType}
+          </div>
+        </section>
+
+        {/* Info strip */}
+        <section className="mx-5 grid grid-cols-4 overflow-hidden rounded-lg border-2" style={{ borderColor: `${theme.accent}50` }}>
+          {[
+            { label: "Entry Fee", val: pubMat.walkInPrice },
+            { label: "Date", val: pubMat.date },
+            { label: "Prep", val: pubMat.prepTime },
+            { label: "Start", val: pubMat.startTime },
+          ].map(({ label, val }, i) => (
+            <div key={label} className="border-r-2 px-3 py-3 last:border-r-0" style={{ borderColor: `${theme.accent}40`, background: i === 0 ? `${theme.accent}15` : undefined }}>
+              <div className="font-condensed text-[10px] uppercase tracking-[0.28em]" style={{ color: theme.muted }}>{label}</div>
+              <div className="pubmat-line-lock font-display text-2xl leading-none" style={{ color: i === 0 ? theme.accent : theme.ink }}>{val}</div>
+            </div>
+          ))}
+        </section>
+
+        {/* Venue */}
+        <div className="mx-5 mt-3 flex items-center gap-3 rounded-lg border px-4 py-2" style={{ borderColor: `${theme.accent2}40`, background: `${theme.accent2}08` }}>
+          <MapPin className="h-5 w-5 shrink-0" style={{ color: theme.accent2 }} />
+          <div className="pubmat-line-lock font-condensed text-xl font-black uppercase tracking-[0.06em]">{pubMat.venue}</div>
+        </div>
+
+        {/* Prize tiles */}
+        <section className="mx-5 mt-4">
+          <div className="mb-2 font-condensed text-xs font-black uppercase tracking-[0.32em]" style={{ color: theme.accent }}>{pubMat.prizeHeadline}</div>
+          <div className="grid grid-cols-4 gap-2">
+            {gallery.map((src, i) => <PrizeTile key={i} src={src} label={pubMat.guests[i] || `Prize ${i + 1}`} theme={theme} />)}
+          </div>
+        </section>
+
+        {/* Notes + sponsors */}
+        <footer className="mx-5 mt-4">
+          {visibleNotes.length > 0 && (
+            <div className="mb-3 flex flex-wrap gap-2">
+              {visibleNotes.slice(0, 4).map((n, i) => (
+                <span key={`${n}-${i}`} className="border px-3 py-1 font-condensed text-sm font-bold uppercase" style={{ borderColor: `${theme.accent}50`, color: theme.muted }}>{n}</span>
+              ))}
+            </div>
+          )}
+          {visibleSponsors.length > 0 && (
+            <div className="grid grid-cols-6 gap-2 border-t pt-3" style={{ borderColor: `${theme.accent}30` }}>
+              {visibleSponsors.slice(0, 12).map((s, i) => (
+                <div key={`${s.text}-${i}`} className="flex h-9 items-center justify-center border px-1 text-center font-condensed text-xs font-black uppercase" style={{ borderColor: `${theme.accent}30`, color: theme.muted }}>
+                  {s.image
+                    ? <img src={s.image} alt={s.text || "Sponsor"} className="max-h-full max-w-full object-contain p-1" draggable={false} />
+                    : s.text}
+                </div>
+              ))}
+            </div>
+          )}
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+// ─── layout: cosmic arena ─────────────────────────────────────────────────────
+function CosmicArenaPubMatPoster({ pubMat, theme }: { pubMat: PubMatState; theme: PubMatTheme }) {
+  const gallery = [pubMat.images.gallery1, pubMat.images.gallery2, pubMat.images.gallery3, pubMat.images.gallery4];
+  const visibleGuests = pubMat.guests.filter(Boolean);
+  const visibleSponsors = pubMat.sponsors.filter((s) => s.text || s.image);
+  const visibleNotes = pubMat.notes.filter(Boolean);
+
+  return (
+    <div className="relative min-h-[1080px] overflow-hidden" style={{ background: theme.paper, color: theme.ink }}>
+      <div className="pubmat-cosmic-stars absolute inset-0" />
+      {/* Nebula glows */}
+      <div className="absolute left-1/4 top-1/4 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl" style={{ background: `${theme.accent}20` }} />
+      <div className="absolute right-1/4 bottom-1/3 h-[400px] w-[400px] rounded-full blur-3xl" style={{ background: `${theme.accent2}18` }} />
+      {/* Orbital ring decoration */}
+      <div className="absolute left-1/2 top-[260px] h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full border opacity-20" style={{ borderColor: theme.accent, borderWidth: 2 }} />
+      <div className="absolute left-1/2 top-[260px] h-[380px] w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-full border opacity-15" style={{ borderColor: theme.accent2, borderWidth: 1 }} />
+
+      <div className="relative z-10 px-6 py-5">
+        {/* Header */}
+        <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+          <div>
+            <div className="pubmat-line-lock font-condensed text-2xl font-black uppercase tracking-[0.1em]" style={{ color: theme.ink }}>{pubMat.shopName}</div>
+            <div className="font-condensed text-sm uppercase tracking-[0.2em]" style={{ color: theme.muted }}>{pubMat.partners}</div>
+          </div>
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full blur-xl" style={{ background: theme.accent }} />
+            <div className="relative flex h-14 w-14 items-center justify-center rounded-full border-2 font-display text-3xl leading-none" style={{ borderColor: theme.accent2, background: theme.block, color: theme.accent2 }}>
+              ✦
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="pubmat-line-lock font-condensed text-2xl font-black uppercase tracking-[0.1em]" style={{ color: theme.ink }}>{pubMat.game}</div>
+            <div className="font-condensed text-sm uppercase tracking-[0.2em]" style={{ color: theme.muted }}>{pubMat.eventType}</div>
+          </div>
+        </header>
+
+        {/* Title + hero centered */}
+        <section className="mt-6 text-center">
+          <div className="pubmat-title-lock font-display text-[84px] leading-[0.84]" style={{ color: theme.ink, textShadow: `0 0 40px ${theme.accent}70, 0 0 80px ${theme.accent}40` }}>
+            {pubMat.eventName}
+          </div>
+          <div className="mt-2 inline-flex items-center gap-2 rounded-full border px-5 py-1 font-condensed text-base font-black uppercase tracking-[0.22em]" style={{ borderColor: `${theme.accent2}60`, color: theme.accent2 }}>
+            {pubMat.eventType}
+          </div>
+        </section>
+
+        {/* Hero image in "viewport" */}
+        <section className="relative mx-auto mt-5 h-[300px] w-[460px] overflow-hidden rounded-full border-4" style={{ borderColor: theme.accent, boxShadow: `0 0 40px ${theme.accent}50, inset 0 0 40px rgba(0,0,0,0.5)` }}>
+          {pubMat.images.hero
+            ? <img src={pubMat.images.hero} alt="" className="h-full w-full object-cover" draggable={false} />
+            : <PosterHeroImage src="" label="Main Visual" theme={theme} />}
+          <div className="absolute inset-0 rounded-full" style={{ boxShadow: `inset 0 0 60px ${theme.paper}80` }} />
+        </section>
+
+        {/* 3-column info */}
+        <section className="mt-5 grid grid-cols-3 gap-3">
+          {[
+            { icon: <CalendarDays className="h-8 w-8" />, label: "Date", val: pubMat.date, val2: pubMat.prepTime },
+            { icon: <MapPin className="h-8 w-8" />, label: "Venue", val: pubMat.venue, val2: "" },
+            { icon: <Zap className="h-8 w-8" />, label: "Entry Fee", val: pubMat.preRegPrice, val2: `${pubMat.walkInPrice} door` },
+          ].map(({ icon, label, val, val2 }) => (
+            <div key={label} className="rounded-xl border p-4 text-center" style={{ borderColor: `${theme.accent}40`, background: `${theme.accent}08`, boxShadow: `0 0 14px ${theme.accent}14` }}>
+              <div className="flex justify-center" style={{ color: theme.accent2 }}>{icon}</div>
+              <div className="mt-1 font-condensed text-xs uppercase tracking-[0.26em]" style={{ color: theme.muted }}>{label}</div>
+              <div className="pubmat-small-lock mt-1 font-condensed text-xl font-black leading-tight" style={{ color: theme.ink }}>{val}</div>
+              {val2 && <div className="pubmat-line-lock font-condensed text-sm" style={{ color: theme.muted }}>{val2}</div>}
+            </div>
+          ))}
+        </section>
+
+        {/* Guests */}
+        {visibleGuests.length > 0 && (
+          <section className="mt-4 text-center">
+            <div className="mb-2 font-condensed text-xs uppercase tracking-[0.3em]" style={{ color: theme.muted }}>{pubMat.guestHeadline}</div>
+            <div className="flex flex-wrap justify-center gap-4">
+              {visibleGuests.slice(0, 4).map((g, i) => (
+                <span key={`${g}-${i}`} className="font-display text-3xl leading-none" style={{ color: i % 2 === 0 ? theme.accent : theme.accent2, textShadow: `0 0 14px ${i % 2 === 0 ? theme.accent : theme.accent2}` }}>{g}</span>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Prize row */}
+        <section className="mt-4">
+          <div className="mb-2 flex items-center gap-3">
+            <div className="h-px flex-1" style={{ background: `linear-gradient(90deg, transparent, ${theme.accent})` }} />
+            <div className="font-condensed text-sm font-black uppercase tracking-[0.28em]" style={{ color: theme.accent }}>{pubMat.prizeHeadline}</div>
+            <div className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${theme.accent}, transparent)` }} />
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {gallery.map((src, i) => <PrizeTile key={i} src={src} label={pubMat.guests[i] || `Prize ${i + 1}`} theme={theme} />)}
+          </div>
+        </section>
+
+        {/* Notes + sponsors */}
+        {visibleNotes.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {visibleNotes.slice(0, 4).map((n, i) => (
+              <span key={`${n}-${i}`} className="rounded-full border px-3 py-1 font-condensed text-xs font-bold uppercase" style={{ borderColor: `${theme.accent}40`, color: theme.muted }}>{n}</span>
+            ))}
+          </div>
+        )}
+        {visibleSponsors.length > 0 && (
+          <footer className="mt-4 grid grid-cols-6 gap-2 border-t pt-3" style={{ borderColor: `${theme.accent}30` }}>
+            {visibleSponsors.slice(0, 12).map((s, i) => (
+              <div key={`${s.text}-${i}`} className="flex h-9 items-center justify-center rounded border px-1 text-center font-condensed text-xs font-black uppercase" style={{ borderColor: `${theme.accent}30`, color: theme.muted }}>
+                {s.image
+                  ? <img src={s.image} alt={s.text || "Sponsor"} className="max-h-full max-w-full object-contain p-1" draggable={false} />
+                  : s.text}
+              </div>
+            ))}
+          </footer>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── layout: volcanic ─────────────────────────────────────────────────────────
+function VolcanicPubMatPoster({ pubMat, theme }: { pubMat: PubMatState; theme: PubMatTheme }) {
+  const gallery = [pubMat.images.gallery1, pubMat.images.gallery2, pubMat.images.gallery3, pubMat.images.gallery4];
+  const visibleSponsors = pubMat.sponsors.filter((s) => s.text || s.image);
+  const visibleNotes = pubMat.notes.filter(Boolean);
+  const hazardStripe = `repeating-linear-gradient(-55deg, ${theme.accent}55 0 10px, transparent 10px 22px)`;
+
+  return (
+    <div className="relative min-h-[1080px] overflow-hidden" style={{ background: theme.paper, color: theme.ink }}>
+      <div className="pubmat-volcanic-lava absolute inset-0" />
+      <div className="absolute left-1/2 bottom-0 h-[600px] w-[800px] -translate-x-1/2 rounded-full blur-3xl" style={{ background: `${theme.accent}22` }} />
+
+      <div className="relative z-10">
+        {/* Hazard stripe header */}
+        <header className="border-b-4 px-5 py-4" style={{ borderColor: theme.accent, background: hazardStripe }}>
+          <div className="flex items-center justify-between rounded-md border-2 bg-black/80 px-4 py-3" style={{ borderColor: `${theme.accent}60` }}>
+            <div>
+              <div className="pubmat-line-lock font-display text-3xl leading-none" style={{ color: theme.accent }}>{pubMat.shopName}</div>
+              <div className="font-condensed text-sm uppercase tracking-[0.18em]" style={{ color: theme.muted }}>{pubMat.partners}</div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap className="h-8 w-8" style={{ color: theme.accent2 }} />
+              <span className="font-condensed text-sm font-black uppercase tracking-[0.3em]" style={{ color: theme.muted }}>EXTREME</span>
+              <Zap className="h-8 w-8" style={{ color: theme.accent2 }} />
+            </div>
+            <div className="text-right">
+              <div className="pubmat-line-lock font-display text-3xl leading-none" style={{ color: theme.accent2 }}>{pubMat.game}</div>
+              <div className="font-condensed text-sm uppercase tracking-[0.18em]" style={{ color: theme.muted }}>{pubMat.eventType}</div>
+            </div>
+          </div>
+        </header>
+
+        {/* Massive title */}
+        <section className="px-5 py-5">
+          <div className="pubmat-title-lock font-display text-[90px] leading-[0.82]" style={{ color: theme.ink, textShadow: `0 0 24px ${theme.accent}88, 4px 4px 0 ${theme.accent}` }}>
+            {pubMat.eventName}
+          </div>
+          <div className="mt-3 flex items-center gap-4">
+            <div className="h-1 w-16 rounded-full" style={{ background: theme.accent }} />
+            <div className="font-condensed text-2xl font-black uppercase tracking-[0.2em]" style={{ color: theme.accent }}>{pubMat.eventType}</div>
+            <div className="h-1 flex-1 rounded-full" style={{ background: `linear-gradient(90deg, ${theme.accent}, transparent)` }} />
+          </div>
+        </section>
+
+        {/* Hero image + info side-by-side */}
+        <section className="grid grid-cols-[1.2fr_0.8fr] gap-4 px-5 pb-4">
+          <div className="relative h-[380px] overflow-hidden rounded-lg border-4" style={{ borderColor: theme.accent, boxShadow: `0 0 36px ${theme.accent}60, inset 0 0 20px rgba(0,0,0,0.6)` }}>
+            {pubMat.images.hero
+              ? <img src={pubMat.images.hero} alt="" className="h-full w-full object-cover" draggable={false} />
+              : <PosterHeroImage src="" label="Main Visual" theme={theme} />}
+            <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(to top, ${theme.accent}30, transparent 40%)` }} />
+          </div>
+          <div className="flex flex-col gap-3">
+            {/* Price badge */}
+            <div className="rounded-lg border-2 p-4 text-center" style={{ borderColor: theme.accent, background: `${theme.accent}15`, boxShadow: `0 0 18px ${theme.accent}30` }}>
+              <div className="font-condensed text-xs uppercase tracking-[0.28em]" style={{ color: theme.muted }}>Entry Fee</div>
+              <div className="font-display text-5xl leading-none" style={{ color: theme.accent, textShadow: `0 0 16px ${theme.accent}` }}>{pubMat.preRegPrice}</div>
+              <div className="font-condensed text-base font-black" style={{ color: theme.muted }}>Pre-reg</div>
+              <div className="mt-1 border-t pt-1 font-display text-3xl leading-none" style={{ borderColor: `${theme.accent}40`, color: theme.accent2 }}>{pubMat.walkInPrice}</div>
+              <div className="font-condensed text-sm font-black" style={{ color: theme.muted }}>Walk-in</div>
+            </div>
+            {/* Date */}
+            <div className="rounded-lg border px-3 py-3" style={{ borderColor: `${theme.accent}40`, background: `${theme.accent}08` }}>
+              <CalendarDays className="h-5 w-5" style={{ color: theme.accent2 }} />
+              <div className="mt-1 font-condensed text-xs uppercase tracking-[0.22em]" style={{ color: theme.muted }}>Date</div>
+              <div className="pubmat-line-lock font-display text-2xl leading-none" style={{ color: theme.ink }}>{pubMat.date}</div>
+            </div>
+            {/* Time */}
+            <div className="rounded-lg border px-3 py-3" style={{ borderColor: `${theme.accent}40`, background: `${theme.accent}08` }}>
+              <Clock className="h-5 w-5" style={{ color: theme.accent }} />
+              <div className="mt-1 font-condensed text-xs uppercase tracking-[0.22em]" style={{ color: theme.muted }}>Time</div>
+              <div className="font-condensed text-base font-black uppercase">{pubMat.prepTime}</div>
+              <div className="font-display text-2xl leading-none" style={{ color: theme.accent2 }}>{pubMat.startTime}</div>
+            </div>
+            {/* Venue */}
+            <div className="rounded-lg border px-3 py-3" style={{ borderColor: `${theme.accent}40`, background: `${theme.accent}08` }}>
+              <MapPin className="h-5 w-5" style={{ color: theme.accent2 }} />
+              <div className="mt-1 font-condensed text-xs uppercase tracking-[0.22em]" style={{ color: theme.muted }}>Venue</div>
+              <div className="pubmat-small-lock font-condensed text-base font-black uppercase leading-tight">{pubMat.venue}</div>
+            </div>
+          </div>
+        </section>
+
+        {/* Lava-stripe divider */}
+        <div className="mx-5 mb-4" style={{ height: 8, background: hazardStripe, borderRadius: 4 }} />
+
+        {/* Prize tiles */}
+        <section className="px-5">
+          <div className="mb-2 flex items-center gap-3">
+            <Sparkles className="h-5 w-5" style={{ color: theme.accent }} />
+            <div className="font-condensed text-sm font-black uppercase tracking-[0.28em]" style={{ color: theme.accent }}>{pubMat.prizeHeadline}</div>
+            <div className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${theme.accent}, transparent)` }} />
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            {gallery.map((src, i) => <PrizeTile key={i} src={src} label={pubMat.guests[i] || `Prize ${i + 1}`} theme={theme} />)}
+          </div>
+        </section>
+
+        {/* Notes + sponsors */}
+        <footer className="mt-4 px-5 pb-5">
+          {visibleNotes.length > 0 && (
+            <div className="mb-3 flex flex-wrap gap-2">
+              {visibleNotes.slice(0, 4).map((n, i) => (
+                <span key={`${n}-${i}`} className="rounded border px-3 py-1 font-condensed text-sm font-bold uppercase" style={{ borderColor: `${theme.accent}50`, color: theme.muted }}>{n}</span>
+              ))}
+            </div>
+          )}
+          <div className="mb-3 border px-4 py-2 text-center font-condensed text-xl font-black uppercase tracking-[0.12em]" style={{ borderColor: `${theme.accent}50`, color: theme.accent }}>
+            {pubMat.prizeHeadline} · {pubMat.guestHeadline}
+          </div>
+          {visibleSponsors.length > 0 && (
+            <div className="grid grid-cols-6 gap-2 border-t pt-3" style={{ borderColor: `${theme.accent}30` }}>
+              {visibleSponsors.slice(0, 12).map((s, i) => (
+                <div key={`${s.text}-${i}`} className="flex h-9 items-center justify-center rounded border px-1 text-center font-condensed text-xs font-black uppercase" style={{ borderColor: `${theme.accent}30`, color: theme.muted }}>
+                  {s.image
+                    ? <img src={s.image} alt={s.text || "Sponsor"} className="max-h-full max-w-full object-contain p-1" draggable={false} />
+                    : s.text}
+                </div>
+              ))}
+            </div>
+          )}
         </footer>
       </div>
     </div>
