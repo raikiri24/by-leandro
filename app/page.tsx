@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils";
 
 // ─── types ────────────────────────────────────────────────────────────────────
 type CardType = "swiss" | "topcut";
-type GeneratorMode = "cards" | "pubmat" | "feedback";
+type GeneratorMode = "cards" | "pubmat";
 type FeedbackCategory = "problem" | "feature" | "suggestion";
 type LayoutKey = "report" | "arcade" | "blade" | "award" | "minimal";
 type PubMatThemeKey =
@@ -417,6 +417,7 @@ export default function Page() {
   const [pubTheme, setPubTheme] = useState<PubMatThemeKey>("hyper");
   const [pubMat, setPubMat] = useState<PubMatState>(initialPubMat);
   const [feedback, setFeedback] = useState<FeedbackState>(initialFeedback);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
   const [feedbackNotice, setFeedbackNotice] = useState("");
   const [feedbackError, setFeedbackError] = useState("");
@@ -518,6 +519,7 @@ export default function Page() {
 
       setFeedback(initialFeedback);
       setFeedbackNotice("Sent. Thanks for helping improve the tool.");
+      window.setTimeout(() => setFeedbackOpen(false), 900);
     } catch (error) {
       setFeedbackError(
         error instanceof Error ? error.message : "Unable to submit feedback.",
