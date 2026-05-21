@@ -475,7 +475,7 @@ export default function Page() {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ sessionId }),
         });
-        const payload = await response.json();
+        const payload = await readJsonResponse(response);
         if (!response.ok || !payload.ok) {
           throw new Error(payload.error || "Unable to fetch usage count.");
         }
@@ -513,7 +513,7 @@ export default function Page() {
           page: window.location.href,
         }),
       });
-      const payload = await response.json();
+      const payload = await readJsonResponse(response);
       if (!response.ok || !payload.ok) {
         throw new Error(payload.error || "Unable to submit feedback.");
       }
@@ -601,7 +601,7 @@ export default function Page() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ url: scrapeUrl }),
       });
-      const payload = await res.json();
+      const payload = await readJsonResponse(res);
       setLogs(payload.logs || []);
       if (!res.ok || !payload.ok)
         throw new Error(payload.error || "Scrape failed.");
@@ -1296,6 +1296,28 @@ function formatCount(value: number) {
   return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(
     value,
   );
+}
+
+async function readJsonResponse(response: Response) {
+  const contentType = response.headers.get("content-type") || "";
+  const bodyText = await response.text();
+
+  if (!contentType.includes("application/json")) {
+    const preview = bodyText
+      .replace(/<[^>]*>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 180);
+    throw new Error(
+      preview || `Server returned ${response.status} ${response.statusText}.`,
+    );
+  }
+
+  try {
+    return JSON.parse(bodyText);
+  } catch {
+    throw new Error("Server returned invalid JSON.");
+  }
 }
 
 function getBrowserSessionId() {
