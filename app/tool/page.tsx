@@ -39,7 +39,7 @@ import { cn } from "@/lib/utils";
 type CardType = "swiss" | "topcut";
 type GeneratorMode = "cards" | "pubmat";
 type FeedbackCategory = "problem" | "feature" | "suggestion";
-type LayoutKey = "report" | "arcade" | "blade" | "award" | "minimal";
+type LayoutKey = "report" | "arcade" | "blade" | "award" | "minimal" | "terminal" | "ticket" | "split" | "circuit";
 type PubMatThemeKey =
   | "hyper"
   | "arena"
@@ -71,7 +71,31 @@ type DesignKey =
   | "sakura"
   | "dawn"
   | "ice"
-  | "ocean";
+  | "ocean"
+  // terminal layouts
+  | "hack"
+  | "breach"
+  | "echo"
+  | "cobalt_term"
+  | "amber_term"
+  // ticket layouts
+  | "golden_pass"
+  | "night_pass"
+  | "flame_pass"
+  | "frost_pass"
+  | "obsidian_pass"
+  // split layouts
+  | "volt"
+  | "forge"
+  | "dusk_split"
+  | "alpine"
+  | "steel"
+  // circuit layouts
+  | "neon_circuit"
+  | "ember_circuit"
+  | "lime_circuit"
+  | "gold_circuit"
+  | "void_circuit";
 
 type Design = {
   label: string;
@@ -348,6 +372,210 @@ const designs: Record<DesignKey, Design> = {
     bg: "#020b10",
     panel: "rgba(34,211,238,.08)",
     text: "#ecfeff",
+  },
+  // terminal layout
+  hack: {
+    label: "Hack",
+    tagline: "Zero Day",
+    layout: "terminal",
+    a: "#00ff41",
+    b: "#006b1a",
+    bg: "#050a05",
+    panel: "rgba(0,255,65,.08)",
+    text: "#e0ffe8",
+  },
+  breach: {
+    label: "Breach",
+    tagline: "Firewall Down",
+    layout: "terminal",
+    a: "#ff6b35",
+    b: "#7a2500",
+    bg: "#100500",
+    panel: "rgba(255,107,53,.08)",
+    text: "#fff3ee",
+  },
+  echo: {
+    label: "Echo",
+    tagline: "Signal Lost",
+    layout: "terminal",
+    a: "#c084fc",
+    b: "#4c1d95",
+    bg: "#060010",
+    panel: "rgba(192,132,252,.08)",
+    text: "#f5f0ff",
+  },
+  cobalt_term: {
+    label: "Cobalt",
+    tagline: "Deep Code",
+    layout: "terminal",
+    a: "#38bdf8",
+    b: "#0c4a6e",
+    bg: "#000d14",
+    panel: "rgba(56,189,248,.08)",
+    text: "#e0f7ff",
+  },
+  amber_term: {
+    label: "Amber",
+    tagline: "Root Shell",
+    layout: "terminal",
+    a: "#fbbf24",
+    b: "#78350f",
+    bg: "#0d0800",
+    panel: "rgba(251,191,36,.08)",
+    text: "#fff8e6",
+  },
+  // ticket layout
+  golden_pass: {
+    label: "Golden",
+    tagline: "VIP Access",
+    layout: "ticket",
+    a: "#f5c842",
+    b: "#7a5e00",
+    bg: "#0f0c00",
+    panel: "rgba(245,200,66,.1)",
+    text: "#fff9e0",
+  },
+  night_pass: {
+    label: "Night Pass",
+    tagline: "Platinum Tier",
+    layout: "ticket",
+    a: "#94a3b8",
+    b: "#334155",
+    bg: "#050709",
+    panel: "rgba(148,163,184,.08)",
+    text: "#e8edf5",
+  },
+  flame_pass: {
+    label: "Flame Pass",
+    tagline: "Fire Tier",
+    layout: "ticket",
+    a: "#f97316",
+    b: "#7c2d12",
+    bg: "#0f0400",
+    panel: "rgba(249,115,22,.08)",
+    text: "#fff5e8",
+  },
+  frost_pass: {
+    label: "Frost Pass",
+    tagline: "Ice Rank",
+    layout: "ticket",
+    a: "#7dd3fc",
+    b: "#0369a1",
+    bg: "#00060f",
+    panel: "rgba(125,211,252,.07)",
+    text: "#f0faff",
+  },
+  obsidian_pass: {
+    label: "Obsidian",
+    tagline: "Dark Matter",
+    layout: "ticket",
+    a: "#a78bfa",
+    b: "#3b0764",
+    bg: "#030008",
+    panel: "rgba(167,139,250,.08)",
+    text: "#ede9ff",
+  },
+  // split layout
+  volt: {
+    label: "Volt",
+    tagline: "Electric Cut",
+    layout: "split",
+    a: "#facc15",
+    b: "#713f12",
+    bg: "#0a0800",
+    panel: "rgba(250,204,21,.08)",
+    text: "#fffde0",
+  },
+  forge: {
+    label: "Forge",
+    tagline: "Iron Will",
+    layout: "split",
+    a: "#fb7185",
+    b: "#881337",
+    bg: "#110005",
+    panel: "rgba(251,113,133,.08)",
+    text: "#ffe8ec",
+  },
+  dusk_split: {
+    label: "Dusk",
+    tagline: "Twilight Zone",
+    layout: "split",
+    a: "#c084fc",
+    b: "#6b21a8",
+    bg: "#08000f",
+    panel: "rgba(192,132,252,.08)",
+    text: "#f5f0ff",
+  },
+  alpine: {
+    label: "Alpine",
+    tagline: "Mountain High",
+    layout: "split",
+    a: "#7dd3fc",
+    b: "#075985",
+    bg: "#00080d",
+    panel: "rgba(125,211,252,.07)",
+    text: "#e0f7ff",
+  },
+  steel: {
+    label: "Steel",
+    tagline: "Metal Core",
+    layout: "split",
+    a: "#cbd5e1",
+    b: "#334155",
+    bg: "#060809",
+    panel: "rgba(203,213,225,.06)",
+    text: "#f0f4f8",
+  },
+  // circuit layout
+  neon_circuit: {
+    label: "Neon Grid",
+    tagline: "Live Circuit",
+    layout: "circuit",
+    a: "#00ffff",
+    b: "#006b6b",
+    bg: "#000f0f",
+    panel: "rgba(0,255,255,.07)",
+    text: "#e0ffff",
+  },
+  ember_circuit: {
+    label: "Ember Grid",
+    tagline: "Hot Wire",
+    layout: "circuit",
+    a: "#ff4500",
+    b: "#7c1800",
+    bg: "#0f0200",
+    panel: "rgba(255,69,0,.07)",
+    text: "#fff0e8",
+  },
+  lime_circuit: {
+    label: "Lime Grid",
+    tagline: "Bio Circuit",
+    layout: "circuit",
+    a: "#84cc16",
+    b: "#3f6212",
+    bg: "#040a00",
+    panel: "rgba(132,204,22,.07)",
+    text: "#f3ffe0",
+  },
+  gold_circuit: {
+    label: "Gold Grid",
+    tagline: "Premium Board",
+    layout: "circuit",
+    a: "#d4af37",
+    b: "#6b4e00",
+    bg: "#0a0800",
+    panel: "rgba(212,175,55,.07)",
+    text: "#fff8e0",
+  },
+  void_circuit: {
+    label: "Void Grid",
+    tagline: "Dark Matter",
+    layout: "circuit",
+    a: "#818cf8",
+    b: "#1e1b4b",
+    bg: "#03020d",
+    panel: "rgba(129,140,248,.07)",
+    text: "#eeeeff",
   },
 };
 
@@ -5159,6 +5387,133 @@ function LayoutPreview({
       </>
     );
 
+  if (layout === "terminal")
+    return (
+      <>
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "repeating-linear-gradient(0deg,rgba(0,0,0,0.18) 0px,rgba(0,0,0,0.18) 1px,transparent 1px,transparent 4px)",
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{ background: `radial-gradient(ellipse at 50% 0%,${d.a}14 0%,transparent 65%)` }}
+        />
+        <div
+          className="absolute left-0 right-0 top-0 flex items-center gap-1 px-2 py-1.5"
+          style={{ background: `${d.a}10`, borderBottom: `1px solid ${d.a}20` }}
+        >
+          {["#ff5f56","#ffbd2e",d.a].map((c,i) => (
+            <span key={i} className="h-1.5 w-1.5 rounded-full" style={{ background: c, opacity: i===2?1:0.7 }} />
+          ))}
+        </div>
+        <div className="absolute left-3 top-10 space-y-1.5">
+          {["$","$","$"].map((sym, i) => (
+            <div key={i} className="flex items-center gap-1.5">
+              <span className="font-mono text-[7px] leading-none" style={{ color: d.a, opacity: 0.7 }}>{sym}</span>
+              <div className="h-0.5 rounded" style={{ width: `${[55,42,38][i]}%`, background: `${d.a}${i===0?"60":"30"}` }} />
+            </div>
+          ))}
+        </div>
+      </>
+    );
+
+  if (layout === "ticket")
+    return (
+      <>
+        <div
+          className="absolute left-0 top-0 bottom-0 w-7"
+          style={{ background: `${d.a}14`, borderRight: `2px dashed ${d.a}35` }}
+        />
+        <div
+          className="absolute left-[28px] right-0 top-0 h-[3px]"
+          style={{ background: d.a }}
+        />
+        <div
+          className="absolute bottom-5 left-[26px] right-2 h-[1px]"
+          style={{ background: `${d.a}28` }}
+        />
+        <div className="absolute left-9 top-3 right-3 space-y-1.5">
+          {[0.8, 0.55, 0.55].map((w, i) => (
+            <div key={i} className="h-0.5 rounded" style={{ background: `${d.a}${i===0?"60":"28"}`, width: `${w*100}%` }} />
+          ))}
+        </div>
+        <div
+          className="absolute left-1 top-1/2 -translate-y-1/2 font-mono text-[6px] font-bold leading-none"
+          style={{ color: d.a, opacity: 0.5, writingMode: "vertical-rl" }}
+        >
+          #{String(Math.floor(Math.random()*999)+1).padStart(3,"0")}
+        </div>
+      </>
+    );
+
+  if (layout === "split")
+    return (
+      <>
+        <div
+          className="absolute right-0 top-0 bottom-0"
+          style={{
+            width: "55%",
+            background: `${d.a}12`,
+            clipPath: "polygon(28% 0,100% 0,100% 100%,0 100%)",
+          }}
+        />
+        <div
+          className="absolute top-0 bottom-0"
+          style={{
+            left: "40%",
+            width: 3,
+            background: `linear-gradient(to bottom,transparent,${d.a},transparent)`,
+            transform: "skewX(-18deg)",
+          }}
+        />
+        <div className="absolute left-3 top-4 right-4 space-y-2">
+          <div className="h-1 w-3/4 rounded" style={{ background: d.a }} />
+          {[0.8, 0.6, 0.6].map((w, i) => (
+            <div key={i} className="h-0.5" style={{ background: `${d.b}`, width: `${w*100}%` }} />
+          ))}
+        </div>
+      </>
+    );
+
+  if (layout === "circuit")
+    return (
+      <>
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `radial-gradient(${d.a}18 1px,transparent 1px)`,
+            backgroundSize: "10px 10px",
+          }}
+        />
+        <div className="absolute left-4 top-4 right-4 space-y-3">
+          {[0,1,2].map((i) => (
+            <div key={i} className="flex items-center gap-2">
+              <div
+                className="h-2.5 w-2.5 shrink-0 rounded-full border"
+                style={{ borderColor: d.a, background: i===0?d.a:"transparent" }}
+              />
+              <div className="h-px flex-1" style={{ background: `${d.a}35` }} />
+              <div
+                className="h-1.5 w-1.5 shrink-0 rotate-45"
+                style={{ background: d.b }}
+              />
+            </div>
+          ))}
+        </div>
+        {[["top-2 left-2","top-2 right-2"],["bottom-2 left-2","bottom-2 right-2"]].flat().map((pos) => (
+          <div key={pos} className={`absolute ${pos} h-3 w-3`} style={{
+            borderTop: pos.includes("top") ? `2px solid ${d.a}50` : "none",
+            borderBottom: pos.includes("bottom") ? `2px solid ${d.a}50` : "none",
+            borderLeft: pos.includes("left") ? `2px solid ${d.a}50` : "none",
+            borderRight: pos.includes("right") ? `2px solid ${d.a}50` : "none",
+          }} />
+        ))}
+      </>
+    );
+
   // minimal
   return (
     <>
@@ -5190,6 +5545,14 @@ function CardRenderer(props: CardProps) {
       return <AwardCard {...props} />;
     case "minimal":
       return <MinimalCard {...props} />;
+    case "terminal":
+      return <TerminalCard {...props} />;
+    case "ticket":
+      return <TicketCard {...props} />;
+    case "split":
+      return <SplitCard {...props} />;
+    case "circuit":
+      return <CircuitCard {...props} />;
     default:
       return <ReportCard {...props} />;
   }
@@ -6601,6 +6964,660 @@ function MinimalCard({ form, rounds, topCut, cardType, palette }: CardProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── layout: terminal ─────────────────────────────────────────────────────────
+function TerminalCard({ form, rounds, topCut, cardType, palette }: CardProps) {
+  const wins = rounds.filter((r) => r.result === "win").length;
+  const losses = rounds.length - wins;
+  const titleColor = form.champTitle.toUpperCase() === "ELIMINATED" ? "#ff3b3b" : palette.a;
+
+  const renderRow = (label: string, opp: string, score: string, result: "win" | "loss") => {
+    const win = result === "win";
+    const c = win ? palette.a : "#ff3b3b";
+    return (
+      <div className="flex items-center gap-3 font-mono text-sm">
+        <span className="w-24 shrink-0 text-xs" style={{ color: palette.a, opacity: 0.45 }}>{label}</span>
+        <span
+          className="rounded px-2 py-0.5 text-xs font-bold w-[56px] text-center shrink-0"
+          style={{ background: `${c}15`, color: c, border: `1px solid ${c}30` }}
+        >
+          [{win ? "WIN" : "LOSS"}]
+        </span>
+        <span className="flex-1 truncate font-mono text-sm" style={{ color: palette.text, opacity: 0.65 }}>{opp || "—"}</span>
+        <span className="font-bold shrink-0" style={{ color: c }}>{score || "—"}</span>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      {/* CRT scanlines */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: "repeating-linear-gradient(0deg,rgba(0,0,0,0.16) 0px,rgba(0,0,0,0.16) 1px,transparent 1px,transparent 4px)" }}
+      />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: `radial-gradient(ellipse at 50% 0%,${palette.a}12 0%,transparent 58%)` }}
+      />
+
+      {/* Title bar */}
+      <div
+        className="flex items-center gap-2 border-b px-5 py-3"
+        style={{ borderColor: `${palette.a}22`, background: `${palette.a}07` }}
+      >
+        {["#ff5f56","#ffbd2e", palette.a].map((c, i) => (
+          <span key={i} className="h-3 w-3 rounded-full" style={{ background: c, opacity: i === 2 ? 1 : 0.7 }} />
+        ))}
+        <span className="ml-3 font-mono text-xs truncate" style={{ color: palette.a, opacity: 0.55 }}>
+          tournament_report.sh — {form.organizer}
+        </span>
+        <span className="ml-auto font-mono text-xs shrink-0" style={{ color: palette.a, opacity: 0.35 }}>#{form.cardNum}</span>
+      </div>
+
+      <div className="relative space-y-5 p-8">
+        {/* system info */}
+        <div className="font-mono text-xs space-y-0.5" style={{ color: `${palette.a}60` }}>
+          <div>$ ./report --card {form.cardNum} --game "{form.game}"</div>
+          <div style={{ color: `${palette.a}35` }}>// {form.tournament} · {form.date}</div>
+        </div>
+
+        {/* player */}
+        <div>
+          <div className="mb-1 font-mono text-xs" style={{ color: palette.a, opacity: 0.5 }}>$ echo $PLAYER_NAME</div>
+          <div
+            className="break-words font-mono text-[72px] font-bold leading-none"
+            style={{ color: palette.text, textShadow: `0 0 22px ${palette.a}40` }}
+          >
+            {form.player || "PLAYER"}
+          </div>
+        </div>
+
+        {/* separator */}
+        <div className="font-mono text-xs" style={{ color: palette.a, opacity: 0.25 }}>
+          {"─".repeat(48)}
+        </div>
+
+        {/* rounds */}
+        <div className="space-y-2.5">
+          <div className="mb-2 font-mono text-xs" style={{ color: palette.a, opacity: 0.5 }}>
+            $ {cardType === "swiss" ? "list_rounds" : "list_top_cut"} --verbose
+          </div>
+          {cardType === "swiss" ? (
+            <>
+              {rounds.map((r, i) => renderRow(r.rnd || `R${i + 1}`, r.opp, r.score, r.result))}
+              <div className="mt-4 font-mono text-xs space-y-0.5" style={{ color: `${palette.a}55` }}>
+                <div>$ stat: wins={wins} losses={losses} played={rounds.length}</div>
+                {form.advMsg && <div style={{ color: palette.a }}>$ echo "{form.advMsg}"</div>}
+              </div>
+            </>
+          ) : (
+            <>
+              {topCut.map((m, i) => renderRow(m.stage, m.opp, m.score, m.result))}
+              {form.finalsOpp && renderRow("Finals", form.finalsOpp, form.finalsSc, form.finalsResult)}
+              {form.champTitle && (
+                <div
+                  className="mt-4 rounded border p-4"
+                  style={{ borderColor: `${titleColor}40`, background: `${titleColor}08` }}
+                >
+                  <div className="mb-1 font-mono text-xs" style={{ color: titleColor, opacity: 0.55 }}>$ echo $RESULT</div>
+                  <div className="font-display text-6xl leading-none" style={{ color: titleColor, textShadow: `0 0 18px ${titleColor}66` }}>
+                    {form.champTitle}
+                  </div>
+                  {form.tcRecord && (
+                    <div className="mt-1 font-mono text-xs" style={{ color: titleColor, opacity: 0.6 }}>
+                      top_cut_record={form.tcRecord}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* separator + footer */}
+        <div className="font-mono text-xs" style={{ color: palette.a, opacity: 0.25 }}>{"─".repeat(48)}</div>
+        <div className="flex justify-between font-mono text-xs" style={{ color: palette.a, opacity: 0.3 }}>
+          <span>$ exit 0</span>
+          <span>{form.organizer} · {form.date}</span>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ─── layout: ticket ───────────────────────────────────────────────────────────
+function TicketCard({ form, rounds, topCut, cardType, palette }: CardProps) {
+  const wins = rounds.filter((r) => r.result === "win").length;
+  const losses = rounds.length - wins;
+  const titleColor = form.champTitle.toUpperCase() === "ELIMINATED" ? "#ff3b3b" : palette.a;
+
+  const perforation = (
+    <div className="relative my-4 flex items-center gap-0">
+      <div className="h-3 w-3 rounded-full" style={{ background: palette.bg, border: `2px solid ${palette.a}25`, marginLeft: -8 }} />
+      <div className="flex-1 border-t-2 border-dashed" style={{ borderColor: `${palette.a}30` }} />
+      <div className="h-3 w-3 rounded-full" style={{ background: palette.bg, border: `2px solid ${palette.a}25`, marginRight: -8 }} />
+    </div>
+  );
+
+  return (
+    <div className="relative flex min-h-full">
+      {/* Stub column */}
+      <div
+        className="relative flex w-16 shrink-0 flex-col items-center justify-between border-r-2 border-dashed py-8"
+        style={{ borderColor: `${palette.a}35`, background: `${palette.a}07` }}
+      >
+        {/* hole punch top */}
+        <div className="absolute -right-2.5 top-6 h-4 w-4 rounded-full" style={{ background: palette.bg, border: `2px solid ${palette.a}30` }} />
+        {/* hole punch bottom */}
+        <div className="absolute -right-2.5 bottom-6 h-4 w-4 rounded-full" style={{ background: palette.bg, border: `2px solid ${palette.a}30` }} />
+
+        <div
+          className="font-display text-3xl leading-none tracking-[0.04em]"
+          style={{ color: palette.a, writingMode: "vertical-rl", transform: "rotate(180deg)", textShadow: `0 0 12px ${palette.a}55` }}
+        >
+          {form.cardNum}
+        </div>
+        <div
+          className="font-condensed text-[8px] uppercase tracking-[0.3em] text-center"
+          style={{ color: palette.a, opacity: 0.5, writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+        >
+          Admit One
+        </div>
+        <div
+          className="font-condensed text-[8px] uppercase tracking-[0.3em] text-center"
+          style={{ color: palette.text, opacity: 0.3, writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+        >
+          {cardType === "swiss" ? "Swiss" : "Top Cut"}
+        </div>
+      </div>
+
+      {/* Main body */}
+      <div className="flex-1 min-w-0">
+        {/* Top accent bar */}
+        <div className="h-[5px] w-full" style={{ background: `linear-gradient(90deg,${palette.a},${palette.b},transparent)` }} />
+
+        <div className="p-6 pb-4">
+          {/* event header */}
+          <div className="mb-4 flex items-start justify-between gap-2">
+            <div>
+              <div className="font-condensed text-xs font-bold uppercase tracking-[0.28em]" style={{ color: palette.a }}>
+                {form.organizer} · {form.game}
+              </div>
+              <div className="mt-0.5 font-condensed text-xs uppercase tracking-[0.18em]" style={{ color: palette.text, opacity: 0.38 }}>
+                {form.tournament} — {form.date}
+              </div>
+            </div>
+            <div
+              className="shrink-0 rounded border px-2 py-1 text-center"
+              style={{ borderColor: `${palette.a}40`, background: `${palette.a}0c` }}
+            >
+              <div className="font-condensed text-[8px] uppercase tracking-widest" style={{ color: palette.a, opacity: 0.6 }}>No.</div>
+              <div className="font-display text-2xl leading-none" style={{ color: palette.a }}>{form.cardNum}</div>
+            </div>
+          </div>
+
+          {/* player name */}
+          <h2
+            className="break-words font-display text-[76px] leading-none tracking-[0.02em]"
+            style={{ color: palette.text, textShadow: `2px 2px 0 ${palette.a}30` }}
+          >
+            {form.player || "PLAYER"}
+          </h2>
+
+          {perforation}
+
+          {/* rounds section */}
+          <div className="font-condensed text-xs font-bold uppercase tracking-[0.25em] mb-3" style={{ color: palette.a }}>
+            {cardType === "swiss" ? "Swiss Round Results" : "Top Cut Results"}
+          </div>
+
+          <div className="space-y-2">
+            {cardType === "swiss" ? (
+              <>
+                {rounds.map((r, i) => {
+                  const win = r.result === "win";
+                  const c = win ? palette.a : "#ff3b3b";
+                  return (
+                    <div key={i} className="flex items-center gap-3 rounded border px-3 py-2" style={{ borderColor: `${palette.a}18`, background: `${palette.a}05` }}>
+                      <span className="font-mono text-xs w-8 shrink-0" style={{ color: palette.text, opacity: 0.35 }}>{r.rnd || `R${i + 1}`}</span>
+                      <span className="flex-1 truncate font-condensed text-xl font-bold" style={{ color: palette.text }}>{r.opp || "—"}</span>
+                      <span className="font-mono text-sm font-bold" style={{ color: c }}>{r.score || "—"}</span>
+                      <span className="rounded px-2 py-0.5 font-condensed text-xs font-bold uppercase" style={{ background: `${c}18`, color: c }}>{win ? "W" : "L"}</span>
+                    </div>
+                  );
+                })}
+                {perforation}
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-4">
+                    {[["W", wins, palette.a], ["L", losses, "#ff3b3b"], ["P", rounds.length, palette.text]].map(([l, v, c]) => (
+                      <div key={String(l)} className="text-center">
+                        <div className="font-display text-4xl leading-none" style={{ color: String(c) }}>{v}</div>
+                        <div className="font-condensed text-[8px] uppercase tracking-widest" style={{ color: String(c), opacity: 0.55 }}>{String(l)}</div>
+                      </div>
+                    ))}
+                  </div>
+                  {form.advMsg && (
+                    <div className="rounded border px-3 py-2 text-right" style={{ borderColor: `${palette.a}30`, color: palette.a }}>
+                      <div className="font-condensed text-sm font-bold uppercase tracking-[0.1em]">{form.advMsg}</div>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                {topCut.map((m, i) => {
+                  const win = m.result === "win";
+                  const c = win ? palette.a : "#ff3b3b";
+                  return (
+                    <div key={i} className="flex items-center gap-3 rounded border px-3 py-2" style={{ borderColor: `${palette.a}18`, background: `${palette.a}05` }}>
+                      <span className="font-condensed text-xs w-24 shrink-0 uppercase" style={{ color: palette.text, opacity: 0.35 }}>{m.stage}</span>
+                      <span className="flex-1 truncate font-condensed text-xl font-bold" style={{ color: palette.text }}>{m.opp || "—"}</span>
+                      <span className="font-mono text-sm font-bold" style={{ color: c }}>{m.score}</span>
+                      <span className="rounded px-2 py-0.5 font-condensed text-xs font-bold uppercase" style={{ background: `${c}18`, color: c }}>{win ? "W" : "L"}</span>
+                    </div>
+                  );
+                })}
+                {form.finalsOpp && (
+                  <div className="flex items-center gap-3 rounded border px-3 py-2" style={{ borderColor: `${palette.a}40`, background: `${palette.a}08` }}>
+                    <span className="font-condensed text-xs w-24 shrink-0 uppercase" style={{ color: palette.a, opacity: 0.7 }}>Finals</span>
+                    <span className="flex-1 truncate font-condensed text-xl font-bold" style={{ color: palette.text }}>{form.finalsOpp}</span>
+                    <span className="font-mono text-sm font-bold" style={{ color: form.finalsResult === "win" ? palette.a : "#ff3b3b" }}>{form.finalsSc}</span>
+                    <span className="rounded px-2 py-0.5 font-condensed text-xs font-bold uppercase" style={{ background: `${(form.finalsResult === "win" ? palette.a : "#ff3b3b")}18`, color: form.finalsResult === "win" ? palette.a : "#ff3b3b" }}>{form.finalsResult === "win" ? "W" : "L"}</span>
+                  </div>
+                )}
+                {perforation}
+                {form.champTitle && (
+                  <div className="flex items-center gap-4">
+                    <Trophy className="h-10 w-10 shrink-0" style={{ color: titleColor, opacity: 0.7 }} />
+                    <div>
+                      <div className="font-condensed text-xs uppercase tracking-[0.2em]" style={{ color: titleColor, opacity: 0.55 }}>{form.tournament}</div>
+                      <div className="font-display text-6xl leading-none" style={{ color: titleColor }}>{form.champTitle}</div>
+                      {form.tcRecord && <div className="mt-0.5 font-mono text-xs" style={{ color: titleColor, opacity: 0.6 }}>{form.tcRecord}</div>}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── layout: split ────────────────────────────────────────────────────────────
+function SplitCard({ form, rounds, topCut, cardType, palette }: CardProps) {
+  const wins = rounds.filter((r) => r.result === "win").length;
+  const losses = rounds.length - wins;
+  const titleColor = form.champTitle.toUpperCase() === "ELIMINATED" ? "#ff3b3b" : palette.a;
+
+  return (
+    <>
+      {/* Diagonal color split */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `linear-gradient(135deg,transparent 48%,${palette.a}10 48%)`,
+        }}
+      />
+      {/* Diagonal accent line */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          top: 0,
+          right: 0,
+          width: "100%",
+          height: "100%",
+          background: `linear-gradient(135deg,transparent calc(48% - 1px),${palette.a}55 calc(48% - 1px),${palette.a}55 calc(48% + 1px),transparent calc(48% + 1px))`,
+        }}
+      />
+
+      <div className="relative">
+        {/* Header: player name runs across the diagonal */}
+        <header className="relative px-8 pt-10 pb-0">
+          <div className="mb-3 flex items-center gap-3">
+            <div
+              className="rounded-full px-3 py-1 font-condensed text-xs font-bold uppercase tracking-[0.22em]"
+              style={{ background: `${palette.a}15`, color: palette.a, border: `1px solid ${palette.a}30` }}
+            >
+              {form.organizer} / {form.game}
+            </div>
+            <span className="font-mono text-xs" style={{ color: palette.text, opacity: 0.3 }}>{form.cardNum}</span>
+          </div>
+
+          {/* Giant player name */}
+          <h2
+            className="break-words font-display text-[80px] leading-none tracking-[-0.01em]"
+            style={{ color: palette.text, textShadow: `3px 3px 0 ${palette.a}30, 0 0 28px ${palette.a}22` }}
+          >
+            {form.player || "PLAYER"}
+          </h2>
+
+          {/* Meta row beneath name */}
+          <div className="mt-3 mb-6 flex items-center gap-0">
+            <div className="h-[3px] w-8" style={{ background: palette.a }} />
+            <div className="mx-3 flex gap-4">
+              {[form.tournament, form.date, cardType === "swiss" ? "Swiss" : "Top Cut"].map((v, i) => (
+                <span key={i} className="font-condensed text-sm uppercase tracking-[0.16em]" style={{ color: palette.text, opacity: 0.4 }}>{v}</span>
+              ))}
+            </div>
+            <div className="h-px flex-1" style={{ background: `${palette.a}20` }} />
+          </div>
+        </header>
+
+        {/* Body: two-column feel */}
+        <div className="px-8 pb-8">
+          {cardType === "swiss" ? (
+            <>
+              <div className="mb-3 font-condensed text-xs uppercase tracking-[0.28em]" style={{ color: palette.a, opacity: 0.65 }}>Swiss Round Results</div>
+              <div className="grid grid-cols-2 gap-2">
+                {rounds.map((r, i) => {
+                  const win = r.result === "win";
+                  const c = win ? palette.a : "#ff3b3b";
+                  return (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 rounded-md border p-3"
+                      style={{ borderColor: `${c}28`, background: `${c}06` }}
+                    >
+                      <div
+                        className="h-7 w-7 shrink-0 rounded-full text-center font-condensed text-xs font-bold leading-7"
+                        style={{ background: `${c}18`, color: c, border: `1px solid ${c}40` }}
+                      >
+                        {win ? "W" : "L"}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-mono text-[10px]" style={{ color: palette.text, opacity: 0.3 }}>{r.rnd || `R${i + 1}`}</div>
+                        <div className="truncate font-condensed text-base font-bold" style={{ color: palette.text }}>{r.opp || "—"}</div>
+                      </div>
+                      <span className="font-mono text-sm font-bold shrink-0" style={{ color: c }}>{r.score || "—"}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Stats bar */}
+              <div className="mt-5 flex items-center gap-0 rounded-md overflow-hidden">
+                {[
+                  ["Wins", wins, palette.a],
+                  ["Loss", losses, "#ff3b3b"],
+                  ["Played", rounds.length, palette.text],
+                ].map(([l, v, c], i) => (
+                  <div
+                    key={String(l)}
+                    className="flex-1 py-3 text-center"
+                    style={{ background: `${String(c)}${["12","08","06"][i]}`, borderRight: i < 2 ? `1px solid ${palette.bg}` : "none" }}
+                  >
+                    <div className="font-display text-4xl leading-none" style={{ color: String(c) }}>{v}</div>
+                    <div className="font-condensed text-[9px] uppercase tracking-widest mt-0.5" style={{ color: String(c), opacity: 0.55 }}>{String(l)}</div>
+                  </div>
+                ))}
+              </div>
+              {form.advMsg && (
+                <div className="mt-3 border-l-4 pl-4 py-2 font-condensed text-xl font-bold uppercase tracking-[0.1em]" style={{ borderColor: palette.a, color: palette.a }}>
+                  {form.advMsg}
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="mb-3 font-condensed text-xs uppercase tracking-[0.28em]" style={{ color: palette.a, opacity: 0.65 }}>Top Cut Results</div>
+              <div className="grid grid-cols-2 gap-2">
+                {topCut.map((m, i) => {
+                  const win = m.result === "win";
+                  const c = win ? palette.a : "#ff3b3b";
+                  return (
+                    <div key={i} className="flex items-center gap-2 rounded-md border p-3" style={{ borderColor: `${c}28`, background: `${c}06` }}>
+                      <div className="h-7 w-7 shrink-0 rounded-full text-center font-condensed text-xs font-bold leading-7" style={{ background: `${c}18`, color: c, border: `1px solid ${c}40` }}>
+                        {win ? "W" : "L"}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-condensed text-[10px] uppercase" style={{ color: palette.text, opacity: 0.3 }}>{m.stage}</div>
+                        <div className="truncate font-condensed text-base font-bold" style={{ color: palette.text }}>{m.opp || "—"}</div>
+                      </div>
+                      <span className="font-mono text-sm font-bold shrink-0" style={{ color: c }}>{m.score}</span>
+                    </div>
+                  );
+                })}
+                {form.finalsOpp && (
+                  <div className="col-span-2 flex items-center gap-2 rounded-md border p-3" style={{ borderColor: `${palette.a}50`, background: `${palette.a}0a` }}>
+                    <div className="h-7 w-7 shrink-0 rounded-full text-center font-condensed text-xs font-bold leading-7" style={{ background: `${(form.finalsResult === "win" ? palette.a : "#ff3b3b")}22`, color: form.finalsResult === "win" ? palette.a : "#ff3b3b", border: `1px solid ${(form.finalsResult === "win" ? palette.a : "#ff3b3b")}50` }}>
+                      {form.finalsResult === "win" ? "W" : "L"}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-condensed text-[10px] uppercase" style={{ color: palette.a, opacity: 0.6 }}>Finals</div>
+                      <div className="truncate font-condensed text-base font-bold" style={{ color: palette.text }}>{form.finalsOpp}</div>
+                    </div>
+                    <span className="font-mono text-sm font-bold shrink-0" style={{ color: form.finalsResult === "win" ? palette.a : "#ff3b3b" }}>{form.finalsSc}</span>
+                  </div>
+                )}
+              </div>
+
+              {form.champTitle && (
+                <div className="mt-5 relative overflow-hidden rounded-md border py-6 px-6 text-center" style={{ borderColor: titleColor, background: `${titleColor}08` }}>
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ background: `linear-gradient(135deg,transparent 48%,${titleColor}05 48%)` }}
+                  />
+                  <Trophy className="mx-auto mb-2 h-7 w-7" style={{ color: titleColor, opacity: 0.7 }} />
+                  <div className="font-display text-[68px] leading-none" style={{ color: titleColor, textShadow: `0 0 20px ${titleColor}66` }}>
+                    {form.champTitle}
+                  </div>
+                  {form.tcRecord && <div className="mt-1 font-mono text-sm" style={{ color: titleColor, opacity: 0.6 }}>{form.tcRecord}</div>}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Footer */}
+          <div className="mt-6 flex justify-between font-condensed text-xs uppercase tracking-[0.2em]" style={{ color: palette.text, opacity: 0.25 }}>
+            <span>{form.organizer} · {form.game}</span>
+            <span>{form.date}</span>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ─── layout: circuit ──────────────────────────────────────────────────────────
+function CircuitCard({ form, rounds, topCut, cardType, palette }: CardProps) {
+  const wins = rounds.filter((r) => r.result === "win").length;
+  const losses = rounds.length - wins;
+  const titleColor = form.champTitle.toUpperCase() === "ELIMINATED" ? "#ff3b3b" : palette.a;
+
+  const CornerBracket = ({ pos }: { pos: "tl" | "tr" | "bl" | "br" }) => {
+    const top = pos.startsWith("t");
+    const left = pos.endsWith("l");
+    return (
+      <div
+        className={`absolute h-5 w-5 ${top ? "top-4" : "bottom-4"} ${left ? "left-4" : "right-4"}`}
+        style={{
+          borderTop: top ? `2px solid ${palette.a}55` : "none",
+          borderBottom: !top ? `2px solid ${palette.a}55` : "none",
+          borderLeft: left ? `2px solid ${palette.a}55` : "none",
+          borderRight: !left ? `2px solid ${palette.a}55` : "none",
+        }}
+      />
+    );
+  };
+
+  const renderCircuitRow = (label: string, opp: string, score: string, result: "win" | "loss", featured?: boolean) => {
+    const win = result === "win";
+    const c = win ? palette.a : "#ff3b3b";
+    return (
+      <div className="relative flex items-center gap-0 py-1">
+        {/* vertical trace on left */}
+        <div className="relative w-10 shrink-0 flex flex-col items-center">
+          <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px" style={{ background: `${palette.a}18` }} />
+          <div
+            className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 font-condensed text-[9px] font-bold"
+            style={{ background: palette.bg, borderColor: c, color: c }}
+          >
+            {win ? "W" : "L"}
+          </div>
+        </div>
+        {/* horizontal trace */}
+        <div className="mx-2 h-px w-4 shrink-0" style={{ background: `${palette.a}30` }} />
+        {/* content */}
+        <div
+          className={`flex flex-1 items-center gap-3 rounded border px-3 ${featured ? "py-3" : "py-2"}`}
+          style={{ borderColor: `${c}22`, background: `${c}05` }}
+        >
+          <span className="font-mono text-xs w-20 shrink-0" style={{ color: palette.text, opacity: 0.35 }}>{label}</span>
+          <span className="flex-1 truncate font-condensed text-xl font-bold" style={{ color: palette.text }}>{opp || "—"}</span>
+          <span className="font-mono text-sm font-bold shrink-0" style={{ color: c }}>{score || "—"}</span>
+        </div>
+        {/* end node */}
+        <div className="mx-2 h-px w-3 shrink-0" style={{ background: `${palette.a}20` }} />
+        <div className="h-2 w-2 shrink-0 rotate-45" style={{ background: c, opacity: 0.7 }} />
+      </div>
+    );
+  };
+
+  return (
+    <>
+      {/* Dot grid background */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: `radial-gradient(${palette.a}16 1px, transparent 1px)`,
+          backgroundSize: "18px 18px",
+        }}
+      />
+      {/* Ambient glow */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: `radial-gradient(ellipse at 30% 20%,${palette.a}10 0%,transparent 55%)` }}
+      />
+
+      {/* Corner brackets */}
+      <CornerBracket pos="tl" />
+      <CornerBracket pos="tr" />
+      <CornerBracket pos="bl" />
+      <CornerBracket pos="br" />
+
+      <div className="relative p-10">
+        {/* Header */}
+        <header className="mb-6">
+          <div className="mb-4 flex items-center gap-3">
+            {/* chip-style badge */}
+            <div
+              className="flex items-center gap-2 rounded border px-3 py-1.5"
+              style={{ borderColor: `${palette.a}35`, background: `${palette.a}0c` }}
+            >
+              <div className="h-1.5 w-1.5 rounded-full" style={{ background: palette.a, boxShadow: `0 0 6px ${palette.a}` }} />
+              <span className="font-condensed text-xs font-bold uppercase tracking-[0.22em]" style={{ color: palette.a }}>
+                {form.organizer} / {form.game}
+              </span>
+            </div>
+            <div className="flex-1 h-px" style={{ background: `${palette.a}18` }} />
+            <div className="flex items-center gap-1">
+              {[0,1,2,3].map(i => (
+                <div key={i} className="h-1 w-1 rounded-full" style={{ background: palette.a, opacity: 0.15 + i * 0.2 }} />
+              ))}
+            </div>
+          </div>
+
+          <p className="font-condensed text-xs font-bold uppercase tracking-[0.38em]" style={{ color: palette.a, opacity: 0.55 }}>
+            {cardType === "swiss" ? "Swiss Stage" : "Top Cut"} · Node {form.cardNum}
+          </p>
+          <h2
+            className="mt-2 break-words font-display text-[76px] leading-none tracking-[0.02em]"
+            style={{ color: palette.text, textShadow: `0 0 24px ${palette.a}35` }}
+          >
+            {form.player || "PLAYER"}
+          </h2>
+          <div className="mt-3 flex items-center gap-3">
+            <div className="h-px flex-1" style={{ background: `${palette.a}20` }} />
+            {[form.tournament, form.date].map((v, i) => (
+              <span key={i} className="font-condensed text-xs uppercase tracking-[0.18em]" style={{ color: palette.text, opacity: 0.38 }}>{v}</span>
+            ))}
+          </div>
+        </header>
+
+        {/* Circuit trace rows */}
+        <div>
+          {cardType === "swiss" ? (
+            <>
+              <div className="mb-2 font-condensed text-xs uppercase tracking-[0.3em]" style={{ color: palette.a, opacity: 0.5 }}>Circuit Log</div>
+              {rounds.map((r, i) => renderCircuitRow(r.rnd || `R${i + 1}`, r.opp, r.score, r.result))}
+
+              {/* Stats chip */}
+              <div
+                className="mt-5 grid grid-cols-3 overflow-hidden rounded border"
+                style={{ borderColor: `${palette.a}25` }}
+              >
+                {[["WIN", wins, palette.a], ["LOSS", losses, "#ff3b3b"], ["TOTAL", rounds.length, palette.text]].map(([l, v, c], i) => (
+                  <div
+                    key={String(l)}
+                    className="py-4 text-center"
+                    style={{
+                      background: `${String(c)}08`,
+                      borderRight: i < 2 ? `1px solid ${palette.a}14` : "none",
+                    }}
+                  >
+                    <div className="font-display text-5xl leading-none" style={{ color: String(c) }}>{v}</div>
+                    <div className="mt-1 font-condensed text-[9px] uppercase tracking-widest" style={{ color: String(c), opacity: 0.5 }}>{String(l)}</div>
+                  </div>
+                ))}
+              </div>
+              {form.advMsg && (
+                <div
+                  className="mt-3 flex items-center gap-3 rounded border px-4 py-2"
+                  style={{ borderColor: `${palette.a}30`, background: `${palette.a}08` }}
+                >
+                  <div className="h-2 w-2 rounded-full" style={{ background: palette.a, boxShadow: `0 0 8px ${palette.a}` }} />
+                  <span className="font-condensed text-lg font-bold uppercase tracking-[0.1em]" style={{ color: palette.a }}>{form.advMsg}</span>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="mb-2 font-condensed text-xs uppercase tracking-[0.3em]" style={{ color: palette.a, opacity: 0.5 }}>Bracket Log</div>
+              {topCut.map((m, i) => renderCircuitRow(m.stage, m.opp, m.score, m.result))}
+              {form.finalsOpp && renderCircuitRow("Finals", form.finalsOpp, form.finalsSc, form.finalsResult, true)}
+
+              {form.champTitle && (
+                <div
+                  className="mt-5 relative overflow-hidden rounded border p-5 text-center"
+                  style={{ borderColor: `${titleColor}40`, background: `${titleColor}08` }}
+                >
+                  {/* circuit corner accents */}
+                  {(["top-2 left-2","top-2 right-2","bottom-2 left-2","bottom-2 right-2"] as const).map((pos, pi) => {
+                    const t = pos.includes("top"); const l = pos.includes("left");
+                    return (
+                      <div key={pi} className={`absolute ${pos} h-3 w-3`} style={{
+                        borderTop: t ? `2px solid ${titleColor}45` : "none",
+                        borderBottom: !t ? `2px solid ${titleColor}45` : "none",
+                        borderLeft: l ? `2px solid ${titleColor}45` : "none",
+                        borderRight: !l ? `2px solid ${titleColor}45` : "none",
+                      }} />
+                    );
+                  })}
+                  <Trophy className="mx-auto mb-2 h-8 w-8" style={{ color: titleColor, opacity: 0.7 }} />
+                  <div className="font-condensed text-xs uppercase tracking-[0.25em]" style={{ color: titleColor, opacity: 0.55 }}>{form.tournament} / {form.date}</div>
+                  <div className="font-display text-6xl leading-none" style={{ color: titleColor, textShadow: `0 0 22px ${titleColor}55` }}>{form.champTitle}</div>
+                  {form.tcRecord && <div className="mt-1 font-mono text-xs" style={{ color: titleColor, opacity: 0.6 }}>Record: {form.tcRecord}</div>}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Footer trace */}
+        <div className="mt-8 flex items-center gap-3">
+          <div className="h-px flex-1" style={{ background: `${palette.a}15` }} />
+          <span className="font-condensed text-[9px] uppercase tracking-[0.35em]" style={{ color: palette.text, opacity: 0.22 }}>
+            {form.organizer} · {form.game} · {form.date}
+          </span>
+          <div className="h-px flex-1" style={{ background: `${palette.a}15` }} />
+        </div>
+      </div>
+    </>
   );
 }
 
