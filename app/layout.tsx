@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Leandro's Tournament Card Generator",
   description:
-    "Generate player result cards from Challonge tournaments or manual inputs.",
+    "A free tournament card and pub mat generator for anyone, especially Tournament Organizers creating event graphics and player result cards.",
   icons: {
     icon: "/icon.png",
     shortcut: "/icon.png",
