@@ -24,6 +24,7 @@ import {
   Trophy,
   Users,
   Wand2,
+  X,
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -733,12 +734,11 @@ export default function Page() {
         </div>
 
         <Section title="Module">
-          <div className="grid grid-cols-3 rounded-md border bg-secondary p-1">
+          <div className="grid grid-cols-2 rounded-md border bg-secondary p-1">
             {(
               [
                 ["cards", "Cards"],
                 ["pubmat", "Pub Mat"],
-                ["feedback", "Feedback"],
               ] as [GeneratorMode, string][]
             ).map(([key, label]) => (
               <Button
@@ -753,16 +753,7 @@ export default function Page() {
           </div>
         </Section>
 
-        {generatorMode === "feedback" ? (
-          <FeedbackEditor
-            feedback={feedback}
-            setFeedback={setFeedback}
-            submitting={feedbackSubmitting}
-            notice={feedbackNotice}
-            error={feedbackError}
-            onSubmit={submitFeedback}
-          />
-        ) : generatorMode === "pubmat" ? (
+        {generatorMode === "pubmat" ? (
           <PubMatEditor
             pubMat={pubMat}
             setPubMat={setPubMat}
@@ -1172,18 +1163,16 @@ export default function Page() {
           </>
         )}
 
-        {generatorMode !== "feedback" && (
-          <div className="space-y-3 px-6 pb-6">
-            <Button
-              onClick={downloadCard}
-              disabled={exporting}
-              className="h-12 w-full font-display text-xl tracking-[0.15em]"
-            >
-              <Download className="h-4 w-4" />{" "}
-              {exporting ? "Exporting" : "Download JPG"}
-            </Button>
-          </div>
-        )}
+        <div className="space-y-3 px-6 pb-6">
+          <Button
+            onClick={downloadCard}
+            disabled={exporting}
+            className="h-12 w-full font-display text-xl tracking-[0.15em]"
+          >
+            <Download className="h-4 w-4" />{" "}
+            {exporting ? "Exporting" : "Download JPG"}
+          </Button>
+        </div>
       </aside>
 
       <section className="card-stage flex min-h-screen flex-col items-center gap-6 overflow-auto p-4 sm:p-6 lg:p-10">
@@ -1195,13 +1184,10 @@ export default function Page() {
         >
           Live Preview
         </div>
-        {generatorMode === "feedback" ? (
-          <FeedbackPreview />
-        ) : (
-          <div
-            ref={previewViewportRef}
-            className="flex w-full justify-center overflow-visible"
-          >
+        <div
+          ref={previewViewportRef}
+          className="flex w-full justify-center overflow-visible"
+        >
             <div
               className="relative"
               style={{
@@ -1246,9 +1232,18 @@ export default function Page() {
                 </div>
               </div>
             </div>
-          </div>
-        )}
+        </div>
       </section>
+      <FloatingFeedbackTool
+        open={feedbackOpen}
+        onOpenChange={setFeedbackOpen}
+        feedback={feedback}
+        setFeedback={setFeedback}
+        submitting={feedbackSubmitting}
+        notice={feedbackNotice}
+        error={feedbackError}
+        onSubmit={submitFeedback}
+      />
     </main>
   );
 }
@@ -1432,42 +1427,81 @@ function FeedbackEditor({
   );
 }
 
-function FeedbackPreview() {
-  const items = [
-    ["Problems", "Broken exports, bad layout, confusing controls"],
-    ["Feature Requests", "New templates, fields, export formats"],
-    ["Suggestions", "Small workflow and design improvements"],
-  ];
-
+function FloatingFeedbackTool({
+  open,
+  onOpenChange,
+  feedback,
+  setFeedback,
+  submitting,
+  notice,
+  error,
+  onSubmit,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  feedback: FeedbackState;
+  setFeedback: React.Dispatch<React.SetStateAction<FeedbackState>>;
+  submitting: boolean;
+  notice: string;
+  error: string;
+  onSubmit: () => void;
+}) {
   return (
-    <div className="w-full max-w-[680px] rounded-lg border border-primary/20 bg-card/90 p-8 shadow-2xl">
-      <div className="flex items-center gap-3 font-condensed text-xs font-black uppercase tracking-[0.28em] text-primary">
+    <>
+      <Button
+        type="button"
+        onClick={() => onOpenChange(true)}
+        className="fixed bottom-5 right-5 z-40 h-14 rounded-full px-5 font-condensed text-base font-black uppercase tracking-[0.14em] shadow-2xl shadow-primary/20"
+      >
         <MessageSquare className="h-5 w-5" />
-        Feedback Inbox
-      </div>
-      <h2 className="mt-5 font-display text-6xl leading-none tracking-[0.06em]">
-        Help Shape The Tool
-      </h2>
-      <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-        Reports are saved in MongoDB with the feedback type, details, optional
-        contact, page URL, and browser session id for follow-up debugging.
-      </p>
-      <div className="mt-6 grid gap-3">
-        {items.map(([title, description]) => (
+        Feedback
+      </Button>
+
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-3 backdrop-blur-sm sm:items-center sm:p-6">
+          <button
+            type="button"
+            aria-label="Close feedback"
+            className="absolute inset-0 cursor-default"
+            onClick={() => onOpenChange(false)}
+          />
           <div
-            key={title}
-            className="rounded-md border border-white/10 bg-white/[0.03] p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Feedback"
+            className="relative max-h-[92vh] w-full max-w-[460px] overflow-auto rounded-lg border bg-card shadow-2xl"
           >
-            <div className="font-condensed text-xl font-black uppercase tracking-[0.12em]">
-              {title}
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-card/95 px-6 py-4 backdrop-blur">
+              <div>
+                <div className="font-display text-3xl leading-none tracking-[0.08em] text-primary">
+                  Feedback
+                </div>
+                <div className="mt-1 font-condensed text-xs font-black uppercase tracking-[0.18em] text-muted-foreground">
+                  Report problems or request features
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="Close feedback"
+                onClick={() => onOpenChange(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
-            <div className="mt-1 text-sm text-muted-foreground">
-              {description}
-            </div>
+            <FeedbackEditor
+              feedback={feedback}
+              setFeedback={setFeedback}
+              submitting={submitting}
+              notice={notice}
+              error={error}
+              onSubmit={onSubmit}
+            />
           </div>
-        ))}
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 }
 
