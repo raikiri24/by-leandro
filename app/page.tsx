@@ -3,18 +3,28 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toJpeg } from "html-to-image";
 import {
+  Bug,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
+  Clock,
   Download,
+  Gift,
   ImagePlus,
+  Lightbulb,
   Loader2,
+  MapPin,
+  MessageSquare,
   Plus,
   Search,
+  Send,
   Sparkles,
+  Target,
   Trash2,
   Trophy,
+  Users,
   Wand2,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,9 +33,18 @@ import { cn } from "@/lib/utils";
 
 // ─── types ────────────────────────────────────────────────────────────────────
 type CardType = "swiss" | "topcut";
-type GeneratorMode = "cards" | "pubmat";
+type GeneratorMode = "cards" | "pubmat" | "feedback";
+type FeedbackCategory = "problem" | "feature" | "suggestion";
 type LayoutKey = "report" | "arcade" | "blade" | "award" | "minimal";
-type PubMatThemeKey = "deadly" | "pop" | "clean";
+type PubMatThemeKey =
+  | "hyper"
+  | "arena"
+  | "tribe"
+  | "catchup"
+  | "cup"
+  | "deadly"
+  | "pop"
+  | "clean";
 type DesignKey =
   | "signal"
   | "ember"
@@ -125,6 +144,7 @@ type PubMatState = {
 };
 type PubMatTheme = {
   label: string;
+  template?: "classic" | "futuristic" | "arena" | "tribe" | "catchup" | "cup";
   bg: string;
   paper: string;
   ink: string;
@@ -132,6 +152,17 @@ type PubMatTheme = {
   accent: string;
   accent2: string;
   block: string;
+};
+type UsageStats = {
+  totalUsers: number;
+  activeUsers: number;
+  activeWindowMinutes: number;
+};
+type FeedbackState = {
+  category: FeedbackCategory;
+  title: string;
+  message: string;
+  contact: string;
 };
 
 // ─── design catalog ───────────────────────────────────────────────────────────
@@ -250,8 +281,64 @@ const initialRounds: Round[] = [
 ];
 
 const pubMatThemes: Record<PubMatThemeKey, PubMatTheme> = {
+  hyper: {
+    label: "Hyper Strike",
+    template: "futuristic",
+    bg: "#030407",
+    paper: "#05070d",
+    ink: "#f7fbff",
+    muted: "#8f9bad",
+    accent: "#ff1f35",
+    accent2: "#00e5ff",
+    block: "#0b1018",
+  },
+  arena: {
+    label: "Arena Clash",
+    template: "arena",
+    bg: "#050506",
+    paper: "#050506",
+    ink: "#f8fafc",
+    muted: "#a5a7ad",
+    accent: "#e61122",
+    accent2: "#f6b21a",
+    block: "#090a0d",
+  },
+  tribe: {
+    label: "Shadow Tribe",
+    template: "tribe",
+    bg: "#050308",
+    paper: "#06030a",
+    ink: "#f4f1ff",
+    muted: "#a99abe",
+    accent: "#7c22ff",
+    accent2: "#f01824",
+    block: "#100916",
+  },
+  catchup: {
+    label: "Velocity Pop",
+    template: "catchup",
+    bg: "#07100b",
+    paper: "#07100b",
+    ink: "#f9fff8",
+    muted: "#b8d1c8",
+    accent: "#46ff28",
+    accent2: "#16d9ff",
+    block: "#07150d",
+  },
+  cup: {
+    label: "Blade Cup",
+    template: "cup",
+    bg: "#070506",
+    paper: "#070506",
+    ink: "#f8fafc",
+    muted: "#aeb3bd",
+    accent: "#e11626",
+    accent2: "#2378ff",
+    block: "#0c0b0d",
+  },
   deadly: {
     label: "Deadly Spin",
+    template: "classic",
     bg: "#111111",
     paper: "#e8e3d8",
     ink: "#202124",
@@ -262,6 +349,7 @@ const pubMatThemes: Record<PubMatThemeKey, PubMatTheme> = {
   },
   pop: {
     label: "Pop Blast",
+    template: "classic",
     bg: "#0b1020",
     paper: "#f7f3ff",
     ink: "#151322",
@@ -272,6 +360,7 @@ const pubMatThemes: Record<PubMatThemeKey, PubMatTheme> = {
   },
   clean: {
     label: "Shop Board",
+    template: "classic",
     bg: "#101316",
     paper: "#f6f7f2",
     ink: "#181a1c",
@@ -308,6 +397,12 @@ const initialPubMat: PubMatState = {
     gallery4: "",
   },
 };
+const initialFeedback: FeedbackState = {
+  category: "problem",
+  title: "",
+  message: "",
+  contact: "",
+};
 
 // ─── page ─────────────────────────────────────────────────────────────────────
 export default function Page() {
@@ -319,13 +414,19 @@ export default function Page() {
   const [mode, setMode] = useState<"manual" | "scrape">("manual");
   const [cardType, setCardType] = useState<CardType>("swiss");
   const [design, setDesign] = useState<DesignKey>("signal");
-  const [pubTheme, setPubTheme] = useState<PubMatThemeKey>("deadly");
+  const [pubTheme, setPubTheme] = useState<PubMatThemeKey>("hyper");
   const [pubMat, setPubMat] = useState<PubMatState>(initialPubMat);
+  const [feedback, setFeedback] = useState<FeedbackState>(initialFeedback);
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const [feedbackNotice, setFeedbackNotice] = useState("");
+  const [feedbackError, setFeedbackError] = useState("");
   const [scrapeUrl, setScrapeUrl] = useState("https://challonge.com/kr11x97w");
   const [scrapePlayer, setScrapePlayer] = useState("");
   const [scraped, setScraped] = useState<ScrapedData | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
   const [scrapeError, setScrapeError] = useState("");
+  const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
+  const [usageError, setUsageError] = useState("");
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [form, setForm] = useState<FormState>({
@@ -359,6 +460,72 @@ export default function Page() {
     const timer = window.setTimeout(() => setShowSplash(false), 3000);
     return () => window.clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function registerUsage() {
+      try {
+        const sessionId = getBrowserSessionId();
+
+        const response = await fetch("/api/usage", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ sessionId }),
+        });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) {
+          throw new Error(payload.error || "Unable to fetch usage count.");
+        }
+        if (!cancelled) {
+          setUsageStats(payload.data);
+          setUsageError("");
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setUsageError(
+            error instanceof Error ? error.message : "Unable to fetch usage count.",
+          );
+        }
+      }
+    }
+
+    registerUsage();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function submitFeedback() {
+    setFeedbackSubmitting(true);
+    setFeedbackError("");
+    setFeedbackNotice("");
+
+    try {
+      const response = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          ...feedback,
+          sessionId: getBrowserSessionId(),
+          page: window.location.href,
+        }),
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error || "Unable to submit feedback.");
+      }
+
+      setFeedback(initialFeedback);
+      setFeedbackNotice("Sent. Thanks for helping improve the tool.");
+    } catch (error) {
+      setFeedbackError(
+        error instanceof Error ? error.message : "Unable to submit feedback.",
+      );
+    } finally {
+      setFeedbackSubmitting(false);
+    }
+  }
 
   useEffect(() => {
     const viewport = previewViewportRef.current;
@@ -546,28 +713,54 @@ export default function Page() {
           <h1 className="font-display text-3xl tracking-[0.15em] text-primary">
             Leandro's Tournament Card Generator
           </h1>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <UsageMetric
+              label="Total users"
+              value={usageStats ? formatCount(usageStats.totalUsers) : "--"}
+            />
+            <UsageMetric
+              label={`Active ${usageStats?.activeWindowMinutes || 15}m`}
+              value={usageStats ? formatCount(usageStats.activeUsers) : "--"}
+            />
+          </div>
+          {usageError && (
+            <div className="mt-2 rounded-md border border-destructive/25 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+              {usageError}
+            </div>
+          )}
         </div>
 
         <Section title="Module">
-          <div className="grid grid-cols-2 rounded-md border bg-secondary p-1">
-            <Button
-              variant={generatorMode === "cards" ? "default" : "ghost"}
-              onClick={() => setGeneratorMode("cards")}
-              className="font-condensed uppercase tracking-[0.18em]"
-            >
-              Cards
-            </Button>
-            <Button
-              variant={generatorMode === "pubmat" ? "default" : "ghost"}
-              onClick={() => setGeneratorMode("pubmat")}
-              className="font-condensed uppercase tracking-[0.18em]"
-            >
-              Pub Mat
-            </Button>
+          <div className="grid grid-cols-3 rounded-md border bg-secondary p-1">
+            {(
+              [
+                ["cards", "Cards"],
+                ["pubmat", "Pub Mat"],
+                ["feedback", "Feedback"],
+              ] as [GeneratorMode, string][]
+            ).map(([key, label]) => (
+              <Button
+                key={key}
+                variant={generatorMode === key ? "default" : "ghost"}
+                onClick={() => setGeneratorMode(key)}
+                className="px-2 font-condensed uppercase tracking-[0.14em]"
+              >
+                {label}
+              </Button>
+            ))}
           </div>
         </Section>
 
-        {generatorMode === "pubmat" ? (
+        {generatorMode === "feedback" ? (
+          <FeedbackEditor
+            feedback={feedback}
+            setFeedback={setFeedback}
+            submitting={feedbackSubmitting}
+            notice={feedbackNotice}
+            error={feedbackError}
+            onSubmit={submitFeedback}
+          />
+        ) : generatorMode === "pubmat" ? (
           <PubMatEditor
             pubMat={pubMat}
             setPubMat={setPubMat}
@@ -977,16 +1170,18 @@ export default function Page() {
           </>
         )}
 
-        <div className="space-y-3 px-6 pb-6">
-          <Button
-            onClick={downloadCard}
-            disabled={exporting}
-            className="h-12 w-full font-display text-xl tracking-[0.15em]"
-          >
-            <Download className="h-4 w-4" />{" "}
-            {exporting ? "Exporting" : "Download JPG"}
-          </Button>
-        </div>
+        {generatorMode !== "feedback" && (
+          <div className="space-y-3 px-6 pb-6">
+            <Button
+              onClick={downloadCard}
+              disabled={exporting}
+              className="h-12 w-full font-display text-xl tracking-[0.15em]"
+            >
+              <Download className="h-4 w-4" />{" "}
+              {exporting ? "Exporting" : "Download JPG"}
+            </Button>
+          </div>
+        )}
       </aside>
 
       <section className="card-stage flex min-h-screen flex-col items-center gap-6 overflow-auto p-4 sm:p-6 lg:p-10">
@@ -998,55 +1193,59 @@ export default function Page() {
         >
           Live Preview
         </div>
-        <div
-          ref={previewViewportRef}
-          className="flex w-full justify-center overflow-visible"
-        >
+        {generatorMode === "feedback" ? (
+          <FeedbackPreview />
+        ) : (
           <div
-            className="relative"
-            style={{
-              width: canvasWidth * previewScale,
-              height: previewBoxHeight,
-            }}
+            ref={previewViewportRef}
+            className="flex w-full justify-center overflow-visible"
           >
             <div
-              className="absolute left-1/2 top-0"
+              className="relative"
               style={{
-                transform: `translateX(-50%) scale(${previewScale})`,
-                transformOrigin: "top center",
+                width: canvasWidth * previewScale,
+                height: previewBoxHeight,
               }}
             >
               <div
-                ref={cardRef}
-                className={cn(
-                  "shadow-2xl",
-                  generatorMode === "pubmat" ? "pubmat-stage" : "report-card",
-                )}
+                className="absolute left-1/2 top-0"
                 style={{
-                  background:
-                    generatorMode === "pubmat"
-                      ? pubMatThemes[pubTheme].paper
-                      : palette.bg,
+                  transform: `translateX(-50%) scale(${previewScale})`,
+                  transformOrigin: "top center",
                 }}
               >
-                {generatorMode === "pubmat" ? (
-                  <PubMatPoster
-                    pubMat={pubMat}
-                    theme={pubMatThemes[pubTheme]}
-                  />
-                ) : (
-                  <CardRenderer
-                    form={form}
-                    rounds={rounds}
-                    topCut={topCut}
-                    cardType={cardType}
-                    palette={palette}
-                  />
-                )}
+                <div
+                  ref={cardRef}
+                  className={cn(
+                    "shadow-2xl",
+                    generatorMode === "pubmat" ? "pubmat-stage" : "report-card",
+                  )}
+                  style={{
+                    background:
+                      generatorMode === "pubmat"
+                        ? pubMatThemes[pubTheme].paper
+                        : palette.bg,
+                  }}
+                >
+                  {generatorMode === "pubmat" ? (
+                    <PubMatPoster
+                      pubMat={pubMat}
+                      theme={pubMatThemes[pubTheme]}
+                    />
+                  ) : (
+                    <CardRenderer
+                      form={form}
+                      rounds={rounds}
+                      topCut={topCut}
+                      cardType={cardType}
+                      palette={palette}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </section>
     </main>
   );
@@ -1077,6 +1276,194 @@ function SplashScreen() {
         <div className="h-1 w-52 overflow-hidden rounded-full bg-white/10">
           <div className="splash-loader h-full rounded-full bg-gradient-to-r from-[#d89023] via-[#ffe07a] to-[#f52236]" />
         </div>
+      </div>
+    </div>
+  );
+}
+
+function UsageMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-primary/20 bg-primary/5 px-3 py-2">
+      <div className="flex items-center gap-2 font-condensed text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
+        <Users className="h-3.5 w-3.5 text-primary" />
+        {label}
+      </div>
+      <div className="mt-1 font-display text-3xl leading-none tracking-[0.08em] text-primary">
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function formatCount(value: number) {
+  return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(
+    value,
+  );
+}
+
+function getBrowserSessionId() {
+  const storageKey = "leandro-tool-session-id";
+  let sessionId = window.localStorage.getItem(storageKey);
+  if (!sessionId) {
+    sessionId =
+      window.crypto?.randomUUID?.() ||
+      `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+    window.localStorage.setItem(storageKey, sessionId);
+  }
+  return sessionId;
+}
+
+function FeedbackEditor({
+  feedback,
+  setFeedback,
+  submitting,
+  notice,
+  error,
+  onSubmit,
+}: {
+  feedback: FeedbackState;
+  setFeedback: React.Dispatch<React.SetStateAction<FeedbackState>>;
+  submitting: boolean;
+  notice: string;
+  error: string;
+  onSubmit: () => void;
+}) {
+  const feedbackTypes: Array<{
+    key: FeedbackCategory;
+    label: string;
+    icon: React.ReactNode;
+  }> = [
+    { key: "problem", label: "Problem", icon: <Bug className="h-4 w-4" /> },
+    { key: "feature", label: "Feature", icon: <Lightbulb className="h-4 w-4" /> },
+    {
+      key: "suggestion",
+      label: "Suggest",
+      icon: <MessageSquare className="h-4 w-4" />,
+    },
+  ];
+
+  return (
+    <>
+      <Section title="Report / Request">
+        <div className="grid grid-cols-3 rounded-md border bg-secondary p-1">
+          {feedbackTypes.map((item) => (
+            <Button
+              key={item.key}
+              variant={feedback.category === item.key ? "default" : "ghost"}
+              onClick={() =>
+                setFeedback((current) => ({ ...current, category: item.key }))
+              }
+              className="gap-1 px-2 font-condensed uppercase tracking-[0.12em]"
+            >
+              {item.icon}
+              {item.label}
+            </Button>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Details">
+        <Field label="Title">
+          <Input
+            value={feedback.title}
+            onChange={(event) =>
+              setFeedback((current) => ({
+                ...current,
+                title: event.target.value,
+              }))
+            }
+            placeholder="Short summary"
+            maxLength={120}
+          />
+        </Field>
+        <Field label="Description">
+          <textarea
+            value={feedback.message}
+            onChange={(event) =>
+              setFeedback((current) => ({
+                ...current,
+                message: event.target.value,
+              }))
+            }
+            placeholder="What happened, what should change, or what would make this better?"
+            maxLength={3000}
+            className="min-h-36 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          />
+        </Field>
+        <Field label="Contact (optional)">
+          <Input
+            value={feedback.contact}
+            onChange={(event) =>
+              setFeedback((current) => ({
+                ...current,
+                contact: event.target.value,
+              }))
+            }
+            placeholder="Name, email, Discord, or FB"
+            maxLength={160}
+          />
+        </Field>
+        {notice && (
+          <div className="mb-3 rounded-md border border-primary/25 bg-primary/10 px-3 py-2 text-sm text-primary">
+            {notice}
+          </div>
+        )}
+        {error && (
+          <div className="mb-3 rounded-md border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {error}
+          </div>
+        )}
+        <Button
+          onClick={onSubmit}
+          disabled={submitting}
+          className="h-11 w-full font-condensed text-base font-black uppercase tracking-[0.16em]"
+        >
+          {submitting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
+          {submitting ? "Sending" : "Send Feedback"}
+        </Button>
+      </Section>
+    </>
+  );
+}
+
+function FeedbackPreview() {
+  const items = [
+    ["Problems", "Broken exports, bad layout, confusing controls"],
+    ["Feature Requests", "New templates, fields, export formats"],
+    ["Suggestions", "Small workflow and design improvements"],
+  ];
+
+  return (
+    <div className="w-full max-w-[680px] rounded-lg border border-primary/20 bg-card/90 p-8 shadow-2xl">
+      <div className="flex items-center gap-3 font-condensed text-xs font-black uppercase tracking-[0.28em] text-primary">
+        <MessageSquare className="h-5 w-5" />
+        Feedback Inbox
+      </div>
+      <h2 className="mt-5 font-display text-6xl leading-none tracking-[0.06em]">
+        Help Shape The Tool
+      </h2>
+      <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
+        Reports are saved in MongoDB with the feedback type, details, optional
+        contact, page URL, and browser session id for follow-up debugging.
+      </p>
+      <div className="mt-6 grid gap-3">
+        {items.map(([title, description]) => (
+          <div
+            key={title}
+            className="rounded-md border border-white/10 bg-white/[0.03] p-4"
+          >
+            <div className="font-condensed text-xl font-black uppercase tracking-[0.12em]">
+              {title}
+            </div>
+            <div className="mt-1 text-sm text-muted-foreground">
+              {description}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -1373,6 +1760,21 @@ function PubMatPoster({
   pubMat: PubMatState;
   theme: PubMatTheme;
 }) {
+  switch (theme.template) {
+    case "futuristic":
+      return <FuturisticPubMatPoster pubMat={pubMat} theme={theme} />;
+    case "arena":
+      return <ArenaClashPubMatPoster pubMat={pubMat} theme={theme} />;
+    case "tribe":
+      return <ShadowTribePubMatPoster pubMat={pubMat} theme={theme} />;
+    case "catchup":
+      return <VelocityPopPubMatPoster pubMat={pubMat} theme={theme} />;
+    case "cup":
+      return <BladeCupPubMatPoster pubMat={pubMat} theme={theme} />;
+    default:
+      break;
+  }
+
   const gallery = [
     pubMat.images.gallery1,
     pubMat.images.gallery2,
@@ -1425,13 +1827,13 @@ function PubMatPoster({
             {pubMat.game}
           </div>
           <div
-            className="font-display text-[92px] leading-[0.85] tracking-[0.03em]"
+            className="pubmat-title-lock font-display text-[76px] leading-[0.88] tracking-[0.03em]"
             style={{ color: theme.ink }}
           >
             {pubMat.eventName}
           </div>
           <div
-            className="font-display text-[132px] leading-[0.78] tracking-[0.03em]"
+            className="pubmat-title-lock font-display text-[96px] leading-[0.82] tracking-[0.03em]"
             style={{
               color: theme.accent2,
               WebkitTextStroke: `5px ${theme.accent}`,
@@ -1447,7 +1849,7 @@ function PubMatPoster({
           style={{ background: theme.block }}
         >
           <Sparkles className="h-9 w-9" style={{ color: theme.accent }} />
-          <span className="truncate">{pubMat.venue}</span>
+          <span className="pubmat-line-lock min-w-0">{pubMat.venue}</span>
           <Sparkles className="h-9 w-9" style={{ color: theme.accent }} />
         </div>
 
@@ -1491,7 +1893,7 @@ function PubMatPoster({
                 {visibleGuests.slice(0, 8).map((guest, index) => (
                   <div
                     key={`${guest}-${index}`}
-                    className="border-4 bg-white px-3 py-2 text-center font-display text-3xl leading-none text-white"
+                    className="pubmat-small-lock border-4 bg-white px-3 py-2 text-center font-display text-2xl leading-none text-white"
                     style={{
                       borderColor: theme.ink,
                       background: theme.accent,
@@ -1516,7 +1918,7 @@ function PubMatPoster({
             <div className="flex items-center gap-3">
               <CalendarDays className="h-12 w-12 shrink-0" />
               <div
-                className="font-display text-[74px] leading-none tracking-[0.05em]"
+                className="pubmat-line-lock font-display text-[58px] leading-none tracking-[0.05em]"
                 style={{ color: theme.ink }}
               >
                 {pubMat.date}
@@ -1542,7 +1944,7 @@ function PubMatPoster({
                 {visibleNotes.slice(0, 4).map((note, index) => (
                   <div
                     key={`${note}-${index}`}
-                    className="border-l-8 bg-white px-4 py-2 font-condensed text-2xl font-bold uppercase tracking-[0.08em]"
+                    className="pubmat-small-lock border-l-8 bg-white px-4 py-2 font-condensed text-xl font-bold uppercase tracking-[0.06em]"
                     style={{ borderColor: theme.accent, color: theme.ink }}
                   >
                     {note}
@@ -1561,7 +1963,7 @@ function PubMatPoster({
               {visibleSponsors.slice(0, 18).map((sponsor, index) => (
                 <div
                   key={`${sponsor}-${index}`}
-                  className="flex h-14 items-center justify-center border-2 bg-white px-2 text-center font-condensed text-sm font-black uppercase leading-tight"
+                  className="pubmat-cell-lock flex h-14 items-center justify-center border-2 bg-white px-2 text-center font-condensed text-xs font-black uppercase leading-tight"
                   style={{ borderColor: theme.ink, color: theme.ink }}
                 >
                   {sponsor}
@@ -1572,6 +1974,771 @@ function PubMatPoster({
         </footer>
       </div>
     </div>
+  );
+}
+
+function FuturisticPubMatPoster({
+  pubMat,
+  theme,
+}: {
+  pubMat: PubMatState;
+  theme: PubMatTheme;
+}) {
+  const gallery = [
+    pubMat.images.gallery1,
+    pubMat.images.gallery2,
+    pubMat.images.gallery3,
+    pubMat.images.gallery4,
+  ];
+  const visibleNotes = pubMat.notes.filter(Boolean);
+  const visibleSponsors = pubMat.sponsors.filter(Boolean);
+  const visibleGuests = pubMat.guests.filter(Boolean);
+
+  return (
+    <div
+      className="relative min-h-[1080px] overflow-hidden border border-white/10 p-5 text-white"
+      style={{ background: theme.paper, color: theme.ink }}
+    >
+      <div className="pubmat-hyper-grid absolute inset-0" />
+      <div className="pubmat-speed-lines absolute inset-0 opacity-80" />
+      <div
+        className="absolute -left-36 top-16 h-[520px] w-[520px] rounded-full blur-3xl"
+        style={{ background: `${theme.accent}44` }}
+      />
+      <div
+        className="absolute -right-28 top-48 h-[440px] w-[440px] rounded-full blur-3xl"
+        style={{ background: `${theme.accent2}33` }}
+      />
+      <div className="absolute inset-x-5 top-5 h-1 bg-gradient-to-r from-transparent via-white/70 to-transparent" />
+
+      <div className="relative z-10">
+        <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+          <CyberBrand title={pubMat.shopName} subtitle={pubMat.partners} theme={theme} />
+          <div
+            className="flex h-20 w-20 items-center justify-center border-2 font-display text-5xl leading-none"
+            style={{
+              borderColor: theme.accent,
+              color: theme.accent2,
+              boxShadow: `0 0 28px ${theme.accent}66, inset 0 0 24px ${theme.accent2}22`,
+              clipPath: "polygon(18% 0, 100% 0, 82% 100%, 0 100%)",
+            }}
+          >
+            X
+          </div>
+          <CyberBrand
+            title={pubMat.game}
+            subtitle={pubMat.eventType}
+            theme={theme}
+            align="right"
+          />
+        </header>
+
+        <section className="mt-7 grid grid-cols-[150px_1fr_150px] gap-4">
+          <div>
+            <div
+              className="font-display text-5xl leading-none"
+              style={{ color: theme.accent2, textShadow: `0 0 18px ${theme.accent2}` }}
+            >
+              {pubMat.date.split(/[ ,./-]/)[0] || pubMat.date}
+            </div>
+            <div
+              className="mt-1 font-display text-[104px] leading-[0.78]"
+              style={{ color: theme.accent, textShadow: `0 0 24px ${theme.accent}` }}
+            >
+              {pubMat.date.split(/[ ,./-]/)[1] || ""}
+            </div>
+            <div className="mt-3 font-condensed text-xl font-black uppercase tracking-[0.18em] text-white/70">
+              Tournament
+            </div>
+          </div>
+
+          <div className="text-center">
+            <div
+              className="font-condensed text-2xl font-black uppercase tracking-[0.42em]"
+              style={{ color: theme.accent2 }}
+            >
+              {pubMat.game}
+            </div>
+            <h2
+              className="pubmat-glitch-title pubmat-title-lock mt-1 break-words font-display text-[92px] leading-[0.82] tracking-[0.03em]"
+              style={{
+                color: theme.ink,
+                textShadow: `5px 5px 0 ${theme.accent}, 0 0 26px ${theme.accent2}`,
+              }}
+            >
+              {pubMat.eventName}
+            </h2>
+            <div
+              className="pubmat-chip-text mx-auto mt-2 inline-flex max-w-full px-7 py-1 font-display text-4xl leading-none tracking-[0.08em]"
+              style={{
+                background: theme.accent,
+                color: "#ffffff",
+                clipPath: "polygon(6% 0, 100% 0, 94% 100%, 0 100%)",
+                textShadow: "2px 2px 0 #050505",
+              }}
+            >
+              {pubMat.eventType}
+            </div>
+          </div>
+
+          <CyberPanel className="self-start p-4 text-center" theme={theme}>
+            <Gift className="mx-auto h-9 w-9" style={{ color: theme.accent2 }} />
+            <div className="pubmat-small-lock mt-2 font-condensed text-lg font-black uppercase leading-tight tracking-[0.08em]">
+              {pubMat.prizeHeadline}
+            </div>
+          </CyberPanel>
+        </section>
+
+        <section className="relative mt-4 h-[408px]">
+          <div className="absolute left-1/2 top-12 h-[310px] w-[310px] -translate-x-1/2 rounded-full border border-white/20" />
+          <div
+            className="absolute left-1/2 top-4 h-[390px] w-[390px] -translate-x-1/2 rounded-full border-4 opacity-70"
+            style={{ borderColor: theme.accent, boxShadow: `0 0 55px ${theme.accent}` }}
+          />
+          <div
+            className="absolute left-1/2 top-16 h-[260px] w-[520px] -translate-x-1/2 rounded-[50%] blur-sm"
+            style={{
+              background: `radial-gradient(ellipse, ${theme.accent}44 0%, ${theme.accent2}22 38%, transparent 72%)`,
+            }}
+          />
+
+          <CyberPanel className="absolute left-0 top-16 w-[198px] p-4" theme={theme}>
+            <div className="font-condensed text-base font-black uppercase tracking-[0.18em] text-white/50">
+              Entrance Fee
+            </div>
+            <PriceRow label="Pre-Reg" value={pubMat.preRegPrice} theme={theme} />
+            <PriceRow label="Walk-In" value={pubMat.walkInPrice} theme={theme} />
+          </CyberPanel>
+
+          <CyberPanel className="absolute right-0 top-10 w-[220px] space-y-3 p-4" theme={theme}>
+            <InfoLine icon={<CalendarDays className="h-6 w-6" />} label={pubMat.date} theme={theme} />
+            <InfoLine icon={<Clock className="h-6 w-6" />} label={pubMat.prepTime} theme={theme} />
+            <InfoLine icon={<Zap className="h-6 w-6" />} label={pubMat.startTime} theme={theme} />
+          </CyberPanel>
+
+          <div className="absolute left-[190px] right-[190px] top-5 h-[360px]">
+            <PosterHeroImage src={pubMat.images.hero} label="Main Visual" theme={theme} />
+          </div>
+
+          <div className="absolute bottom-0 left-[62px] right-[62px]">
+            <CyberPanel className="grid grid-cols-[auto_1fr] items-center gap-3 p-4" theme={theme}>
+              <MapPin className="h-9 w-9" style={{ color: theme.accent }} />
+              <div>
+                <div className="font-condensed text-sm font-black uppercase tracking-[0.22em] text-white/45">
+                  Location
+                </div>
+                <div className="pubmat-line-lock font-condensed text-2xl font-black uppercase tracking-[0.06em]">
+                  {pubMat.venue}
+                </div>
+              </div>
+            </CyberPanel>
+          </div>
+        </section>
+
+        <section className="mt-5">
+          <div className="mb-2 flex items-center justify-between">
+            <div
+              className="font-display text-5xl leading-none tracking-[0.08em]"
+              style={{ color: theme.ink, textShadow: `3px 3px 0 ${theme.accent}` }}
+            >
+              PRIZES
+            </div>
+            <div className="font-condensed text-lg font-black uppercase tracking-[0.2em] text-white/50">
+              {pubMat.guestHeadline}
+            </div>
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            {gallery.map((src, index) => (
+              <PrizeTile
+                key={index}
+                src={src}
+                label={visibleGuests[index] || `Prize ${index + 1}`}
+                theme={theme}
+              />
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-4 grid grid-cols-[1fr_190px] gap-3">
+          <div className="grid grid-cols-3 gap-3">
+            {(visibleNotes.length ? visibleNotes : ["3G Deck", "5-Round Swiss", "No Repeating Parts"])
+              .slice(0, 6)
+              .map((note, index) => (
+                <StatTile key={`${note}-${index}`} note={note} index={index} theme={theme} />
+              ))}
+          </div>
+          <CyberPanel className="flex flex-col items-center justify-center p-4 text-center" theme={theme}>
+            <Users className="h-10 w-10" style={{ color: theme.accent2 }} />
+            <div className="mt-2 font-display text-5xl leading-none" style={{ color: theme.accent }}>
+              {visibleGuests.length || "20"}
+            </div>
+            <div className="font-condensed text-xl font-black uppercase leading-tight tracking-[0.16em]">
+              Player Cap
+            </div>
+          </CyberPanel>
+        </section>
+
+        <footer className="mt-4">
+          <div
+            className="pubmat-title-lock font-display text-[52px] leading-none tracking-[0.04em]"
+            style={{ color: theme.ink, textShadow: `4px 4px 0 ${theme.accent}` }}
+          >
+            LET IT RIP. BE THE CHAMPION.
+          </div>
+          {visibleSponsors.length > 0 && (
+            <div className="mt-3 grid grid-cols-6 gap-2">
+              {visibleSponsors.slice(0, 12).map((sponsor, index) => (
+                <div
+                  key={`${sponsor}-${index}`}
+                  className="flex h-11 items-center justify-center border px-2 text-center font-condensed text-xs font-black uppercase leading-tight tracking-[0.08em]"
+                  style={{
+                    borderColor: `${theme.accent2}70`,
+                    background: "rgba(255,255,255,.04)",
+                    color: theme.ink,
+                  }}
+                >
+                  {sponsor}
+                </div>
+              ))}
+            </div>
+          )}
+        </footer>
+      </div>
+      <div className="pubmat-scanline pointer-events-none absolute inset-0" />
+    </div>
+  );
+}
+
+function ArenaClashPubMatPoster({
+  pubMat,
+  theme,
+}: {
+  pubMat: PubMatState;
+  theme: PubMatTheme;
+}) {
+  const gallery = [
+    pubMat.images.gallery1,
+    pubMat.images.gallery2,
+    pubMat.images.gallery3,
+    pubMat.images.gallery4,
+  ];
+  const visibleSponsors = pubMat.sponsors.filter(Boolean);
+  const visibleNotes = pubMat.notes.filter(Boolean);
+
+  return (
+    <div className="relative min-h-[1080px] overflow-hidden bg-black p-5 text-white">
+      <div className="pubmat-hyper-grid absolute inset-0 opacity-55" />
+      <div className="pubmat-red-scratch absolute inset-0" />
+      <div className="relative z-10">
+        <header className="grid grid-cols-4 items-center gap-4">
+          {visibleSponsors.slice(0, 4).map((sponsor, index) => (
+            <CyberPanel key={`${sponsor}-${index}`} className="flex h-24 items-center justify-center p-3 text-center" theme={theme}>
+              <div className="pubmat-small-lock font-display text-2xl leading-none tracking-[0.04em]">{sponsor}</div>
+            </CyberPanel>
+          ))}
+        </header>
+
+        <section className="mt-5 text-center">
+          <div className="font-condensed text-xl font-black uppercase tracking-[0.32em]" style={{ color: theme.accent2 }}>
+            {pubMat.shopName} / {pubMat.partners}
+          </div>
+          <h2 className="pubmat-title-lock mt-1 font-display text-[86px] leading-[0.84] tracking-[0.03em]" style={{ textShadow: `5px 5px 0 ${theme.accent}` }}>
+            {pubMat.game}
+          </h2>
+          <div className="pubmat-title-lock font-display text-[62px] leading-none" style={{ color: theme.accent2, textShadow: "3px 3px 0 #000" }}>
+            {pubMat.eventName}
+          </div>
+        </section>
+
+        <section className="mt-3 grid grid-cols-[180px_1fr_180px] gap-4">
+          <CyberPanel className="space-y-5 p-4" theme={theme}>
+            <PriceRow label="Single Entry" value={pubMat.preRegPrice} theme={theme} />
+            <PriceRow label="Double Entry" value={pubMat.walkInPrice} theme={theme} />
+            <div className="border-t border-white/15 pt-4 font-condensed text-2xl font-black uppercase leading-tight tracking-[0.08em]">
+              {visibleNotes[0] || "Includes food voucher"}
+            </div>
+          </CyberPanel>
+
+          <div className="relative h-[444px]">
+            <div
+              className="absolute inset-x-8 bottom-10 h-40 rounded-[50%] blur-sm"
+              style={{ background: `radial-gradient(ellipse, ${theme.accent}66, transparent 70%)` }}
+            />
+            <PosterHeroImage src={pubMat.images.hero || pubMat.images.product} label="Battle Visual" theme={theme} />
+          </div>
+
+          <CyberPanel className="space-y-4 p-4" theme={theme}>
+            <InfoLine icon={<CalendarDays className="h-6 w-6" />} label={pubMat.date} theme={theme} />
+            <InfoLine icon={<Clock className="h-6 w-6" />} label={pubMat.prepTime} theme={theme} />
+            <InfoLine icon={<Zap className="h-6 w-6" />} label={pubMat.startTime} theme={theme} />
+            <div className="border-t border-white/15 pt-3">
+              <div className="font-condensed text-sm font-black uppercase tracking-[0.2em] text-white/45">Location</div>
+              <div className="pubmat-small-lock font-condensed text-xl font-black uppercase leading-tight">{pubMat.venue}</div>
+            </div>
+          </CyberPanel>
+        </section>
+
+        <section className="mt-4">
+          <div className="mx-auto mb-2 w-fit px-8 py-1 font-display text-4xl leading-none" style={{ background: theme.accent }}>
+            PRIZES
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            {[pubMat.images.product, ...gallery].slice(0, 4).map((src, index) => (
+              <PrizeTile key={index} src={src} label={pubMat.guests[index] || `Prize ${index + 1}`} theme={theme} />
+            ))}
+          </div>
+        </section>
+
+        <footer className="mt-4 grid grid-cols-[1fr_1fr] gap-4">
+          <CyberPanel className="p-4 text-center" theme={theme}>
+            <div className="font-condensed text-xl font-black uppercase tracking-[0.18em] text-white/55">Special Prizes</div>
+            <div className="pubmat-title-lock font-display text-5xl leading-none" style={{ color: theme.accent2 }}>
+              {pubMat.prizeHeadline}
+            </div>
+          </CyberPanel>
+          <CyberPanel className="p-4 text-center" theme={theme}>
+            <div className="font-condensed text-xl font-black uppercase tracking-[0.18em] text-white/55">Callout</div>
+            <div className="pubmat-title-lock font-display text-4xl leading-none" style={{ color: theme.accent }}>
+              {pubMat.guestHeadline}
+            </div>
+          </CyberPanel>
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+function ShadowTribePubMatPoster({
+  pubMat,
+  theme,
+}: {
+  pubMat: PubMatState;
+  theme: PubMatTheme;
+}) {
+  const gallery = [
+    pubMat.images.gallery1,
+    pubMat.images.gallery2,
+    pubMat.images.gallery3,
+    pubMat.images.gallery4,
+  ];
+  const visibleNotes = pubMat.notes.filter(Boolean);
+
+  return (
+    <div className="relative min-h-[1080px] overflow-hidden p-5 text-white" style={{ background: theme.paper }}>
+      <div className="pubmat-purple-storm absolute inset-0" />
+      <div className="relative z-10">
+        <header className="grid grid-cols-[145px_1fr_145px] gap-4">
+          <CyberPanel className="p-4 text-center" theme={theme}>
+            <div className="pubmat-small-lock font-display text-4xl leading-none" style={{ color: theme.accent }}>{pubMat.date}</div>
+            <div className="font-condensed text-xl font-black uppercase tracking-[0.16em]">Tournament</div>
+          </CyberPanel>
+          <div className="text-center">
+            <h2 className="pubmat-title-lock font-display text-[90px] leading-[0.84]" style={{ textShadow: `5px 5px 0 ${theme.accent2}` }}>
+              {pubMat.eventName}
+            </h2>
+            <div className="pubmat-line-lock font-display text-4xl leading-none" style={{ color: theme.accent2 }}>
+              {pubMat.game}
+            </div>
+          </div>
+          <CyberPanel className="p-4 text-center" theme={theme}>
+            <Gift className="mx-auto h-10 w-10" style={{ color: theme.accent }} />
+            <div className="pubmat-small-lock mt-2 font-condensed text-lg font-black uppercase leading-tight tracking-[0.08em]">
+              {pubMat.prizeHeadline}
+            </div>
+          </CyberPanel>
+        </header>
+
+        <section className="relative mt-3 h-[250px]">
+          <div className="absolute left-0 top-4 h-56 w-56">
+            <PosterHeroImage src={pubMat.images.hero} label="Left Bey" theme={theme} />
+          </div>
+          <div className="absolute right-0 top-4 h-56 w-56">
+            <PosterHeroImage src={pubMat.images.product} label="Right Bey" theme={theme} />
+          </div>
+          <CyberPanel className="absolute bottom-2 left-[175px] right-[175px] grid grid-cols-2 gap-4 p-4" theme={theme}>
+            <InfoLine icon={<Clock className="h-6 w-6" />} label={pubMat.prepTime} theme={theme} />
+            <InfoLine icon={<Zap className="h-6 w-6" />} label={pubMat.startTime} theme={theme} />
+          </CyberPanel>
+        </section>
+
+        <section className="mt-4">
+          <div className="mb-2 text-center font-display text-5xl leading-none">PRIZES</div>
+          <div className="grid grid-cols-4 gap-3">
+            {gallery.map((src, index) => (
+              <PrizeTile key={index} src={src} label={pubMat.guests[index] || ["Champion", "2nd", "3rd", "Swiss King"][index]} theme={theme} />
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-4 grid grid-cols-[1fr_170px] gap-3">
+          <div className="grid grid-cols-3 gap-3">
+            {(visibleNotes.length ? visibleNotes : ["4G", "1-Bey Banning", "5-Round Swiss", "5 Points Each Match", "Semis 6 Points", "Finals 7 Points"])
+              .slice(0, 6)
+              .map((note, index) => (
+                <StatTile key={`${note}-${index}`} note={note} index={index} theme={theme} />
+              ))}
+          </div>
+          <CyberPanel className="flex flex-col justify-center p-4 text-center" theme={theme}>
+            <div className="font-display text-6xl leading-none" style={{ color: theme.accent2 }}>
+              X
+            </div>
+            <div className="font-condensed text-2xl font-black uppercase leading-tight">
+              Special Rule
+            </div>
+          </CyberPanel>
+        </section>
+
+        <footer className="mt-4">
+          <div className="grid grid-cols-[1fr_auto] items-end gap-4">
+            <div>
+              <div className="font-display text-4xl leading-none text-white/80">ENTRANCE FEE:</div>
+              <div className="pubmat-line-lock font-display text-[88px] leading-[0.8]" style={{ color: theme.accent2, textShadow: `5px 5px 0 ${theme.accent}` }}>
+                {pubMat.walkInPrice}
+              </div>
+            </div>
+            <CyberPanel className="w-72 p-4" theme={theme}>
+              <InfoLine icon={<MapPin className="h-6 w-6" />} label={pubMat.venue} theme={theme} />
+            </CyberPanel>
+          </div>
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+function VelocityPopPubMatPoster({
+  pubMat,
+  theme,
+}: {
+  pubMat: PubMatState;
+  theme: PubMatTheme;
+}) {
+  return (
+    <div className="relative min-h-[1080px] overflow-hidden p-5 text-white" style={{ background: theme.paper }}>
+      <div className="pubmat-green-flow absolute inset-0" />
+      <div className="absolute inset-y-0 left-0 w-[58%] bg-black/45" style={{ clipPath: "polygon(0 0, 100% 0, 72% 100%, 0 100%)" }} />
+      <div className="relative z-10 grid min-h-[1040px] grid-cols-[0.92fr_1.08fr] gap-5">
+        <div className="flex flex-col justify-between">
+          <header>
+            <div className="font-display text-5xl leading-none" style={{ color: theme.accent }}>
+              {pubMat.date}
+            </div>
+            <h2 className="pubmat-title-lock mt-1 font-display text-[76px] leading-[0.86]" style={{ textShadow: "4px 4px 0 #000" }}>
+              {pubMat.eventName}
+            </h2>
+            <div className="font-display text-4xl leading-none italic">Catchin up</div>
+          </header>
+
+          <div className="space-y-3">
+            <PriceRow label="Pre-Reg" value={pubMat.preRegPrice} theme={theme} />
+            <PriceRow label="Walk-In" value={pubMat.walkInPrice} theme={theme} />
+            <div className="font-display text-5xl leading-none" style={{ color: theme.accent2 }}>
+              {pubMat.startTime}
+            </div>
+            <CyberPanel className="p-4" theme={theme}>
+              <div className="pubmat-title-lock font-display text-3xl leading-none">{pubMat.prizeHeadline}</div>
+              <div className="mt-2 font-condensed text-2xl font-black uppercase tracking-[0.08em]" style={{ color: theme.accent }}>
+                {pubMat.guestHeadline}
+              </div>
+            </CyberPanel>
+          </div>
+        </div>
+
+        <div className="relative flex min-h-0 flex-col gap-4">
+          <CyberPanel className="ml-auto w-64 p-4 text-center" theme={theme}>
+            <MapPin className="mx-auto h-10 w-10" style={{ color: theme.accent }} />
+            <div className="pubmat-small-lock mt-2 font-condensed text-xl font-black uppercase leading-tight">{pubMat.venue}</div>
+          </CyberPanel>
+          <div className="h-[460px]">
+            <PosterHeroImage src={pubMat.images.hero || pubMat.images.product} label="Featured Product" theme={theme} />
+          </div>
+          <div className="h-40">
+            <PosterHeroImage src={pubMat.images.gallery1} label="Launcher / Bonus" theme={theme} />
+          </div>
+          <div className="pubmat-title-lock mt-auto font-display text-[56px] leading-none tracking-[0.06em]">
+            {pubMat.game}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BladeCupPubMatPoster({
+  pubMat,
+  theme,
+}: {
+  pubMat: PubMatState;
+  theme: PubMatTheme;
+}) {
+  const gallery = [
+    pubMat.images.gallery1,
+    pubMat.images.gallery2,
+    pubMat.images.gallery3,
+    pubMat.images.gallery4,
+  ];
+  const visibleNotes = pubMat.notes.filter(Boolean);
+
+  return (
+    <div className="relative min-h-[1080px] overflow-hidden p-5 text-white" style={{ background: theme.paper }}>
+      <div className="pubmat-red-scratch absolute inset-0" />
+      <div className="relative z-10">
+        <header className="grid grid-cols-[140px_1fr] gap-4">
+          <CyberPanel className="flex h-32 items-center justify-center p-3 text-center" theme={theme}>
+            <div className="pubmat-small-lock font-display text-3xl leading-none">{pubMat.shopName}</div>
+          </CyberPanel>
+          <div>
+            <h2 className="pubmat-title-lock font-display text-[80px] leading-[0.84]" style={{ color: theme.accent, textShadow: "4px 4px 0 #fff" }}>
+              {pubMat.eventName}
+            </h2>
+            <div className="pubmat-line-lock font-display text-4xl leading-none">{pubMat.game}</div>
+          </div>
+        </header>
+
+        <section className="mt-4 grid grid-cols-[1fr_1fr] gap-4">
+          <div className="h-[318px]">
+            <PosterHeroImage src={pubMat.images.hero} label="Player / Host" theme={theme} />
+          </div>
+          <div className="h-[318px]">
+            <PosterHeroImage src={pubMat.images.product} label="Battle Visual" theme={theme} />
+          </div>
+        </section>
+
+        <CyberPanel className="mt-4 grid grid-cols-5 gap-2 p-3" theme={theme}>
+          {[
+            ["Entrance Fee", pubMat.walkInPrice],
+            ["Deck", visibleNotes[0] || "3G"],
+            ["Format", visibleNotes[1] || "5 Round Swiss"],
+            ["Prize Pool", pubMat.prizeHeadline],
+            ["Player Cap", pubMat.guests.filter(Boolean).length || "60"],
+          ].map(([label, value]) => (
+            <div key={label} className="border-r border-white/15 px-2 text-center last:border-r-0">
+              <div className="font-condensed text-sm font-black uppercase tracking-[0.12em] text-white/45">{label}</div>
+              <div className="pubmat-small-lock font-display text-2xl leading-none" style={{ color: theme.accent2 }}>{value}</div>
+            </div>
+          ))}
+        </CyberPanel>
+
+        <section className="mt-4">
+          <div className="text-center font-display text-4xl leading-none">POSSIBLE PRIZES</div>
+          <div className="mt-2 grid grid-cols-4 gap-3">
+            {gallery.map((src, index) => (
+              <PrizeTile key={index} src={src} label={pubMat.guests[index] || `${index + 1}${["st", "nd", "rd", "th"][index]} Place`} theme={theme} />
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-4 grid grid-cols-[1fr_1fr] gap-4">
+          <CyberPanel className="p-4 text-center" theme={theme}>
+            <Trophy className="mx-auto h-12 w-12" style={{ color: theme.accent2 }} />
+            <div className="font-display text-4xl leading-none">SPECIAL TITLE</div>
+            <div className="font-display text-5xl leading-none" style={{ color: theme.accent }}>SWISS KING</div>
+          </CyberPanel>
+          <CyberPanel className="p-4" theme={theme}>
+            <InfoLine icon={<CalendarDays className="h-6 w-6" />} label={pubMat.date} theme={theme} />
+            <InfoLine icon={<Clock className="h-6 w-6" />} label={pubMat.prepTime} theme={theme} />
+            <InfoLine icon={<Zap className="h-6 w-6" />} label={pubMat.startTime} theme={theme} />
+            <InfoLine icon={<MapPin className="h-6 w-6" />} label={pubMat.venue} theme={theme} />
+          </CyberPanel>
+        </section>
+
+        <footer className="pubmat-title-lock mt-4 text-center font-display text-4xl leading-none" style={{ color: theme.accent }}>
+          SHOW YOUR SKILLS. DOMINATE THE ARENA.
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+function CyberBrand({
+  title,
+  subtitle,
+  theme,
+  align = "left",
+}: {
+  title: string;
+  subtitle: string;
+  theme: PubMatTheme;
+  align?: "left" | "right";
+}) {
+  return (
+    <div className={cn("min-w-0", align === "right" && "text-right")}>
+      <div className="pubmat-line-lock font-display text-4xl leading-none tracking-[0.08em]">
+        {title}
+      </div>
+      <div
+        className="pubmat-line-lock mt-1 font-condensed text-base font-black uppercase tracking-[0.18em]"
+        style={{ color: theme.accent2 }}
+      >
+        {subtitle}
+      </div>
+    </div>
+  );
+}
+
+function CyberPanel({
+  children,
+  className,
+  theme,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  theme: PubMatTheme;
+}) {
+  return (
+    <div
+      className={cn("relative overflow-hidden border bg-black/55 backdrop-blur", className)}
+      style={{
+        borderColor: `${theme.accent}88`,
+        boxShadow: `0 0 22px ${theme.accent}24, inset 0 0 24px rgba(255,255,255,.04)`,
+        clipPath: "polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))",
+      }}
+    >
+      <div
+        className="absolute inset-x-0 top-0 h-px"
+        style={{ background: `linear-gradient(90deg, transparent, ${theme.accent2}, transparent)` }}
+      />
+      <div className="relative">{children}</div>
+    </div>
+  );
+}
+
+function PriceRow({
+  label,
+  value,
+  theme,
+}: {
+  label: string;
+  value: string;
+  theme: PubMatTheme;
+}) {
+  return (
+    <div className="mt-3">
+      <div
+        className="pubmat-line-lock font-display text-[46px] leading-none"
+        style={{ color: theme.ink, textShadow: `3px 3px 0 ${theme.accent}` }}
+      >
+        {value}
+      </div>
+      <div
+        className="pubmat-chip-text inline-flex max-w-full px-3 py-0.5 font-condensed text-sm font-black uppercase tracking-[0.08em]"
+        style={{ background: theme.accent2, color: "#031017" }}
+      >
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function InfoLine({
+  icon,
+  label,
+  theme,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  theme: PubMatTheme;
+}) {
+  return (
+    <div className="grid grid-cols-[28px_1fr] items-center gap-3">
+      <div style={{ color: theme.accent }}>{icon}</div>
+      <div className="pubmat-small-lock font-condensed text-xl font-black uppercase leading-tight tracking-[0.06em]">
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function PosterHeroImage({
+  src,
+  label,
+  theme,
+}: {
+  src: string;
+  label: string;
+  theme: PubMatTheme;
+}) {
+  return (
+    <div className="relative h-full">
+      {src ? (
+        <img
+          src={src}
+          alt=""
+          className="relative z-10 h-full w-full object-contain drop-shadow-[0_0_34px_rgba(255,255,255,0.28)]"
+          draggable={false}
+        />
+      ) : (
+        <div className="relative z-10 flex h-full items-center justify-center">
+          <div
+            className="relative h-72 w-72 rounded-full border-[18px]"
+            style={{
+              borderColor: theme.accent,
+              boxShadow: `0 0 48px ${theme.accent}, inset 0 0 48px ${theme.accent2}44`,
+              background: `radial-gradient(circle, ${theme.accent2} 0 11%, #111827 12% 31%, ${theme.accent} 32% 38%, #dce7f2 39% 48%, #111827 49% 100%)`,
+            }}
+          >
+            <div className="absolute inset-8 rounded-full border-[12px] border-black/50" />
+            <div className="absolute inset-20 rounded-full bg-black/80" />
+          </div>
+          <div className="absolute bottom-8 font-condensed text-xl font-black uppercase tracking-[0.18em] text-white/55">
+            {label}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PrizeTile({
+  src,
+  label,
+  theme,
+}: {
+  src: string;
+  label: string;
+  theme: PubMatTheme;
+}) {
+  return (
+    <CyberPanel className="h-[154px] p-2" theme={theme}>
+      <div className="relative h-[104px] overflow-hidden bg-white/5">
+        {src ? (
+          <img src={src} alt="" className="h-full w-full object-cover" draggable={false} />
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <Target className="h-12 w-12" style={{ color: theme.accent2 }} />
+          </div>
+        )}
+      </div>
+      <div className="pubmat-line-lock mt-2 text-center font-condensed text-base font-black uppercase tracking-[0.06em]">
+        {label}
+      </div>
+    </CyberPanel>
+  );
+}
+
+function StatTile({
+  note,
+  index,
+  theme,
+}: {
+  note: string;
+  index: number;
+  theme: PubMatTheme;
+}) {
+  const icons = [
+    <Zap key="zap" className="h-9 w-9" />,
+    <Users key="users" className="h-9 w-9" />,
+    <Target key="target" className="h-9 w-9" />,
+  ];
+  return (
+    <CyberPanel className="flex h-[86px] items-center gap-3 p-3" theme={theme}>
+      <div style={{ color: index % 2 ? theme.accent2 : theme.accent }}>
+        {icons[index % icons.length]}
+      </div>
+      <div className="pubmat-small-lock font-condensed text-lg font-black uppercase leading-tight tracking-[0.06em]">
+        {note}
+      </div>
+    </CyberPanel>
   );
 }
 
@@ -1589,13 +2756,13 @@ function LogoWordmark({
   return (
     <div className={cn("min-w-0", align === "right" && "text-right")}>
       <div
-        className="truncate font-display text-4xl leading-none tracking-[0.04em]"
+        className="pubmat-line-lock font-display text-4xl leading-none tracking-[0.04em]"
         style={{ color: theme.accent2 }}
       >
         {label}
       </div>
       <div
-        className="truncate font-condensed text-lg font-black uppercase tracking-[0.12em]"
+        className="pubmat-line-lock font-condensed text-lg font-black uppercase tracking-[0.1em]"
         style={{ color: theme.accent }}
       >
         {sublabel}
@@ -1616,7 +2783,7 @@ function PriceBlock({
   return (
     <div>
       <div
-        className="font-display text-[64px] leading-none"
+        className="pubmat-line-lock font-display text-[54px] leading-none"
         style={{
           color: theme.accent,
           WebkitTextStroke: `2px ${theme.accent2}`,
@@ -1625,7 +2792,7 @@ function PriceBlock({
       >
         {value}
       </div>
-      <div className="font-condensed text-lg font-black uppercase tracking-[0.08em]">
+      <div className="pubmat-line-lock font-condensed text-base font-black uppercase tracking-[0.06em]">
         {label}
       </div>
     </div>
@@ -1635,7 +2802,7 @@ function PriceBlock({
 function TimeBlock({ value, theme }: { value: string; theme: PubMatTheme }) {
   return (
     <div
-      className="border-4 px-3 py-2 text-center font-display text-4xl leading-none tracking-[0.05em]"
+      className="pubmat-line-lock border-4 px-3 py-2 text-center font-display text-3xl leading-none tracking-[0.04em]"
       style={{ borderColor: theme.ink, background: theme.paper }}
     >
       {value}
@@ -1676,7 +2843,7 @@ function PosterImage({
         />
       ) : (
         <div
-          className="flex h-full items-center justify-center p-6 text-center font-condensed text-2xl font-black uppercase tracking-[0.12em]"
+          className="pubmat-cell-lock flex h-full items-center justify-center p-6 text-center font-condensed text-xl font-black uppercase tracking-[0.08em]"
           style={{ color: accent ? "#ffffff" : theme.muted }}
         >
           {label}
@@ -1689,7 +2856,7 @@ function PosterImage({
 function Banner({ text, theme }: { text: string; theme: PubMatTheme }) {
   return (
     <div
-      className="px-5 py-3 text-center font-display text-5xl leading-none tracking-[0.08em] text-white"
+      className="pubmat-title-lock px-5 py-3 text-center font-display text-4xl leading-none tracking-[0.06em] text-white"
       style={{ background: theme.block }}
     >
       {text}

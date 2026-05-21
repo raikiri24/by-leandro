@@ -80,6 +80,107 @@
   background-size: 28px 28px, 34px 34px, 42px 42px, 100% 100%;
 }
 
+.pubmat-hyper-grid {
+  background:
+    linear-gradient(rgba(255,255,255,.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.055) 1px, transparent 1px),
+    radial-gradient(circle at 50% 36%, rgba(255,31,53,.22), transparent 34%),
+    radial-gradient(circle at 68% 52%, rgba(0,229,255,.18), transparent 28%),
+    #030407;
+  background-size: 38px 38px, 38px 38px, 100% 100%, 100% 100%, 100% 100%;
+}
+
+.pubmat-speed-lines {
+  background:
+    repeating-linear-gradient(112deg, transparent 0 26px, rgba(255,31,53,.3) 27px 28px, transparent 29px 72px),
+    repeating-linear-gradient(-18deg, transparent 0 38px, rgba(0,229,255,.18) 39px 40px, transparent 41px 96px);
+  mix-blend-mode: screen;
+}
+
+.pubmat-glitch-title {
+  text-transform: uppercase;
+}
+
+.pubmat-title-lock,
+.pubmat-small-lock,
+.pubmat-line-lock,
+.pubmat-chip-text,
+.pubmat-cell-lock {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.pubmat-title-lock {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.pubmat-small-lock {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.pubmat-line-lock,
+.pubmat-chip-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pubmat-line-lock {
+  display: block;
+  white-space: nowrap;
+}
+
+.pubmat-chip-text {
+  white-space: nowrap;
+}
+
+.pubmat-cell-lock {
+  overflow: hidden;
+}
+
+.pubmat-scanline {
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255,255,255,.04) 0,
+    rgba(255,255,255,.04) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  mix-blend-mode: overlay;
+  opacity: .34;
+}
+
+.pubmat-red-scratch {
+  background:
+    repeating-linear-gradient(18deg, transparent 0 28px, rgba(225,22,38,.26) 29px 31px, transparent 32px 82px),
+    repeating-linear-gradient(-32deg, transparent 0 42px, rgba(255,255,255,.08) 43px 44px, transparent 45px 110px),
+    radial-gradient(circle at 50% 42%, rgba(225,22,38,.36), transparent 38%),
+    #050506;
+}
+
+.pubmat-purple-storm {
+  background:
+    radial-gradient(circle at 50% 18%, rgba(124,34,255,.38), transparent 28%),
+    radial-gradient(circle at 18% 28%, rgba(124,34,255,.24), transparent 22%),
+    radial-gradient(circle at 82% 30%, rgba(240,24,36,.24), transparent 22%),
+    repeating-linear-gradient(102deg, transparent 0 34px, rgba(124,34,255,.2) 35px 36px, transparent 37px 92px),
+    #06030a;
+}
+
+.pubmat-green-flow {
+  background:
+    radial-gradient(circle at 74% 28%, rgba(70,255,40,.28), transparent 32%),
+    radial-gradient(circle at 72% 60%, rgba(22,217,255,.26), transparent 28%),
+    repeating-linear-gradient(-18deg, transparent 0 46px, rgba(70,255,40,.16) 47px 49px, transparent 50px 118px),
+    linear-gradient(112deg, rgba(255,255,255,.09) 0 36%, transparent 36% 100%),
+    #07100b;
+}
+
 .splash-screen {
   animation: splash-exit 3s ease forwards;
 }
