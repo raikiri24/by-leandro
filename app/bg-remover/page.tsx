@@ -92,6 +92,7 @@ export default function BgRemoverPage() {
   const originalNameRef = useRef("image");
   const workingCanvasRef = useRef<HTMLCanvasElement>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
+  const originalCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const snapshotCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const undoStackRef = useRef<ImageData[]>([]);
   const isDrawingRef = useRef(false);
@@ -239,8 +240,9 @@ export default function BgRemoverPage() {
         ctx.fill();
       }
       ctx.globalCompositeOperation = "source-over";
-    } else if (activeTool === "restore" && snapshotCanvasRef.current) {
-      const snap = snapshotCanvasRef.current;
+    } else if (activeTool === "restore") {
+      const restoreSource = originalCanvasRef.current ?? snapshotCanvasRef.current;
+      if (!restoreSource) return;
       for (let i = 0; i <= steps; i++) {
         const t = i / steps;
         const cx = x1 + (x2 - x1) * t;
@@ -248,11 +250,23 @@ export default function BgRemoverPage() {
         const r = brushSize;
         const sx = Math.max(0, cx - r), sy = Math.max(0, cy - r);
         const sw = Math.min(canvas.width - sx, r * 2), sh = Math.min(canvas.height - sy, r * 2);
+        const sourceScaleX = restoreSource.width / canvas.width;
+        const sourceScaleY = restoreSource.height / canvas.height;
         ctx.save();
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.clip();
-        ctx.drawImage(snap, sx, sy, sw, sh, sx, sy, sw, sh);
+        ctx.drawImage(
+          restoreSource,
+          sx * sourceScaleX,
+          sy * sourceScaleY,
+          sw * sourceScaleX,
+          sh * sourceScaleY,
+          sx,
+          sy,
+          sw,
+          sh,
+        );
         ctx.restore();
       }
     }
@@ -381,10 +395,12 @@ export default function BgRemoverPage() {
     setRawData(null); setRefinedData(null); setRefinedUrl(null);
     setError(null); setAdj(DEFAULT_ADJUSTMENTS); setCrispness(60);
     setActiveTool("none"); wasInToolModeRef.current = false;
+    originalCanvasRef.current = null; snapshotCanvasRef.current = null;
     undoStackRef.current = []; setCanUndo(false);
     setStage("processing"); setProgress("Loading model…");
 
     try {
+      originalCanvasRef.current = imageDataToCanvas(await blobToImageData(file));
       const { removeBackground } = await import("@imgly/background-removal");
       const blob = await removeBackground(file, {
         model: "isnet",
@@ -423,6 +439,7 @@ export default function BgRemoverPage() {
     setOriginalUrl(null); setRawData(null); setRefinedData(null); setRefinedUrl(null);
     setError(null); setStage("idle"); setAdj(DEFAULT_ADJUSTMENTS); setCrispness(60);
     setActiveTool("none"); wasInToolModeRef.current = false;
+    originalCanvasRef.current = null; snapshotCanvasRef.current = null;
     undoStackRef.current = []; setCanUndo(false);
   };
 
