@@ -23,6 +23,11 @@ const features = [
     icon: ImagePlus,
   },
   {
+    title: "Winner Posts",
+    copy: "Create post-tournament winner graphics with player photos, logos, custom colors, backgrounds, and social templates.",
+    icon: Trophy,
+  },
+  {
     title: "Organizer Workflow",
     copy: "Use manual entry, Challonge imports, live previews, quick edits, feedback, and one-click JPG downloads.",
     icon: Target,
@@ -201,7 +206,7 @@ export default function HomePage() {
             event recaps.
           </p>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {features.map((feature) => {
             const Icon = feature.icon;
             return (

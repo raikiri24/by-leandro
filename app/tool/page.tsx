@@ -1,15 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { toJpeg } from "html-to-image";
 import {
+  Ban,
   Bug,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
   Clock,
+  Crown,
   Download,
+  Flame,
   Gift,
+  Grip,
   ImagePlus,
   Layers,
   Lightbulb,
@@ -22,7 +27,9 @@ import {
   Send,
   SlidersHorizontal,
   Sparkles,
+  Star,
   Target,
+  Timer,
   Trash2,
   Trophy,
   Users,
@@ -33,17 +40,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 
 // ─── types ────────────────────────────────────────────────────────────────────
 type CardType = "swiss" | "topcut";
-type GeneratorMode = "cards" | "pubmat";
+type GeneratorMode = "cards" | "pubmat" | "winners";
 type FeedbackCategory = "problem" | "feature" | "suggestion";
 type LayoutKey = "report" | "arcade" | "blade" | "award" | "minimal" | "terminal" | "ticket" | "split" | "circuit";
 type PubMatThemeKey =
   | "hyper"
   | "arena"
   | "tribe"
+  | "contact"
   | "catchup"
   | "cup"
   | "deadly"
@@ -185,7 +194,7 @@ type PubMatState = {
 };
 type PubMatTheme = {
   label: string;
-  template?: "classic" | "futuristic" | "arena" | "tribe" | "catchup" | "cup" | "neon" | "manga" | "gold" | "street" | "cosmic" | "volcanic";
+  template?: "classic" | "futuristic" | "arena" | "tribe" | "contact" | "catchup" | "cup" | "neon" | "manga" | "gold" | "street" | "cosmic" | "volcanic";
   bg: string;
   paper: string;
   ink: string;
@@ -193,6 +202,64 @@ type PubMatTheme = {
   accent: string;
   accent2: string;
   block: string;
+};
+type WinnerTemplateKey =
+  | "shadow"
+  | "scarlet"
+  | "goldrush"
+  | "podium"
+  | "anime"
+  | "neon"
+  | "splitfire"
+  | "royal"
+  | "posterwall"
+  | "blueprint"
+  | "prism"
+  | "clean";
+type WinnerPlayer = {
+  placement: string;
+  name: string;
+  subtitle: string;
+  image: string;
+};
+type WinnerState = {
+  posterFormat: "group" | "individual";
+  selectedPlayerIndex: number;
+  eventName: string;
+  game: string;
+  organizer: string;
+  venue: string;
+  date: string;
+  headline: string;
+  subheadline: string;
+  footer: string;
+  logoLeft: string;
+  logoRight: string;
+  background: string;
+  accent: string;
+  accent2: string;
+  text: string;
+  muted: string;
+  fontPreset: WinnerFontKey;
+  customFontName: string;
+  customFontData: string;
+  playerScale: number;
+  players: WinnerPlayer[];
+};
+type WinnerFontKey =
+  | "impact"
+  | "condensed"
+  | "tech"
+  | "editorial"
+  | "arcade"
+  | "clean";
+type WinnerTemplate = {
+  label: string;
+  mood: string;
+  bg: string;
+  accent: string;
+  accent2: string;
+  text: string;
 };
 type UsageStats = {
   totalUsers: number;
@@ -619,6 +686,17 @@ const pubMatThemes: Record<PubMatThemeKey, PubMatTheme> = {
     accent2: "#f01824",
     block: "#100916",
   },
+  contact: {
+    label: "Contact Tribe",
+    template: "contact",
+    bg: "#1a0e08",
+    paper: "#e9ddc6",
+    ink: "#1a0e08",
+    muted: "#6a4530",
+    accent: "#c81a2c",
+    accent2: "#5d2a8a",
+    block: "#0c0608",
+  },
   catchup: {
     label: "Velocity Pop",
     template: "catchup",
@@ -775,6 +853,166 @@ const initialPubMat: PubMatState = {
     gallery4: "",
   },
 };
+const winnerTemplates: Record<WinnerTemplateKey, WinnerTemplate> = {
+  shadow: {
+    label: "Shadow Champion",
+    mood: "Grainy champion reveal",
+    bg: "#050607",
+    accent: "#21d6ee",
+    accent2: "#8f42ff",
+    text: "#f8fbff",
+  },
+  scarlet: {
+    label: "Scarlet Arena",
+    mood: "Red event recap",
+    bg: "#120203",
+    accent: "#df101d",
+    accent2: "#ffffff",
+    text: "#ffffff",
+  },
+  goldrush: {
+    label: "Gold Rush",
+    mood: "Premium trophy glow",
+    bg: "#090800",
+    accent: "#d9b64a",
+    accent2: "#fff0a6",
+    text: "#fffbe6",
+  },
+  podium: {
+    label: "Podium Stack",
+    mood: "All winners in one frame",
+    bg: "#080b10",
+    accent: "#00d4e8",
+    accent2: "#f52236",
+    text: "#f7fbff",
+  },
+  anime: {
+    label: "Anime Burst",
+    mood: "Big manga energy",
+    bg: "#f2f0e9",
+    accent: "#ff2d2d",
+    accent2: "#111111",
+    text: "#111111",
+  },
+  neon: {
+    label: "Neon Circuit",
+    mood: "Cyber leaderboard",
+    bg: "#030014",
+    accent: "#00ffd1",
+    accent2: "#ff00cc",
+    text: "#f5f0ff",
+  },
+  splitfire: {
+    label: "Split Fire",
+    mood: "Versus-style winner wall",
+    bg: "#070304",
+    accent: "#ff6b00",
+    accent2: "#23b7ff",
+    text: "#fff8f0",
+  },
+  royal: {
+    label: "Royal Plaque",
+    mood: "Elegant award board",
+    bg: "#08070a",
+    accent: "#c9a15a",
+    accent2: "#6f56ff",
+    text: "#fff8eb",
+  },
+  posterwall: {
+    label: "Poster Wall",
+    mood: "Street collage",
+    bg: "#111111",
+    accent: "#f52236",
+    accent2: "#f5d547",
+    text: "#ffffff",
+  },
+  blueprint: {
+    label: "Blueprint",
+    mood: "Technical bracket board",
+    bg: "#031726",
+    accent: "#57d7ff",
+    accent2: "#e9fbff",
+    text: "#e9fbff",
+  },
+  prism: {
+    label: "Prism Pop",
+    mood: "Colorful social post",
+    bg: "#090014",
+    accent: "#ff4fd8",
+    accent2: "#50ff9f",
+    text: "#fff7ff",
+  },
+  clean: {
+    label: "Clean Results",
+    mood: "Minimal shop post",
+    bg: "#f4f6f8",
+    accent: "#101820",
+    accent2: "#1d9a6c",
+    text: "#101820",
+  },
+};
+
+const winnerFontPresets: Record<WinnerFontKey, { label: string; display: string; body: string }> = {
+  impact: {
+    label: "Impact Arena",
+    display: 'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif',
+    body: '"Arial Narrow", Arial, sans-serif',
+  },
+  condensed: {
+    label: "Condensed Sport",
+    display: '"Arial Narrow", Impact, sans-serif',
+    body: 'Inter, ui-sans-serif, system-ui, sans-serif',
+  },
+  tech: {
+    label: "Tech Circuit",
+    display: 'Orbitron, "Eurostile", "Arial Black", sans-serif',
+    body: '"SFMono-Regular", Consolas, monospace',
+  },
+  editorial: {
+    label: "Editorial Trophy",
+    display: 'Georgia, "Times New Roman", serif',
+    body: 'Inter, ui-sans-serif, system-ui, sans-serif',
+  },
+  arcade: {
+    label: "Arcade Block",
+    display: '"Arial Black", Impact, sans-serif',
+    body: '"Trebuchet MS", Arial, sans-serif',
+  },
+  clean: {
+    label: "Clean Club",
+    display: 'Inter, ui-sans-serif, system-ui, sans-serif',
+    body: 'Inter, ui-sans-serif, system-ui, sans-serif',
+  },
+};
+
+const initialWinners: WinnerState = {
+  posterFormat: "group",
+  selectedPlayerIndex: 0,
+  eventName: "Tournament 7",
+  game: "Beyblade X",
+  organizer: "Philippines Bladers",
+  venue: "Megamall Activity Center",
+  date: "May 23, 2026",
+  headline: "Tournament Winners",
+  subheadline: "Post Tournament Results",
+  footer: "Congratulations to all finalists",
+  logoLeft: "",
+  logoRight: "",
+  background: "",
+  accent: "#00d4e8",
+  accent2: "#f52236",
+  text: "#ffffff",
+  muted: "#a9b0ba",
+  fontPreset: "impact",
+  customFontName: "",
+  customFontData: "",
+  playerScale: 100,
+  players: [
+    { placement: "Champion", name: "Leandro", subtitle: "1st Place", image: "" },
+    { placement: "2nd Place", name: "Blader X", subtitle: "Finalist", image: "" },
+    { placement: "3rd Place", name: "Bird", subtitle: "Semifinalist", image: "" },
+  ],
+};
 const initialFeedback: FeedbackState = {
   category: "problem",
   title: "",
@@ -794,6 +1032,8 @@ export default function ToolPage() {
   const [design, setDesign] = useState<DesignKey>("signal");
   const [pubTheme, setPubTheme] = useState<PubMatThemeKey>("hyper");
   const [pubMat, setPubMat] = useState<PubMatState>(initialPubMat);
+  const [winnerTemplate, setWinnerTemplate] = useState<WinnerTemplateKey>("shadow");
+  const [winners, setWinners] = useState<WinnerState>(initialWinners);
   const [feedback, setFeedback] = useState<FeedbackState>(initialFeedback);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
@@ -829,8 +1069,9 @@ export default function ToolPage() {
   ]);
 
   const palette = designs[design];
-  const canvasWidth = generatorMode === "pubmat" ? 780 : 680;
-  const fallbackCanvasHeight = generatorMode === "pubmat" ? 1080 : 760;
+  const canvasWidth = generatorMode === "cards" ? 680 : 780;
+  const fallbackCanvasHeight =
+    generatorMode === "pubmat" ? 1080 : generatorMode === "winners" ? 780 : 760;
   const previewScale = previewSize.scale;
   const previewBoxHeight =
     (previewSize.height || fallbackCanvasHeight) * previewScale;
@@ -935,6 +1176,49 @@ export default function ToolPage() {
       window.removeEventListener("resize", updatePreviewSize);
     };
   }, [canvasWidth, generatorMode]);
+
+  useLayoutEffect(() => {
+    if (generatorMode !== "pubmat" && generatorMode !== "winners") return;
+    const root = cardRef.current;
+    if (!root) return;
+
+    const SELECTORS =
+      ".pubmat-title-lock, .pubmat-small-lock, .pubmat-line-lock, .pubmat-chip-text, .pubmat-cell-lock, .winner-lock, .winner-line-lock";
+    const MIN_PX = 8;
+
+    const fit = (el: HTMLElement) => {
+      const stored = el.getAttribute("data-fit-original");
+      const original = stored
+        ? parseFloat(stored)
+        : parseFloat(getComputedStyle(el).fontSize);
+      if (!Number.isFinite(original) || original <= 0) return;
+      if (!stored) el.setAttribute("data-fit-original", String(original));
+      el.style.fontSize = `${original}px`;
+
+      let size = original;
+      for (let i = 0; i < 40; i++) {
+        const overflows =
+          el.scrollWidth > el.clientWidth + 1 ||
+          el.scrollHeight > el.clientHeight + 1;
+        if (!overflows) break;
+        size *= 0.94;
+        if (size < MIN_PX) {
+          size = MIN_PX;
+          el.style.fontSize = `${MIN_PX}px`;
+          break;
+        }
+        el.style.fontSize = `${size}px`;
+      }
+    };
+
+    const fitAll = () => {
+      root.querySelectorAll<HTMLElement>(SELECTORS).forEach(fit);
+    };
+
+    fitAll();
+    const raf = requestAnimationFrame(fitAll);
+    return () => cancelAnimationFrame(raf);
+  }, [generatorMode, pubTheme, pubMat, winnerTemplate, winners]);
 
   const playerMatches = useMemo(() => {
     const needle = scrapePlayer.trim().toLowerCase();
@@ -1068,12 +1352,20 @@ export default function ToolPage() {
       const fileName =
         generatorMode === "pubmat"
           ? `${pubMat.shopName}_${pubMat.eventName}_pub_mat`
+          : generatorMode === "winners"
+            ? winners.posterFormat === "individual"
+              ? `${winners.eventName}_${winners.players[winners.selectedPlayerIndex]?.placement || "winner"}_${winners.players[winners.selectedPlayerIndex]?.name || "player"}`
+              : `${winners.eventName}_${winners.headline}_winners`
           : `${form.player}_${form.tournament}_${cardType}`;
       const dataUrl = await toJpeg(cardRef.current, {
         pixelRatio: 2,
         cacheBust: true,
         backgroundColor:
-          generatorMode === "pubmat" ? pubMatThemes[pubTheme].paper : palette.bg,
+          generatorMode === "pubmat"
+            ? pubMatThemes[pubTheme].paper
+            : generatorMode === "winners"
+              ? winnerTemplates[winnerTemplate].bg
+              : palette.bg,
         quality: 0.95,
       });
       const a = document.createElement("a");
@@ -1086,9 +1378,9 @@ export default function ToolPage() {
   }
 
   return (
-    <main className="flex min-h-dvh flex-col bg-background text-foreground lg:grid lg:min-h-screen lg:grid-cols-[440px_1fr]">
+    <main className="flex min-h-dvh flex-col bg-background text-foreground lg:grid lg:min-h-screen lg:grid-cols-[300px_minmax(0,1fr)_440px] xl:grid-cols-[340px_minmax(0,1fr)_480px]">
       {showSplash && <SplashScreen />}
-      <aside className="hidden bg-card lg:block lg:h-screen lg:overflow-y-auto">
+      <aside className="hidden border-r bg-card lg:block lg:h-screen lg:overflow-y-auto">
         <div className="sticky top-0 z-20 border-b bg-card/95 px-6 py-5 backdrop-blur">
           <div className="mb-4 flex items-center justify-between gap-3">
             <a
@@ -1107,7 +1399,7 @@ export default function ToolPage() {
           <h1 className="font-display text-3xl tracking-[0.15em] text-primary">
             Leandro's Tournament Card Generator
           </h1>
-          <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className="mt-4 grid grid-cols-3 gap-2">
             <UsageMetric
               label="Total users"
               value={usageStats ? formatCount(usageStats.totalUsers) : "--"}
@@ -1125,11 +1417,12 @@ export default function ToolPage() {
         </div>
 
         <Section title="Module">
-          <div className="grid grid-cols-2 rounded-md border bg-secondary p-1">
+          <div className="grid grid-cols-3 rounded-md border bg-secondary p-1">
             {(
               [
                 ["cards", "Cards"],
                 ["pubmat", "Pub Mat"],
+                ["winners", "Winners"],
               ] as [GeneratorMode, string][]
             ).map(([key, label]) => (
               <Button
@@ -1144,30 +1437,111 @@ export default function ToolPage() {
           </div>
         </Section>
 
+        {generatorMode === "cards" && (
+          <>
+            <Section title="Source">
+              <div className="grid grid-cols-2 rounded-md border bg-secondary p-1">
+                {(["manual", "scrape"] as const).map((item) => (
+                  <Button
+                    key={item}
+                    variant={mode === item ? "default" : "ghost"}
+                    onClick={() => setMode(item)}
+                    className="font-condensed uppercase tracking-[0.18em]"
+                  >
+                    {item}
+                  </Button>
+                ))}
+              </div>
+            </Section>
+            <Section title="Design Library">
+              <DesignCarousel
+                designs={designs}
+                selected={design}
+                onSelect={setDesign}
+              />
+            </Section>
+            <Section title="Card Type">
+              <div className="grid grid-cols-2 rounded-md border bg-secondary p-1">
+                <Button
+                  variant={cardType === "swiss" ? "default" : "ghost"}
+                  onClick={() => setCardType("swiss")}
+                  className="font-condensed uppercase tracking-[0.18em]"
+                >
+                  Swiss
+                </Button>
+                <Button
+                  variant={cardType === "topcut" ? "default" : "ghost"}
+                  onClick={() => setCardType("topcut")}
+                  className="font-condensed uppercase tracking-[0.18em]"
+                >
+                  Top Cut
+                </Button>
+              </div>
+            </Section>
+          </>
+        )}
+
+        {generatorMode === "pubmat" && (
+          <Section title="Theme Library">
+            <PubMatThemePicker theme={pubTheme} setTheme={setPubTheme} />
+          </Section>
+        )}
+
+        {generatorMode === "winners" && (
+          <>
+            <Section title="Template Library">
+              <WinnerTemplatePicker
+                template={winnerTemplate}
+                setTemplate={setWinnerTemplate}
+              />
+            </Section>
+            <Section title="Poster Format">
+              <WinnerFormatControls winners={winners} setWinners={setWinners} />
+            </Section>
+          </>
+        )}
+      </aside>
+
+      <aside className="hidden border-l bg-card lg:col-start-3 lg:row-start-1 lg:block lg:h-screen lg:overflow-y-auto">
+        <div className="sticky top-0 z-20 border-b bg-card/95 px-6 py-5 backdrop-blur">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="font-condensed text-xs font-black uppercase tracking-[0.22em] text-muted-foreground">
+                Inspector
+              </div>
+              <h2 className="mt-1 font-display text-3xl tracking-[0.1em] text-primary">
+                Edit {generatorMode === "pubmat" ? "Pub Mat" : generatorMode === "winners" ? "Winners" : "Card"}
+              </h2>
+            </div>
+            <Button
+              onClick={downloadCard}
+              disabled={exporting}
+              size="icon"
+              aria-label="Download JPG"
+            >
+              {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            </Button>
+          </div>
+        </div>
+
         {generatorMode === "pubmat" ? (
           <PubMatEditor
             pubMat={pubMat}
             setPubMat={setPubMat}
             theme={pubTheme}
             setTheme={setPubTheme}
+            hideTheme
+          />
+        ) : generatorMode === "winners" ? (
+          <WinnersEditor
+            winners={winners}
+            setWinners={setWinners}
+            template={winnerTemplate}
+            setTemplate={setWinnerTemplate}
+            hideTemplate
           />
         ) : (
           <>
-        <Section title="Input Mode">
-          <div className="grid grid-cols-2 rounded-md border bg-secondary p-1">
-            {(["manual", "scrape"] as const).map((item) => (
-              <Button
-                key={item}
-                variant={mode === item ? "default" : "ghost"}
-                onClick={() => setMode(item)}
-                className="font-condensed uppercase tracking-[0.18em]"
-              >
-                {item}
-              </Button>
-            ))}
-          </div>
-        </Section>
-
         {mode === "scrape" && (
           <Section title="Challonge Scraper">
             <div className="space-y-3 rounded-lg border border-primary/25 bg-primary/5 p-4">
@@ -1323,33 +1697,6 @@ export default function ToolPage() {
                 onChange={(e) => setForm({ ...form, cardNum: e.target.value })}
               />
             </Field>
-          </div>
-        </Section>
-
-        <Section title="Design">
-          <DesignCarousel
-            designs={designs}
-            selected={design}
-            onSelect={setDesign}
-          />
-        </Section>
-
-        <Section title="Card Type">
-          <div className="grid grid-cols-2 rounded-md border bg-secondary p-1">
-            <Button
-              variant={cardType === "swiss" ? "default" : "ghost"}
-              onClick={() => setCardType("swiss")}
-              className="font-condensed uppercase tracking-[0.18em]"
-            >
-              Swiss
-            </Button>
-            <Button
-              variant={cardType === "topcut" ? "default" : "ghost"}
-              onClick={() => setCardType("topcut")}
-              className="font-condensed uppercase tracking-[0.18em]"
-            >
-              Top Cut
-            </Button>
           </div>
         </Section>
 
@@ -1566,11 +1913,11 @@ export default function ToolPage() {
         </div>
       </aside>
 
-      <section className="card-stage flex flex-1 flex-col items-center gap-4 overflow-auto p-4 pb-28 sm:gap-6 sm:p-5 sm:pb-28 lg:min-h-screen lg:gap-6 lg:p-10 lg:pb-10">
+      <section className="card-stage flex flex-1 flex-col items-center gap-4 overflow-auto p-4 pb-28 sm:gap-6 sm:p-5 sm:pb-28 lg:col-start-2 lg:row-start-1 lg:min-h-screen lg:gap-6 lg:p-8 lg:pb-8 xl:p-10">
         <div
           className={cn(
             "flex w-full items-center justify-between gap-3",
-            generatorMode === "pubmat" ? "max-w-[780px]" : "max-w-[680px]",
+            generatorMode === "cards" ? "max-w-[680px]" : "max-w-[780px]",
           )}
         >
           <span className="font-condensed text-xs font-bold uppercase tracking-[0.28em] text-muted-foreground">
@@ -1578,7 +1925,11 @@ export default function ToolPage() {
           </span>
           {/* Mobile-only: quick mode indicator */}
           <span className="rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 font-condensed text-[10px] font-black uppercase tracking-[0.18em] text-primary lg:hidden">
-            {generatorMode === "pubmat" ? "Pub Mat" : cardType === "swiss" ? "Swiss" : "Top Cut"}
+            {generatorMode === "pubmat"
+              ? "Pub Mat"
+              : generatorMode === "winners"
+                ? "Winners"
+                : cardType === "swiss" ? "Swiss" : "Top Cut"}
           </span>
         </div>
         <div
@@ -1603,12 +1954,18 @@ export default function ToolPage() {
                   ref={cardRef}
                   className={cn(
                     "shadow-2xl",
-                    generatorMode === "pubmat" ? "pubmat-stage" : "report-card",
+                    generatorMode === "pubmat"
+                      ? "pubmat-stage"
+                      : generatorMode === "winners"
+                        ? "winner-stage"
+                        : "report-card",
                   )}
                   style={{
                     background:
                       generatorMode === "pubmat"
                         ? pubMatThemes[pubTheme].paper
+                        : generatorMode === "winners"
+                          ? winnerTemplates[winnerTemplate].bg
                         : palette.bg,
                   }}
                 >
@@ -1616,6 +1973,12 @@ export default function ToolPage() {
                     <PubMatPoster
                       pubMat={pubMat}
                       theme={pubMatThemes[pubTheme]}
+                    />
+                  ) : generatorMode === "winners" ? (
+                    <WinnersPoster
+                      winners={winners}
+                      templateKey={winnerTemplate}
+                      template={winnerTemplates[winnerTemplate]}
                     />
                   ) : (
                     <CardRenderer
@@ -1650,6 +2013,10 @@ export default function ToolPage() {
         setPubMat={setPubMat}
         pubTheme={pubTheme}
         setPubTheme={setPubTheme}
+        winners={winners}
+        setWinners={setWinners}
+        winnerTemplate={winnerTemplate}
+        setWinnerTemplate={setWinnerTemplate}
         scrapeUrl={scrapeUrl}
         setScrapeUrl={setScrapeUrl}
         scrapePlayer={scrapePlayer}
@@ -2085,6 +2452,10 @@ function MobileToolbox({
   setPubMat,
   pubTheme,
   setPubTheme,
+  winners,
+  setWinners,
+  winnerTemplate,
+  setWinnerTemplate,
   scrapeUrl,
   setScrapeUrl,
   scrapePlayer,
@@ -2117,6 +2488,10 @@ function MobileToolbox({
   setPubMat: React.Dispatch<React.SetStateAction<PubMatState>>;
   pubTheme: PubMatThemeKey;
   setPubTheme: (t: PubMatThemeKey) => void;
+  winners: WinnerState;
+  setWinners: React.Dispatch<React.SetStateAction<WinnerState>>;
+  winnerTemplate: WinnerTemplateKey;
+  setWinnerTemplate: (t: WinnerTemplateKey) => void;
   scrapeUrl: string;
   setScrapeUrl: (u: string) => void;
   scrapePlayer: string;
@@ -2138,6 +2513,7 @@ function MobileToolbox({
   }
 
   const isCards = generatorMode === "cards";
+  const isWinners = generatorMode === "winners";
 
   const tabs = isCards
     ? [
@@ -2145,7 +2521,13 @@ function MobileToolbox({
         { id: "event" as MobileTab, icon: Users, label: "Event" },
         { id: "rounds" as MobileTab, icon: Trophy, label: "Rounds" },
       ]
-    : [
+    : isWinners
+      ? [
+          { id: "style" as MobileTab, icon: Paintbrush, label: "Template" },
+          { id: "event" as MobileTab, icon: SlidersHorizontal, label: "Details" },
+          { id: "rounds" as MobileTab, icon: Trophy, label: "Winners" },
+        ]
+      : [
         { id: "style" as MobileTab, icon: Paintbrush, label: "Theme" },
         { id: "event" as MobileTab, icon: SlidersHorizontal, label: "Details" },
         { id: "rounds" as MobileTab, icon: ImagePlus, label: "Media" },
@@ -2178,11 +2560,12 @@ function MobileToolbox({
 
           {/* Module toggle always at top of every panel */}
           <div className="border-b border-white/10 px-5 py-3">
-            <div className="grid grid-cols-2 rounded-md border bg-secondary p-1">
+            <div className="grid grid-cols-3 rounded-md border bg-secondary p-1">
               {(
                 [
                   ["cards", "Cards"],
                   ["pubmat", "Pub Mat"],
+                  ["winners", "Winners"],
                 ] as [GeneratorMode, string][]
               ).map(([key, label]) => (
                 <Button
@@ -2204,7 +2587,19 @@ function MobileToolbox({
             </div>
           )}
 
-          {activeTab === "style" && !isCards && (
+          {activeTab === "style" && isWinners && (
+            <div className="px-5 py-4">
+              <WinnerTemplatePicker
+                template={winnerTemplate}
+                setTemplate={setWinnerTemplate}
+              />
+              <div className="mt-4">
+                <WinnerTypographyFields winners={winners} setWinners={setWinners} />
+              </div>
+            </div>
+          )}
+
+          {activeTab === "style" && !isCards && !isWinners && (
             <div className="px-5 py-4">
               <div className="grid grid-cols-3 gap-2">
                 {(Object.keys(pubMatThemes) as PubMatThemeKey[]).map((key) => {
@@ -2367,7 +2762,13 @@ function MobileToolbox({
           )}
 
           {/* ── Details (PubMat) ── */}
-          {activeTab === "event" && !isCards && (
+          {activeTab === "event" && isWinners && (
+            <div className="space-y-3 px-5 py-4">
+              <WinnerDetailsFields winners={winners} setWinners={setWinners} />
+            </div>
+          )}
+
+          {activeTab === "event" && !isCards && !isWinners && (
             <div className="space-y-3 px-5 py-4">
               <Field label="Shop / Host">
                 <Input value={pubMat.shopName} onChange={(e) => setPubMat((p) => ({ ...p, shopName: e.target.value }))} />
@@ -2585,7 +2986,13 @@ function MobileToolbox({
           )}
 
           {/* ── Media (PubMat) ── */}
-          {activeTab === "rounds" && !isCards && (
+          {activeTab === "rounds" && isWinners && (
+            <div className="space-y-4 px-5 py-4">
+              <WinnerMediaFields winners={winners} setWinners={setWinners} />
+            </div>
+          )}
+
+          {activeTab === "rounds" && !isCards && !isWinners && (
             <div className="pb-4">
               <div className="grid grid-cols-2 gap-3 px-5 pt-4">
                 {(
@@ -2787,16 +3194,395 @@ function FloatingFeedbackTool({
   );
 }
 
+function WinnersEditor({
+  winners,
+  setWinners,
+  template,
+  setTemplate,
+  hideTemplate = false,
+}: {
+  winners: WinnerState;
+  setWinners: React.Dispatch<React.SetStateAction<WinnerState>>;
+  template: WinnerTemplateKey;
+  setTemplate: (template: WinnerTemplateKey) => void;
+  hideTemplate?: boolean;
+}) {
+  return (
+    <>
+      {!hideTemplate && (
+        <Section title="Winner Template">
+          <WinnerTemplatePicker template={template} setTemplate={setTemplate} />
+        </Section>
+      )}
+      <Section title="Post Details">
+        <WinnerDetailsFields
+          winners={winners}
+          setWinners={setWinners}
+          hideFormat={hideTemplate}
+        />
+      </Section>
+      <Section title="Brand & Colors">
+        <WinnerTypographyFields winners={winners} setWinners={setWinners} />
+        <div className="grid grid-cols-2 gap-3">
+          <ImagePicker
+            label="Left Logo"
+            value={winners.logoLeft}
+            onChange={(value) => setWinners((w) => ({ ...w, logoLeft: value }))}
+          />
+          <ImagePicker
+            label="Right Logo"
+            value={winners.logoRight}
+            onChange={(value) => setWinners((w) => ({ ...w, logoRight: value }))}
+          />
+        </div>
+        <div className="mt-3">
+          <ImagePicker
+            label="Custom Background"
+            value={winners.background}
+            onChange={(value) => setWinners((w) => ({ ...w, background: value }))}
+          />
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <ColorField label="Accent" value={winners.accent} onChange={(accent) => setWinners((w) => ({ ...w, accent }))} />
+          <ColorField label="Accent 2" value={winners.accent2} onChange={(accent2) => setWinners((w) => ({ ...w, accent2 }))} />
+          <ColorField label="Text" value={winners.text} onChange={(text) => setWinners((w) => ({ ...w, text }))} />
+          <ColorField label="Muted" value={winners.muted} onChange={(muted) => setWinners((w) => ({ ...w, muted }))} />
+        </div>
+      </Section>
+      <Section title="Winners">
+        <WinnerMediaFields winners={winners} setWinners={setWinners} />
+      </Section>
+    </>
+  );
+}
+
+function WinnerTemplatePicker({
+  template,
+  setTemplate,
+}: {
+  template: WinnerTemplateKey;
+  setTemplate: (template: WinnerTemplateKey) => void;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {(Object.keys(winnerTemplates) as WinnerTemplateKey[]).map((key) => {
+        const item = winnerTemplates[key];
+        return (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setTemplate(key)}
+            className={cn(
+              "rounded-md border p-3 text-left transition",
+              template === key ? "border-primary bg-primary/10" : "bg-secondary",
+            )}
+          >
+            <div
+              className="mb-2 h-12 rounded"
+              style={{
+                background: `linear-gradient(135deg, ${item.bg}, ${item.accent}55, ${item.accent2}66)`,
+              }}
+            />
+            <div className="font-condensed text-sm font-bold uppercase tracking-[0.12em]">
+              {item.label}
+            </div>
+            <div className="mt-1 text-[11px] text-muted-foreground">
+              {item.mood}
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function WinnerFormatControls({
+  winners,
+  setWinners,
+}: {
+  winners: WinnerState;
+  setWinners: React.Dispatch<React.SetStateAction<WinnerState>>;
+}) {
+  const setField = (patch: Partial<WinnerState>) =>
+    setWinners((current) => ({ ...current, ...patch }));
+
+  return (
+    <>
+      <Field label="Poster Format">
+        <div className="grid grid-cols-2 rounded-md border bg-secondary p-1">
+          {(
+            [
+              ["group", "All Winners"],
+              ["individual", "Individual"],
+            ] as const
+          ).map(([key, label]) => (
+            <Button
+              key={key}
+              type="button"
+              variant={winners.posterFormat === key ? "default" : "ghost"}
+              onClick={() => setField({ posterFormat: key })}
+              className="px-2 font-condensed uppercase tracking-[0.12em]"
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
+      </Field>
+      {winners.posterFormat === "individual" && (
+        <Field label="Current Place">
+          <div className="grid grid-cols-2 gap-2">
+            {winners.players.map((player, index) => (
+              <Button
+                key={`${player.name}-${index}`}
+                type="button"
+                variant={winners.selectedPlayerIndex === index ? "default" : "outline"}
+                onClick={() => setField({ selectedPlayerIndex: index })}
+                className="min-w-0 px-2 font-condensed uppercase tracking-[0.08em]"
+              >
+                <span className="truncate">{player.placement || `Place ${index + 1}`}</span>
+              </Button>
+            ))}
+          </div>
+        </Field>
+      )}
+    </>
+  );
+}
+
+function WinnerDetailsFields({
+  winners,
+  setWinners,
+  hideFormat = false,
+}: {
+  winners: WinnerState;
+  setWinners: React.Dispatch<React.SetStateAction<WinnerState>>;
+  hideFormat?: boolean;
+}) {
+  const setField = (patch: Partial<WinnerState>) =>
+    setWinners((current) => ({ ...current, ...patch }));
+  return (
+    <>
+      {!hideFormat && <WinnerFormatControls winners={winners} setWinners={setWinners} />}
+      <Field label="Headline">
+        <Input value={winners.headline} onChange={(e) => setField({ headline: e.target.value })} />
+      </Field>
+      <Field label="Subheadline">
+        <Input value={winners.subheadline} onChange={(e) => setField({ subheadline: e.target.value })} />
+      </Field>
+      <Field label="Event Name">
+        <Input value={winners.eventName} onChange={(e) => setField({ eventName: e.target.value })} />
+      </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Game">
+          <Input value={winners.game} onChange={(e) => setField({ game: e.target.value })} />
+        </Field>
+        <Field label="Date">
+          <Input value={winners.date} onChange={(e) => setField({ date: e.target.value })} />
+        </Field>
+      </div>
+      <Field label="Organizer">
+        <Input value={winners.organizer} onChange={(e) => setField({ organizer: e.target.value })} />
+      </Field>
+      <Field label="Venue">
+        <Input value={winners.venue} onChange={(e) => setField({ venue: e.target.value })} />
+      </Field>
+      <Field label="Footer">
+        <Input value={winners.footer} onChange={(e) => setField({ footer: e.target.value })} />
+      </Field>
+    </>
+  );
+}
+
+function WinnerMediaFields({
+  winners,
+  setWinners,
+}: {
+  winners: WinnerState;
+  setWinners: React.Dispatch<React.SetStateAction<WinnerState>>;
+}) {
+  const updatePlayer = (index: number, patch: Partial<WinnerPlayer>) =>
+    setWinners((current) => ({
+      ...current,
+      players: current.players.map((player, i) =>
+        i === index ? { ...player, ...patch } : player,
+      ),
+    }));
+
+  return (
+    <>
+      <Field label="Photo Scale">
+        <Slider
+          min={70}
+          max={135}
+          step={1}
+          value={[winners.playerScale]}
+          onValueChange={([playerScale]) =>
+            setWinners((current) => ({ ...current, playerScale }))
+          }
+        />
+      </Field>
+      <div className="space-y-3">
+        {winners.players.map((player, index) => (
+          <div key={index} className="rounded-md border bg-secondary p-3">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <div className="font-condensed text-sm font-black uppercase tracking-[0.18em] text-primary">
+                Winner {index + 1}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label={`Remove winner ${index + 1}`}
+                disabled={winners.players.length <= 1}
+                onClick={() =>
+                  setWinners((current) => ({
+                    ...current,
+                    players: current.players.filter((_, i) => i !== index),
+                  }))
+                }
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="Placement">
+                <Input value={player.placement} onChange={(e) => updatePlayer(index, { placement: e.target.value })} />
+              </Field>
+              <Field label="Name">
+                <Input value={player.name} onChange={(e) => updatePlayer(index, { name: e.target.value })} />
+              </Field>
+            </div>
+            <Field label="Subtitle">
+              <Input value={player.subtitle} onChange={(e) => updatePlayer(index, { subtitle: e.target.value })} />
+            </Field>
+            <ImagePicker
+              label="Player Photo"
+              value={player.image}
+              onChange={(image) => updatePlayer(index, { image })}
+            />
+          </div>
+        ))}
+      </div>
+      <Button
+        type="button"
+        variant="outline"
+        className="mt-3 w-full"
+        onClick={() =>
+          setWinners((current) => ({
+            ...current,
+            players: [
+              ...current.players,
+              { placement: `${current.players.length + 1}th Place`, name: "Player", subtitle: "Finalist", image: "" },
+            ],
+          }))
+        }
+      >
+        <Plus className="h-4 w-4" /> Add Winner
+      </Button>
+    </>
+  );
+}
+
+function WinnerTypographyFields({
+  winners,
+  setWinners,
+}: {
+  winners: WinnerState;
+  setWinners: React.Dispatch<React.SetStateAction<WinnerState>>;
+}) {
+  return (
+    <div className="mb-3 space-y-3 rounded-md border bg-secondary p-3">
+      <Field label="Font Pair">
+        <div className="grid grid-cols-2 gap-2">
+          {(Object.keys(winnerFontPresets) as WinnerFontKey[]).map((key) => (
+            <Button
+              key={key}
+              type="button"
+              variant={winners.fontPreset === key ? "default" : "outline"}
+              onClick={() => setWinners((w) => ({ ...w, fontPreset: key }))}
+              className="min-w-0 px-2 font-condensed uppercase tracking-[0.08em]"
+            >
+              <span className="truncate">{winnerFontPresets[key].label}</span>
+            </Button>
+          ))}
+        </div>
+      </Field>
+      <div className="grid grid-cols-[1fr_40px] gap-2">
+        <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md border bg-background px-3 font-condensed text-xs font-bold uppercase tracking-[0.12em] transition hover:bg-secondary">
+          <Grip className="h-4 w-4" />
+          {winners.customFontData ? winners.customFontName || "Custom Font Loaded" : "Upload Font"}
+          <input
+            type="file"
+            accept=".ttf,.otf,.woff,.woff2,font/*"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = () =>
+                setWinners((w) => ({
+                  ...w,
+                  customFontName: file.name.replace(/\.[^.]+$/, "") || "Custom Winner Font",
+                  customFontData: String(reader.result || ""),
+                }));
+              reader.readAsDataURL(file);
+              event.currentTarget.value = "";
+            }}
+          />
+        </label>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          aria-label="Clear custom font"
+          disabled={!winners.customFontData}
+          onClick={() =>
+            setWinners((w) => ({ ...w, customFontName: "", customFontData: "" }))
+          }
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function ColorField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <Field label={label}>
+      <div className="flex gap-2">
+        <Input
+          type="color"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-10 w-12 p-1"
+        />
+        <Input value={value} onChange={(e) => onChange(e.target.value)} className="font-mono text-xs" />
+      </div>
+    </Field>
+  );
+}
+
 function PubMatEditor({
   pubMat,
   setPubMat,
   theme,
   setTheme,
+  hideTheme = false,
 }: {
   pubMat: PubMatState;
   setPubMat: React.Dispatch<React.SetStateAction<PubMatState>>;
   theme: PubMatThemeKey;
   setTheme: (theme: PubMatThemeKey) => void;
+  hideTheme?: boolean;
 }) {
   const setField = (patch: Partial<PubMatState>) =>
     setPubMat((current) => ({ ...current, ...patch }));
@@ -2812,36 +3598,11 @@ function PubMatEditor({
 
   return (
     <>
-      <Section title="Poster Theme">
-        <div className="grid grid-cols-3 gap-2">
-          {(Object.keys(pubMatThemes) as PubMatThemeKey[]).map((key) => {
-            const item = pubMatThemes[key];
-            return (
-              <button
-                key={key}
-                onClick={() => setTheme(key)}
-                className={cn(
-                  "rounded-md border p-3 text-left transition",
-                  theme === key ? "border-primary bg-primary/10" : "bg-secondary",
-                )}
-              >
-                <div className="mb-2 flex gap-1">
-                  {[item.accent, item.accent2, item.ink].map((color) => (
-                    <span
-                      key={color}
-                      className="h-4 w-4 rounded-full border border-white/20"
-                      style={{ background: color }}
-                    />
-                  ))}
-                </div>
-                <div className="font-condensed text-sm font-bold uppercase tracking-[0.14em]">
-                  {item.label}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </Section>
+      {!hideTheme && (
+        <Section title="Poster Theme">
+          <PubMatThemePicker theme={theme} setTheme={setTheme} />
+        </Section>
+      )}
 
       <Section title="Event Details">
         <Field label="Shop / Host">
@@ -2969,6 +3730,45 @@ function PubMatEditor({
         placeholder="Event note"
       />
     </>
+  );
+}
+
+function PubMatThemePicker({
+  theme,
+  setTheme,
+}: {
+  theme: PubMatThemeKey;
+  setTheme: (theme: PubMatThemeKey) => void;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-2 xl:grid-cols-3">
+      {(Object.keys(pubMatThemes) as PubMatThemeKey[]).map((key) => {
+        const item = pubMatThemes[key];
+        return (
+          <button
+            key={key}
+            onClick={() => setTheme(key)}
+            className={cn(
+              "rounded-md border p-3 text-left transition",
+              theme === key ? "border-primary bg-primary/10" : "bg-secondary",
+            )}
+          >
+            <div className="mb-2 flex gap-1">
+              {[item.accent, item.accent2, item.ink].map((color) => (
+                <span
+                  key={color}
+                  className="h-4 w-4 rounded-full border border-white/20"
+                  style={{ background: color }}
+                />
+              ))}
+            </div>
+            <div className="font-condensed text-sm font-bold uppercase tracking-[0.14em]">
+              {item.label}
+            </div>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -3151,6 +3951,529 @@ function EditableList({
   );
 }
 
+function WinnersPoster({
+  winners,
+  templateKey,
+  template,
+}: {
+  winners: WinnerState;
+  templateKey: WinnerTemplateKey;
+  template: WinnerTemplate;
+}) {
+  const accent = winners.accent || template.accent;
+  const accent2 = winners.accent2 || template.accent2;
+  const text = winners.text || template.text;
+  const muted = winners.muted || "#a9b0ba";
+  const players = winners.players.filter((player) => player.name || player.image);
+  const featured = players[0] || initialWinners.players[0];
+  const selected =
+    players[Math.min(Math.max(winners.selectedPlayerIndex, 0), Math.max(players.length - 1, 0))] ||
+    featured;
+  const runnerUps = players.slice(1, 4);
+  const bgImage = winners.background ? `url(${winners.background})` : undefined;
+  const isLight = templateKey === "anime" || templateKey === "clean";
+  const fonts = getWinnerFonts(winners);
+  const rootStyle = {
+    background: template.bg,
+    color: text,
+    fontFamily: fonts.body,
+    ["--winner-display" as string]: fonts.display,
+    ["--winner-body" as string]: fonts.body,
+  } as React.CSSProperties;
+
+  if (winners.posterFormat === "individual") {
+    return (
+      <div className="winner-font-scope relative h-[780px] w-[780px] overflow-hidden" style={rootStyle}>
+        <WinnerCustomFontStyle winners={winners} />
+        <IndividualWinnerPoster
+          winners={winners}
+          player={selected}
+          templateKey={templateKey}
+          template={template}
+          accent={accent}
+          accent2={accent2}
+          text={text}
+          muted={muted}
+          bgImage={bgImage}
+        />
+      </div>
+    );
+  }
+
+  if (templateKey === "podium") {
+    return (
+      <div className="winner-font-scope relative h-[780px] w-[780px] overflow-hidden" style={rootStyle}>
+        <WinnerCustomFontStyle winners={winners} />
+        <WinnerBackdrop templateKey={templateKey} template={template} image={bgImage} />
+        <WinnerHeader winners={winners} accent={accent} accent2={accent2} muted={muted} />
+        <div className="absolute inset-x-10 bottom-24 grid h-[475px] grid-cols-3 items-end gap-4">
+          {players.slice(0, 3).map((player, index) => (
+            <div
+              key={`${player.name}-${index}`}
+              className={cn("relative overflow-hidden rounded-md border bg-black/35", index === 0 ? "h-[465px]" : "h-[390px]")}
+              style={{ borderColor: index === 0 ? accent : `${accent2}aa` }}
+            >
+              <WinnerPhoto player={player} scale={winners.playerScale} />
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/78 to-transparent p-4 pt-20 text-center">
+                <WinnerPlacementLabel
+                  text={player.placement}
+                  accent={index === 0 ? accent : accent2}
+                  templateBg={template.bg}
+                  size={index === 0 ? "card" : "compact"}
+                />
+                <div className="winner-line-lock mt-1 font-condensed text-2xl font-black uppercase tracking-[0.04em]">
+                  {player.name}
+                </div>
+                <div className="winner-line-lock font-condensed text-sm font-black uppercase tracking-[0.12em]" style={{ color: muted }}>
+                  {player.subtitle}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <WinnerFooter winners={winners} accent={accent} muted={muted} />
+      </div>
+    );
+  }
+
+  if (templateKey === "anime" || templateKey === "posterwall" || templateKey === "blueprint") {
+    return (
+      <div className="winner-font-scope relative h-[780px] w-[780px] overflow-hidden" style={rootStyle}>
+        <WinnerCustomFontStyle winners={winners} />
+        <WinnerBackdrop templateKey={templateKey} template={template} image={bgImage} />
+        <div className="absolute left-8 right-8 top-7 flex items-center justify-between gap-4">
+          <WinnerLogo src={winners.logoLeft} fallback={winners.organizer} />
+          <div className="text-center">
+            <div className="winner-line-lock font-condensed text-sm font-black uppercase tracking-[0.18em]" style={{ color: muted }}>
+              {winners.game}
+            </div>
+            <div className="winner-line-lock font-display text-5xl leading-none" style={{ color: accent }}>
+              {winners.eventName}
+            </div>
+          </div>
+          <WinnerLogo src={winners.logoRight} fallback={winners.venue} />
+        </div>
+        <div className="absolute inset-x-8 top-28 grid grid-cols-[1.1fr_.9fr] gap-5">
+          <div className="relative h-[500px] overflow-hidden rounded-md border-[6px]" style={{ borderColor: accent }}>
+            <WinnerPhoto player={featured} scale={winners.playerScale} />
+            <div className="absolute left-4 top-5 -rotate-2">
+              <WinnerPlacementLabel
+                text={featured.placement}
+                accent={accent}
+                templateBg={template.bg}
+                size="card"
+                lightText={isLight}
+              />
+            </div>
+          </div>
+          <div className="flex flex-col gap-3 pt-8">
+            {runnerUps.map((player, index) => (
+              <div key={`${player.name}-${index}`} className="grid grid-cols-[96px_1fr] overflow-hidden rounded-md border bg-black/40" style={{ borderColor: `${accent2}bb` }}>
+                <div className="relative h-28">
+                  <WinnerPhoto player={player} scale={winners.playerScale} />
+                </div>
+                <div className="min-w-0 p-3">
+                  <WinnerPlacementLabel
+                    text={player.placement}
+                    accent={accent2}
+                    templateBg={template.bg}
+                    size="mini"
+                  />
+                  <div className="winner-line-lock font-condensed text-xl font-black uppercase">
+                    {player.name}
+                  </div>
+                  <div className="winner-line-lock text-xs" style={{ color: muted }}>
+                    {player.subtitle}
+                  </div>
+                </div>
+              </div>
+            ))}
+            <div className="mt-auto rounded-md p-4" style={{ background: isLight ? "#ffffffcc" : "#00000088" }}>
+              <div className="winner-lock font-display text-5xl leading-none" style={{ color: accent }}>
+                {winners.headline}
+              </div>
+              <div className="winner-line-lock mt-2 font-condensed text-xl font-black uppercase tracking-[0.08em]">
+                {winners.subheadline}
+              </div>
+            </div>
+          </div>
+        </div>
+        <WinnerFooter winners={winners} accent={accent} muted={muted} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="winner-font-scope relative h-[780px] w-[780px] overflow-hidden" style={rootStyle}>
+      <WinnerCustomFontStyle winners={winners} />
+      <WinnerBackdrop templateKey={templateKey} template={template} image={bgImage} />
+      <div className="absolute inset-x-9 top-8 z-10 flex items-start justify-between gap-4">
+        <WinnerLogo src={winners.logoLeft} fallback={winners.organizer} />
+        <div className="min-w-0 flex-1 text-center">
+          <div className="winner-line-lock font-condensed text-sm font-black uppercase tracking-[0.24em]" style={{ color: muted }}>
+            {winners.organizer}
+          </div>
+          <div className="winner-line-lock mt-1 font-display text-5xl leading-none" style={{ color: accent }}>
+            {winners.eventName}
+          </div>
+        </div>
+        <WinnerLogo src={winners.logoRight} fallback={winners.game} />
+      </div>
+      <div className="absolute inset-x-0 top-[118px] h-[465px]">
+        <div className="absolute inset-x-10 top-0 h-full">
+          <WinnerPhoto player={featured} scale={winners.playerScale} />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/18 to-transparent" />
+        <div className="absolute right-9 top-8 w-[285px] text-right">
+          <div className="winner-lock font-display text-[82px] leading-[0.82]" style={{ color: accent, textShadow: "0 4px 0 #000" }}>
+            {winners.headline}
+          </div>
+          <div className="winner-line-lock mt-3 font-condensed text-xl font-black uppercase tracking-[0.12em]" style={{ color: muted }}>
+            {winners.subheadline}
+          </div>
+        </div>
+      </div>
+      <div className="absolute inset-x-10 bottom-[92px] z-10">
+        <WinnerPlacementLabel
+          text={featured.placement}
+          accent={accent2}
+          templateBg={template.bg}
+          size="hero"
+        />
+        <div className="winner-line-lock -mt-1 inline-flex max-w-full px-7 py-1 font-display text-5xl leading-none" style={{ background: text, color: template.bg }}>
+          {featured.name}
+        </div>
+      </div>
+      {runnerUps.length > 0 && (
+        <div className="absolute bottom-[92px] right-8 z-20 flex w-[260px] flex-col gap-2">
+          {runnerUps.map((player, index) => (
+            <div key={`${player.name}-${index}`} className="grid grid-cols-[62px_1fr] overflow-hidden rounded-md bg-black/70">
+              <div className="relative h-16">
+                <WinnerPhoto player={player} scale={winners.playerScale} />
+              </div>
+              <div className="min-w-0 px-2 py-1">
+                <WinnerPlacementLabel
+                  text={player.placement}
+                  accent={accent}
+                  templateBg={template.bg}
+                  size="mini"
+                />
+                <div className="winner-line-lock font-condensed text-base font-black uppercase">
+                  {player.name}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      <WinnerFooter winners={winners} accent={accent} muted={muted} />
+    </div>
+  );
+}
+
+function WinnerBackdrop({
+  templateKey,
+  template,
+  image,
+}: {
+  templateKey: WinnerTemplateKey;
+  template: WinnerTemplate;
+  image?: string;
+}) {
+  return (
+    <>
+      {image && <div className="absolute inset-0 bg-cover bg-center opacity-45" style={{ backgroundImage: image }} />}
+      <div className={cn("absolute inset-0", `winner-bg-${templateKey}`)} style={{ ["--winner-a" as string]: template.accent, ["--winner-b" as string]: template.accent2 }} />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,transparent,rgba(0,0,0,.72)_72%)]" />
+    </>
+  );
+}
+
+function IndividualWinnerPoster({
+  winners,
+  player,
+  templateKey,
+  template,
+  accent,
+  accent2,
+  text,
+  muted,
+  bgImage,
+}: {
+  winners: WinnerState;
+  player: WinnerPlayer;
+  templateKey: WinnerTemplateKey;
+  template: WinnerTemplate;
+  accent: string;
+  accent2: string;
+  text: string;
+  muted: string;
+  bgImage?: string;
+}) {
+  const lightPanel = templateKey === "anime" || templateKey === "clean";
+  const placeText = player.placement || "Winner";
+  const nameText = player.name || "Player";
+
+  if (templateKey === "royal" || templateKey === "goldrush" || templateKey === "clean") {
+    return (
+      <>
+        <WinnerBackdrop templateKey={templateKey} template={template} image={bgImage} />
+        <div className="absolute inset-x-8 top-8 z-10 flex items-center justify-between gap-4">
+          <WinnerLogo src={winners.logoLeft} fallback={winners.organizer} />
+          <div className="min-w-0 text-center">
+            <div className="winner-line-lock font-condensed text-sm font-black uppercase tracking-[0.22em]" style={{ color: muted }}>
+              {winners.subheadline}
+            </div>
+            <div className="winner-line-lock font-display text-5xl leading-none" style={{ color: accent }}>
+              {winners.eventName}
+            </div>
+          </div>
+          <WinnerLogo src={winners.logoRight} fallback={winners.game} />
+        </div>
+        <div className="absolute inset-x-16 top-[150px] h-[360px] overflow-hidden rounded-t-full border-[10px] bg-black/40" style={{ borderColor: accent }}>
+          <WinnerPhoto player={player} scale={winners.playerScale} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
+        </div>
+        <div className="absolute inset-x-10 bottom-[116px] rounded-md border p-6 text-center shadow-2xl" style={{ borderColor: `${accent}99`, background: lightPanel ? "rgba(255,255,255,.92)" : "rgba(0,0,0,.72)", color: text }}>
+          <WinnerPlacementLabel
+            text={placeText}
+            accent={accent}
+            templateBg={template.bg}
+            size="hero"
+          />
+          <div className="winner-line-lock mt-1 font-display text-[64px] leading-none" style={{ color: accent2 }}>
+            {nameText}
+          </div>
+          <div className="winner-line-lock mt-2 font-condensed text-xl font-black uppercase tracking-[0.12em]" style={{ color: muted }}>
+            {player.subtitle}
+          </div>
+        </div>
+        <WinnerFooter winners={winners} accent={accent} muted={muted} />
+      </>
+    );
+  }
+
+  if (templateKey === "anime" || templateKey === "posterwall" || templateKey === "prism") {
+    return (
+      <>
+        <WinnerBackdrop templateKey={templateKey} template={template} image={bgImage} />
+        <div className="absolute inset-x-8 top-7 z-10 flex items-center justify-between gap-4">
+          <WinnerLogo src={winners.logoLeft} fallback={winners.organizer} />
+          <div className="winner-line-lock min-w-0 flex-1 text-center font-condensed text-base font-black uppercase tracking-[0.2em]" style={{ color: muted }}>
+            {winners.organizer} / {winners.game}
+          </div>
+          <WinnerLogo src={winners.logoRight} fallback={winners.venue} />
+        </div>
+        <div className="absolute left-8 top-24 z-10 max-w-[420px] -rotate-2">
+          <WinnerPlacementLabel
+            text={placeText}
+            accent={accent}
+            templateBg={template.bg}
+            size="hero"
+            lightText={lightPanel}
+          />
+          <div className="winner-line-lock mt-2 inline-flex max-w-full px-7 py-2 font-display text-[60px] leading-none" style={{ background: accent2, color: lightPanel ? "#fff" : template.bg }}>
+            {nameText}
+          </div>
+        </div>
+        <div className="absolute inset-x-20 bottom-[92px] top-[220px] overflow-hidden rounded-md border-[8px]" style={{ borderColor: accent }}>
+          <WinnerPhoto player={player} scale={winners.playerScale} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+        </div>
+        <div className="absolute bottom-[118px] left-8 right-8 z-20 rounded-md bg-black/75 p-4 text-center">
+          <div className="winner-line-lock font-condensed text-2xl font-black uppercase tracking-[0.14em]" style={{ color: accent }}>
+            {winners.headline}
+          </div>
+          <div className="winner-line-lock mt-1 text-lg" style={{ color: muted }}>{player.subtitle || winners.subheadline}</div>
+        </div>
+        <WinnerFooter winners={winners} accent={accent} muted={muted} />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <WinnerBackdrop templateKey={templateKey} template={template} image={bgImage} />
+      <div className="absolute inset-x-8 top-8 z-10 flex items-center justify-between gap-4">
+        <WinnerLogo src={winners.logoLeft} fallback={winners.organizer} />
+        <div className="min-w-0 flex-1 text-center">
+          <div className="winner-line-lock font-condensed text-sm font-black uppercase tracking-[0.22em]" style={{ color: muted }}>
+            {winners.game}
+          </div>
+          <div className="winner-line-lock font-display text-5xl leading-none" style={{ color: accent }}>
+            {winners.eventName}
+          </div>
+        </div>
+        <WinnerLogo src={winners.logoRight} fallback={winners.venue} />
+      </div>
+      <div className="absolute inset-x-0 top-[120px] h-[480px]">
+        <div className="absolute inset-x-14 top-0 h-full overflow-hidden">
+          <WinnerPhoto player={player} scale={winners.playerScale} />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/12 to-transparent" />
+      </div>
+      <div className="absolute left-10 top-[160px] z-20 w-[300px]">
+        <div className="winner-lock font-display text-[78px] leading-[0.84]" style={{ color: accent, textShadow: visibleTextShadow(templateKey) }}>
+          {winners.headline}
+        </div>
+      </div>
+      <div className="absolute inset-x-10 bottom-[96px] z-30">
+        <WinnerPlacementLabel
+          text={placeText}
+          accent={accent2}
+          templateBg={template.bg}
+          size="mega"
+        />
+        <div className="winner-line-lock inline-flex max-w-full px-8 py-2 font-display text-[62px] leading-none" style={{ background: text, color: template.bg }}>
+          {nameText}
+        </div>
+        <div className="winner-line-lock mt-3 font-condensed text-2xl font-black uppercase tracking-[0.12em]" style={{ color: muted }}>
+          {player.subtitle || winners.subheadline}
+        </div>
+      </div>
+      <WinnerFooter winners={winners} accent={accent} muted={muted} />
+    </>
+  );
+}
+
+function WinnerHeader({
+  winners,
+  accent,
+  accent2,
+  muted,
+}: {
+  winners: WinnerState;
+  accent: string;
+  accent2: string;
+  muted: string;
+}) {
+  return (
+    <div className="absolute inset-x-8 top-8 z-10 flex items-center justify-between gap-4">
+      <WinnerLogo src={winners.logoLeft} fallback={winners.organizer} />
+      <div className="min-w-0 flex-1 text-center">
+        <div className="winner-line-lock font-condensed text-sm font-black uppercase tracking-[0.2em]" style={{ color: muted }}>
+          {winners.subheadline}
+        </div>
+        <div className="winner-lock font-display text-[58px] leading-none" style={{ color: accent }}>
+          {winners.headline}
+        </div>
+        <div className="winner-line-lock font-condensed text-lg font-black uppercase tracking-[0.14em]" style={{ color: accent2 }}>
+          {winners.eventName}
+        </div>
+      </div>
+      <WinnerLogo src={winners.logoRight} fallback={winners.game} />
+    </div>
+  );
+}
+
+function WinnerFooter({
+  winners,
+  accent,
+  muted,
+}: {
+  winners: WinnerState;
+  accent: string;
+  muted: string;
+}) {
+  return (
+    <div className="absolute inset-x-8 bottom-7 z-30 grid grid-cols-[1fr_auto_1fr] items-end gap-4 border-t pt-3 font-condensed text-sm font-black uppercase tracking-[0.12em]" style={{ borderColor: `${accent}77`, color: muted }}>
+      <div className="winner-line-lock">{winners.date}</div>
+      <div className="winner-line-lock text-center" style={{ color: accent }}>{winners.footer}</div>
+      <div className="winner-line-lock text-right">{winners.venue}</div>
+    </div>
+  );
+}
+
+function WinnerLogo({ src, fallback }: { src: string; fallback: string }) {
+  return (
+    <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-black/35 text-center font-condensed text-[10px] font-black uppercase leading-tight text-white/70">
+      {src ? <img src={src} alt="" className="h-full w-full object-cover" draggable={false} /> : fallback.slice(0, 12)}
+    </div>
+  );
+}
+
+function WinnerPhoto({ player, scale }: { player: WinnerPlayer; scale: number }) {
+  return player.image ? (
+    <img
+      src={player.image}
+      alt=""
+      className="h-full w-full object-cover object-top"
+      style={{ transform: `scale(${scale / 100})` }}
+      draggable={false}
+    />
+  ) : (
+    <div className="flex h-full w-full items-center justify-center bg-white/10 text-center font-condensed text-sm font-black uppercase tracking-[0.14em] text-white/45">
+      Upload Photo
+    </div>
+  );
+}
+
+function WinnerPlacementLabel({
+  text,
+  accent,
+  templateBg,
+  size = "card",
+  lightText = false,
+  fullWidth = false,
+}: {
+  text: string;
+  accent: string;
+  templateBg: string;
+  size?: "mini" | "compact" | "card" | "hero" | "mega";
+  lightText?: boolean;
+  fullWidth?: boolean;
+}) {
+  const sizeClass = {
+    mini: "min-h-7 px-3 py-1 text-[20px]",
+    compact: "min-h-9 px-4 py-1.5 text-[28px]",
+    card: "min-h-12 px-5 py-2 text-[38px]",
+    hero: "min-h-16 px-6 py-2.5 text-[62px]",
+    mega: "min-h-20 px-7 py-3 text-[82px]",
+  }[size];
+  const ink = lightText ? "#ffffff" : templateBg;
+
+  return (
+    <div
+      className={cn(
+        "winner-placement-pop inline-flex items-center justify-center font-display leading-none",
+        sizeClass,
+        fullWidth ? "w-full" : "max-w-full",
+      )}
+      style={{
+        ["--winner-place-accent" as string]: accent,
+        ["--winner-place-ink" as string]: ink,
+      }}
+    >
+      {text}
+    </div>
+  );
+}
+
+function WinnerCustomFontStyle({ winners }: { winners: WinnerState }) {
+  if (!winners.customFontData) return null;
+  return (
+    <style>
+      {`@font-face{font-family:"Winner Custom Font";src:url("${winners.customFontData}");font-display:swap;}`}
+    </style>
+  );
+}
+
+function getWinnerFonts(winners: WinnerState) {
+  if (winners.customFontData) {
+    return {
+      display: '"Winner Custom Font", Impact, sans-serif',
+      body: '"Winner Custom Font", Inter, sans-serif',
+    };
+  }
+  return winnerFontPresets[winners.fontPreset] || winnerFontPresets.impact;
+}
+
+function visibleTextShadow(templateKey: WinnerTemplateKey) {
+  return templateKey === "anime" || templateKey === "clean"
+    ? "0 2px 0 rgba(255,255,255,.85), 0 4px 18px rgba(0,0,0,.28)"
+    : "0 4px 0 #000, 0 0 24px rgba(0,0,0,.75)";
+}
+
 function PubMatPoster({
   pubMat,
   theme,
@@ -3165,6 +4488,8 @@ function PubMatPoster({
       return <ArenaClashPubMatPoster pubMat={pubMat} theme={theme} />;
     case "tribe":
       return <ShadowTribePubMatPoster pubMat={pubMat} theme={theme} />;
+    case "contact":
+      return <ContactTribePubMatPoster pubMat={pubMat} theme={theme} />;
     case "catchup":
       return <VelocityPopPubMatPoster pubMat={pubMat} theme={theme} />;
     case "cup":
@@ -3817,6 +5142,499 @@ function ShadowTribePubMatPoster({
             </CyberPanel>
           </div>
         </footer>
+      </div>
+    </div>
+  );
+}
+
+function ContactTribePubMatPoster({
+  pubMat,
+  theme,
+}: {
+  pubMat: PubMatState;
+  theme: PubMatTheme;
+}) {
+  const gallery = [
+    pubMat.images.gallery1,
+    pubMat.images.gallery2,
+    pubMat.images.gallery3,
+    pubMat.images.gallery4,
+  ];
+  const titleWords = pubMat.eventName.trim().split(/\s+/);
+  const titleTop = titleWords.length > 1 ? titleWords[0] : pubMat.eventName;
+  const titleBottom = titleWords.length > 1 ? titleWords.slice(1).join(" ") : "";
+  const dateTokens = pubMat.date.trim().split(/\s+/);
+  const dateMonth = dateTokens[0] ?? "";
+  const dateDay = dateTokens.slice(1).join(" ");
+  const prizeLabels = [
+    "Champion",
+    "2nd Place",
+    "3rd Place",
+    "Swiss King",
+    "Bird King",
+  ];
+  const prizes = prizeLabels.map((fallback, i) => ({
+    label: pubMat.guests[i] || fallback,
+    image: gallery[i] || "",
+    sub: pubMat.sponsors[i]?.text || "",
+  }));
+  const defaultRules = [
+    "4G Format",
+    "1-Bey Banning",
+    "5-Round Swiss",
+    "First to 5 Points Each Match",
+    "Semis · First to 6 Points",
+    "Finals · First to 7 Points",
+  ];
+  const rules = (pubMat.notes.filter(Boolean).length
+    ? pubMat.notes.filter(Boolean)
+    : defaultRules
+  ).slice(0, 6);
+  const banWarnings = ["No Repeating Parts", "Metal Needle Banned"];
+
+  return (
+    <div
+      className="relative min-h-[1080px] overflow-hidden p-6"
+      style={{ background: theme.paper, color: theme.ink }}
+    >
+      <div className="pubmat-tribe-parchment absolute inset-0" />
+      <div className="pubmat-paper-grain absolute inset-0 opacity-30" />
+      <div
+        className="pubmat-tribe-rays pointer-events-none absolute left-1/2 top-[8%] h-[440px] w-[760px] -translate-x-1/2 opacity-80"
+      />
+
+      <div className="relative z-10">
+        <header className="grid grid-cols-[210px_1fr_210px] items-center gap-3">
+          <div className="relative h-[280px]">
+            <ContactWarriorSlot
+              src={pubMat.images.hero}
+              label="Left Warrior"
+              align="left"
+              theme={theme}
+            />
+          </div>
+
+          <div className="relative pt-2 text-center">
+            <div
+              className="pubmat-title-lock font-display leading-[0.84] tracking-[0.02em]"
+              style={{
+                color: theme.ink,
+                fontSize: 84,
+                textShadow: `4px 4px 0 rgba(0,0,0,.18)`,
+              }}
+            >
+              {titleTop || "CONTACT"}
+            </div>
+            {titleBottom && (
+              <div
+                className="pubmat-title-lock font-display leading-[0.84] tracking-[0.02em]"
+                style={{
+                  fontSize: 108,
+                  background: `linear-gradient(180deg, ${theme.accent2} 0%, ${theme.ink} 55%, ${theme.accent} 100%)`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  filter: `drop-shadow(3px 3px 0 rgba(0,0,0,.25))`,
+                }}
+              >
+                {titleBottom}
+              </div>
+            )}
+            <div
+              className="mx-auto mt-1 inline-block border-y-2 px-5 py-1 font-condensed text-sm font-black uppercase tracking-[0.32em]"
+              style={{ borderColor: theme.ink, color: theme.ink }}
+            >
+              {pubMat.eventType || pubMat.game}
+            </div>
+          </div>
+
+          <div className="relative h-[280px]">
+            <ContactWarriorSlot
+              src={pubMat.images.product}
+              label="Right Warrior"
+              align="right"
+              theme={theme}
+            />
+          </div>
+        </header>
+
+        <section className="mt-2 grid grid-cols-[1fr_260px] items-end gap-4">
+          <div className="flex">
+            <div
+              className="relative inline-block -rotate-[4deg] px-7 py-3"
+              style={{
+                background: `linear-gradient(135deg, ${theme.accent} 0%, #6a0915 60%, ${theme.ink} 100%)`,
+                boxShadow: `4px 4px 0 rgba(0,0,0,.35)`,
+                clipPath:
+                  "polygon(4% 0, 96% 8%, 100% 92%, 92% 100%, 6% 96%, 0 12%)",
+              }}
+            >
+              <div
+                className="font-display text-3xl leading-none tracking-[0.12em]"
+                style={{ color: "#fff" }}
+              >
+                {dateMonth || "MAY"}
+              </div>
+              <div
+                className="font-display leading-[0.85]"
+                style={{ color: "#fff", fontSize: 76 }}
+              >
+                {dateDay || "25"}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <ContactFeeBox
+              label="Entrance Fee:"
+              value={pubMat.preRegPrice}
+              theme={theme}
+            />
+            <ContactFeeBox
+              label="Double Entry:"
+              value={pubMat.walkInPrice}
+              theme={theme}
+            />
+          </div>
+        </section>
+
+        <section
+          className="mt-4 grid grid-cols-3 items-center gap-3 border-y-[3px] py-3"
+          style={{ borderColor: theme.ink }}
+        >
+          <ContactInfo
+            icon={<ClipboardList className="h-9 w-9" />}
+            value={pubMat.prepTime}
+            sub="Registration"
+            theme={theme}
+            color={theme.accent2}
+          />
+          <ContactInfo
+            icon={<Timer className="h-9 w-9" />}
+            value={pubMat.startTime}
+            sub="Hard Start"
+            theme={theme}
+            color={theme.accent}
+          />
+          <ContactInfo
+            icon={<MapPin className="h-9 w-9" />}
+            value={pubMat.venue}
+            sub=""
+            theme={theme}
+            color={theme.accent2}
+          />
+        </section>
+
+        <section className="mt-4">
+          <div className="text-center">
+            <h3
+              className="pubmat-title-lock font-display text-4xl leading-none tracking-[0.04em]"
+              style={{ color: theme.ink }}
+            >
+              {pubMat.prizeHeadline || "PRIZES (UNLOCK AT 20 PLAYERS)"}
+            </h3>
+          </div>
+          <div className="mt-3 grid grid-cols-5 gap-2">
+            {prizes.map((prize, i) => (
+              <ContactPrizeCard
+                key={i}
+                tier={i}
+                label={prize.label}
+                sub={prize.sub}
+                src={prize.image}
+                theme={theme}
+              />
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-4 grid grid-cols-[1fr_320px] gap-3">
+          <div
+            className="relative border-[3px] p-3"
+            style={{ borderColor: theme.ink, background: "rgba(255,255,255,.42)" }}
+          >
+            <div className="-mt-7 mb-2 flex justify-center">
+              <div
+                className="px-5 py-1 font-display text-2xl leading-none tracking-[0.08em]"
+                style={{
+                  background: theme.paper,
+                  color: theme.accent2,
+                  border: `3px solid ${theme.ink}`,
+                }}
+              >
+                FORMAT &amp; RULES
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-2">
+              {rules.map((rule, i) => (
+                <ContactRuleRow
+                  key={`${rule}-${i}`}
+                  text={rule}
+                  index={i}
+                  theme={theme}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            {banWarnings.map((label) => (
+              <div
+                key={label}
+                className="flex items-center gap-3 border-[3px] px-4 py-3"
+                style={{
+                  background: theme.block,
+                  borderColor: theme.ink,
+                  color: "#f5e9d2",
+                }}
+              >
+                <Ban
+                  className="h-9 w-9 shrink-0"
+                  style={{ color: theme.accent }}
+                />
+                <div className="pubmat-small-lock font-condensed text-xl font-black uppercase leading-tight tracking-[0.06em]">
+                  {label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <footer className="mt-5 text-center">
+          <div
+            className="pubmat-title-lock font-display leading-[0.9] tracking-[0.04em]"
+            style={{ fontSize: 56 }}
+          >
+            <span style={{ color: theme.ink }}>LAUNCH.</span>{" "}
+            <span style={{ color: theme.accent2 }}>CLASH.</span>{" "}
+            <span style={{ color: theme.accent }}>CONQUER.</span>
+          </div>
+          <div
+            className="mt-2 font-condensed text-base font-black uppercase tracking-[0.32em]"
+            style={{ color: theme.muted }}
+          >
+            {pubMat.guestHeadline || "Only The Strongest Will Survive."}
+          </div>
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+function ContactWarriorSlot({
+  src,
+  label,
+  align,
+  theme,
+}: {
+  src: string;
+  label: string;
+  align: "left" | "right";
+  theme: PubMatTheme;
+}) {
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt=""
+        className="h-full w-full object-contain drop-shadow-[4px_4px_0_rgba(0,0,0,0.35)]"
+        style={{ objectPosition: align === "left" ? "right bottom" : "left bottom" }}
+        draggable={false}
+      />
+    );
+  }
+  return (
+    <div
+      className="flex h-full w-full flex-col items-center justify-center border-[3px] border-dashed text-center"
+      style={{ borderColor: theme.ink, color: theme.muted }}
+    >
+      <Users className="h-10 w-10" />
+      <div className="mt-2 font-condensed text-xs font-black uppercase tracking-[0.18em]">
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function ContactFeeBox({
+  label,
+  value,
+  theme,
+}: {
+  label: string;
+  value: string;
+  theme: PubMatTheme;
+}) {
+  return (
+    <div
+      className="relative -rotate-1 border-[3px] px-4 py-2"
+      style={{
+        background: theme.paper,
+        borderColor: theme.ink,
+        boxShadow: `3px 3px 0 rgba(0,0,0,.25)`,
+      }}
+    >
+      <div
+        className="font-condensed text-sm font-black uppercase leading-none tracking-[0.18em]"
+        style={{ color: theme.ink }}
+      >
+        {label}
+      </div>
+      <div
+        className="font-display leading-[0.9]"
+        style={{ color: theme.accent, fontSize: 48, textShadow: `2px 2px 0 rgba(0,0,0,.18)` }}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function ContactInfo({
+  icon,
+  value,
+  sub,
+  theme,
+  color,
+}: {
+  icon: React.ReactNode;
+  value: string;
+  sub: string;
+  theme: PubMatTheme;
+  color: string;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="shrink-0" style={{ color }}>
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <div
+          className="pubmat-line-lock font-display text-3xl leading-none tracking-[0.04em]"
+          style={{ color }}
+        >
+          {value}
+        </div>
+        {sub && (
+          <div
+            className="pubmat-small-lock font-condensed text-xs font-black uppercase tracking-[0.16em]"
+            style={{ color: theme.ink }}
+          >
+            {sub}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ContactPrizeCard({
+  tier,
+  label,
+  sub,
+  src,
+  theme,
+}: {
+  tier: number;
+  label: string;
+  sub: string;
+  src: string;
+  theme: PubMatTheme;
+}) {
+  const tierColors = [theme.accent, theme.accent, theme.accent2, theme.accent2, theme.ink];
+  const ribbon = tierColors[tier] ?? theme.ink;
+  return (
+    <div
+      className="relative flex flex-col border-[3px]"
+      style={{
+        borderColor: theme.ink,
+        background: "rgba(255,255,255,.52)",
+        boxShadow: `3px 3px 0 rgba(0,0,0,.22)`,
+      }}
+    >
+      <div
+        className="flex items-center justify-center gap-1 px-2 py-1 font-condensed text-xs font-black uppercase tracking-[0.14em]"
+        style={{ background: ribbon, color: "#fff" }}
+      >
+        <Crown className="h-3.5 w-3.5" />
+        <span className="pubmat-cell-lock">{label}</span>
+      </div>
+      <div
+        className="relative flex h-[150px] items-center justify-center overflow-hidden"
+        style={{ background: tier === 4 ? theme.block : "transparent" }}
+      >
+        {src ? (
+          <img
+            src={src}
+            alt=""
+            className="h-full w-full object-contain"
+            draggable={false}
+          />
+        ) : (
+          <div className="text-center" style={{ color: tier === 4 ? "#f5e9d2" : theme.muted }}>
+            <Trophy className="mx-auto h-10 w-10" />
+            <div className="mt-1 font-condensed text-[10px] font-black uppercase tracking-[0.16em]">
+              {sub || "Prize"}
+            </div>
+          </div>
+        )}
+      </div>
+      <div
+        className="border-t-[3px] px-1 py-1 text-center font-condensed text-xs font-black uppercase tracking-[0.1em]"
+        style={{ borderColor: theme.ink, color: theme.ink }}
+      >
+        <span className="pubmat-cell-lock">{sub || "—"}</span>
+      </div>
+    </div>
+  );
+}
+
+function ContactRuleRow({
+  text,
+  index,
+  theme,
+}: {
+  text: string;
+  index: number;
+  theme: PubMatTheme;
+}) {
+  const lower = text.toLowerCase();
+  let Icon: typeof Flame = Target;
+  let tone = theme.accent2;
+  if (lower.includes("4g")) {
+    Icon = Layers;
+    tone = theme.accent2;
+  } else if (lower.includes("ban")) {
+    Icon = Ban;
+    tone = theme.accent;
+  } else if (lower.includes("swiss") || lower.includes("round")) {
+    Icon = Users;
+    tone = theme.accent2;
+  } else if (lower.includes("semi")) {
+    Icon = Flame;
+    tone = theme.accent;
+  } else if (lower.includes("final")) {
+    Icon = Crown;
+    tone = theme.accent;
+  } else if (lower.includes("point") || lower.includes("match")) {
+    Icon = Trophy;
+    tone = theme.accent2;
+  } else {
+    Icon = [Layers, Ban, Users, Trophy, Flame, Crown][index % 6];
+    tone = index % 2 ? theme.accent : theme.accent2;
+  }
+  return (
+    <div className="flex items-center gap-2">
+      <div
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+        style={{ background: tone, color: "#fff" }}
+      >
+        <Icon className="h-5 w-5" />
+      </div>
+      <div
+        className="pubmat-small-lock font-condensed text-sm font-black uppercase leading-tight tracking-[0.06em]"
+        style={{ color: theme.ink }}
+      >
+        {text}
       </div>
     </div>
   );
