@@ -61,6 +61,9 @@ import {
   findPart,
   createStandardBuild,
   createCxBuild,
+  availableOptions,
+  collectUsedPartIds,
+  withBuildCount,
 } from "@/lib/beybladeParts";
 
 // ─── types ────────────────────────────────────────────────────────────────────
@@ -1100,6 +1103,15 @@ export default function ToolPage() {
     deckSize: "3G",
     builds: [createStandardBuild()],
   });
+  const maxDeckBuilds = parseInt(deck.deckSize, 10);
+
+  function handleDeckSizeChange(size: DeckSize) {
+    setDeck((prev) => ({
+      ...prev,
+      deckSize: size,
+      builds: prev.builds.slice(0, parseInt(size, 10)),
+    }));
+  }
 
   const palette = designs[design];
   const canvasWidth = generatorMode === "cards" ? 680 : 780;
@@ -1982,7 +1994,7 @@ export default function ToolPage() {
                     key={g}
                     size="sm"
                     variant={deck.deckSize === g ? "default" : "ghost"}
-                    onClick={() => setDeck({ ...deck, deckSize: g })}
+                    onClick={() => handleDeckSizeChange(g)}
                     className="font-condensed uppercase tracking-[0.14em]"
                   >
                     {g}
@@ -2019,6 +2031,8 @@ export default function ToolPage() {
                   </div>
                   <DeckBuildEditor
                     build={build}
+                    builds={deck.builds}
+                    index={i}
                     onChange={(b) =>
                       setDeck({
                         ...deck,
@@ -2029,14 +2043,21 @@ export default function ToolPage() {
                 </div>
               ))}
             </div>
-            {deck.builds.length < 3 && (
+            {deck.builds.length < maxDeckBuilds && (
               <Button
                 variant="outline"
                 size="sm"
                 className="w-full"
-                onClick={() =>
-                  setDeck({ ...deck, builds: [...deck.builds, createStandardBuild()] })
-                }
+                onClick={() => {
+                  const used = collectUsedPartIds(deck.builds);
+                  setDeck({
+                    ...deck,
+                    builds: [
+                      ...deck.builds,
+                      createStandardBuild({ blade: used.blade, ratchet: used.ratchet, bit: used.bit }),
+                    ],
+                  });
+                }}
               >
                 <Plus className="h-3.5 w-3.5" /> Add Build
               </Button>
@@ -2660,6 +2681,15 @@ function MobileToolbox({
   setDeck: React.Dispatch<React.SetStateAction<DeckInfo>>;
 }) {
   const [activeTab, setActiveTab] = useState<MobileTab>(null);
+  const maxDeckBuilds = parseInt(deck.deckSize, 10);
+
+  function handleDeckSizeChange(size: DeckSize) {
+    setDeck((prev) => ({
+      ...prev,
+      deckSize: size,
+      builds: prev.builds.slice(0, parseInt(size, 10)),
+    }));
+  }
 
   function toggle(tab: MobileTab) {
     setActiveTab((prev) => (prev === tab ? null : tab));
@@ -3169,7 +3199,7 @@ function MobileToolbox({
                         key={g}
                         size="sm"
                         variant={deck.deckSize === g ? "default" : "ghost"}
-                        onClick={() => setDeck({ ...deck, deckSize: g })}
+                        onClick={() => handleDeckSizeChange(g)}
                         className="font-condensed uppercase tracking-[0.14em]"
                       >
                         {g}
@@ -3206,6 +3236,8 @@ function MobileToolbox({
                       </div>
                       <DeckBuildEditor
                         build={build}
+                        builds={deck.builds}
+                        index={i}
                         onChange={(b) =>
                           setDeck({
                             ...deck,
@@ -3216,14 +3248,21 @@ function MobileToolbox({
                     </div>
                   ))}
                 </div>
-                {deck.builds.length < 3 && (
+                {deck.builds.length < maxDeckBuilds && (
                   <Button
                     variant="outline"
                     size="sm"
                     className="w-full"
-                    onClick={() =>
-                      setDeck({ ...deck, builds: [...deck.builds, createStandardBuild()] })
-                    }
+                    onClick={() => {
+                      const used = collectUsedPartIds(deck.builds);
+                      setDeck({
+                        ...deck,
+                        builds: [
+                          ...deck.builds,
+                          createStandardBuild({ blade: used.blade, ratchet: used.ratchet, bit: used.bit }),
+                        ],
+                      });
+                    }}
                   >
                     <Plus className="h-3.5 w-3.5" /> Add Build
                   </Button>
@@ -9883,13 +9922,32 @@ function DeckPartSelect({
 
 function DeckBuildEditor({
   build,
+  builds,
+  index,
   onChange,
 }: {
   build: BeybladeBuild;
+  builds: BeybladeBuild[];
+  index: number;
   onChange: (b: BeybladeBuild) => void;
 }) {
   const selectedBlade =
     build.type === "standard" ? findPart(STANDARD_BLADES, build.bladeId) : undefined;
+  const used = collectUsedPartIds(builds, index);
+
+  function setType(type: "standard" | "cx") {
+    onChange(
+      type === "standard"
+        ? createStandardBuild({ blade: used.blade, ratchet: used.ratchet, bit: used.bit })
+        : createCxBuild({
+            lockChip: used.lockChip,
+            mainBlade: used.mainBlade,
+            armor: used.armor,
+            ratchet: used.ratchet,
+            bit: used.bit,
+          }),
+    );
+  }
 
   return (
     <div className="space-y-2">
@@ -9898,7 +9956,7 @@ function DeckBuildEditor({
         <Button
           size="sm"
           variant={build.type === "standard" ? "default" : "ghost"}
-          onClick={() => onChange(createStandardBuild())}
+          onClick={() => setType("standard")}
           className="h-6 font-condensed text-[11px] uppercase tracking-[0.14em]"
         >
           UX / BX
@@ -9906,7 +9964,7 @@ function DeckBuildEditor({
         <Button
           size="sm"
           variant={build.type === "cx" ? "default" : "ghost"}
-          onClick={() => onChange(createCxBuild())}
+          onClick={() => setType("cx")}
           className="h-6 font-condensed text-[11px] uppercase tracking-[0.14em]"
         >
           CX
@@ -9917,21 +9975,21 @@ function DeckBuildEditor({
         <>
           <DeckPartSelect
             label="Blade"
-            options={STANDARD_BLADES}
+            options={availableOptions(STANDARD_BLADES, used.blade, build.bladeId)}
             value={build.bladeId}
             onChange={(id) => onChange({ ...build, bladeId: id })}
           />
           {!selectedBlade?.integratedRatchet && (
             <DeckPartSelect
               label="Ratchet"
-              options={STANDARD_RATCHETS}
+              options={availableOptions(STANDARD_RATCHETS, used.ratchet, build.ratchetId)}
               value={build.ratchetId}
               onChange={(id) => onChange({ ...build, ratchetId: id })}
             />
           )}
           <DeckPartSelect
             label="Bit"
-            options={STANDARD_BITS}
+            options={availableOptions(STANDARD_BITS, used.bit, build.bitId)}
             value={build.bitId}
             onChange={(id) => onChange({ ...build, bitId: id })}
           />
@@ -9940,31 +9998,31 @@ function DeckBuildEditor({
         <>
           <DeckPartSelect
             label="Lock Chip"
-            options={CX_LOCK_CHIPS}
+            options={availableOptions(CX_LOCK_CHIPS, used.lockChip, build.lockChipId)}
             value={build.lockChipId}
             onChange={(id) => onChange({ ...build, lockChipId: id })}
           />
           <DeckPartSelect
             label="Main Blade"
-            options={CX_MAIN_BLADES}
+            options={availableOptions(CX_MAIN_BLADES, used.mainBlade, build.mainBladeId)}
             value={build.mainBladeId}
             onChange={(id) => onChange({ ...build, mainBladeId: id })}
           />
           <DeckPartSelect
             label="Armor"
-            options={CX_ARMOR}
+            options={availableOptions(CX_ARMOR, used.armor, build.armorId)}
             value={build.armorId}
             onChange={(id) => onChange({ ...build, armorId: id })}
           />
           <DeckPartSelect
             label="Ratchet"
-            options={CX_RATCHETS}
+            options={availableOptions(CX_RATCHETS, used.ratchet, build.ratchetId)}
             value={build.ratchetId}
             onChange={(id) => onChange({ ...build, ratchetId: id })}
           />
           <DeckPartSelect
             label="Bit"
-            options={CX_BITS}
+            options={availableOptions(CX_BITS, used.bit, build.bitId)}
             value={build.bitId}
             onChange={(id) => onChange({ ...build, bitId: id })}
           />

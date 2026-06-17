@@ -21,9 +21,12 @@ import {
   STANDARD_BITS,
   STANDARD_BLADES,
   STANDARD_RATCHETS,
+  availableOptions,
+  collectUsedPartIds,
   createCxBuild,
   createStandardBuild,
   findPart,
+  withBuildCount,
 } from "@/lib/beybladeParts";
 
 function PartSelect({
@@ -141,14 +144,28 @@ function PartSelect({
 function BuildEditor({
   index,
   build,
+  builds,
   onChange,
 }: {
   index: number;
   build: BeybladeBuild;
+  builds: BeybladeBuild[];
   onChange: (build: BeybladeBuild) => void;
 }) {
+  const used = collectUsedPartIds(builds, index);
+
   function setType(type: BuildType) {
-    onChange(type === "standard" ? createStandardBuild() : createCxBuild());
+    onChange(
+      type === "standard"
+        ? createStandardBuild({ blade: used.blade, ratchet: used.ratchet, bit: used.bit })
+        : createCxBuild({
+            lockChip: used.lockChip,
+            mainBlade: used.mainBlade,
+            armor: used.armor,
+            ratchet: used.ratchet,
+            bit: used.bit,
+          }),
+    );
   }
 
   return (
@@ -187,7 +204,7 @@ function BuildEditor({
         <div className="grid gap-3">
           <PartSelect
             label="Blade"
-            options={STANDARD_BLADES}
+            options={availableOptions(STANDARD_BLADES, used.blade, build.bladeId)}
             value={build.bladeId}
             onChange={(id) => onChange({ ...build, bladeId: id })}
           />
@@ -198,14 +215,14 @@ function BuildEditor({
           ) : (
             <PartSelect
               label="Ratchet"
-              options={STANDARD_RATCHETS}
+              options={availableOptions(STANDARD_RATCHETS, used.ratchet, build.ratchetId)}
               value={build.ratchetId}
               onChange={(id) => onChange({ ...build, ratchetId: id })}
             />
           )}
           <PartSelect
             label="Bit"
-            options={STANDARD_BITS}
+            options={availableOptions(STANDARD_BITS, used.bit, build.bitId)}
             value={build.bitId}
             onChange={(id) => onChange({ ...build, bitId: id })}
           />
@@ -214,31 +231,31 @@ function BuildEditor({
         <div className="grid gap-3">
           <PartSelect
             label="Lock Chip"
-            options={CX_LOCK_CHIPS}
+            options={availableOptions(CX_LOCK_CHIPS, used.lockChip, build.lockChipId)}
             value={build.lockChipId}
             onChange={(id) => onChange({ ...build, lockChipId: id })}
           />
           <PartSelect
             label="Main Blade"
-            options={CX_MAIN_BLADES}
+            options={availableOptions(CX_MAIN_BLADES, used.mainBlade, build.mainBladeId)}
             value={build.mainBladeId}
             onChange={(id) => onChange({ ...build, mainBladeId: id })}
           />
           <PartSelect
             label="Assist / Over / Metal Blade"
-            options={CX_ARMOR}
+            options={availableOptions(CX_ARMOR, used.armor, build.armorId)}
             value={build.armorId}
             onChange={(id) => onChange({ ...build, armorId: id })}
           />
           <PartSelect
             label="Ratchet"
-            options={CX_RATCHETS}
+            options={availableOptions(CX_RATCHETS, used.ratchet, build.ratchetId)}
             value={build.ratchetId}
             onChange={(id) => onChange({ ...build, ratchetId: id })}
           />
           <PartSelect
             label="Bit"
-            options={CX_BITS}
+            options={availableOptions(CX_BITS, used.bit, build.bitId)}
             value={build.bitId}
             onChange={(id) => onChange({ ...build, bitId: id })}
           />
@@ -309,11 +326,7 @@ function BuildPreview({ index, build }: { index: number; build: BeybladeBuild })
 export default function DeckBuilderPage() {
   const [deckSize, setDeckSize] = useState<DeckSize>("3G");
   const [deckName, setDeckName] = useState("");
-  const [builds, setBuilds] = useState<BeybladeBuild[]>([
-    createStandardBuild(),
-    createStandardBuild(),
-    createStandardBuild(),
-  ]);
+  const [builds, setBuilds] = useState<BeybladeBuild[]>(() => withBuildCount([], 3));
   const [exporting, setExporting] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [logoColors, setLogoColors] = useState<string[]>([]);
@@ -321,6 +334,11 @@ export default function DeckBuilderPage() {
 
   function updateBuild(i: number, build: BeybladeBuild) {
     setBuilds((prev) => prev.map((b, idx) => (idx === i ? build : b)));
+  }
+
+  function handleDeckSizeChange(size: DeckSize) {
+    setDeckSize(size);
+    setBuilds((prev) => withBuildCount(prev, parseInt(size, 10)));
   }
 
   function handleLogoUpload(event: ChangeEvent<HTMLInputElement>) {
@@ -414,7 +432,7 @@ export default function DeckBuilderPage() {
                     {DECK_SIZES.map((gen) => (
                       <button
                         key={gen}
-                        onClick={() => setDeckSize(gen)}
+                        onClick={() => handleDeckSizeChange(gen)}
                         className={cn(
                           "rounded-md border px-4 py-2 font-condensed text-sm font-black uppercase tracking-[0.1em] transition",
                           deckSize === gen
@@ -472,7 +490,13 @@ export default function DeckBuilderPage() {
             </div>
 
             {builds.map((build, i) => (
-              <BuildEditor key={i} index={i} build={build} onChange={(b) => updateBuild(i, b)} />
+              <BuildEditor
+                key={i}
+                index={i}
+                build={build}
+                builds={builds}
+                onChange={(b) => updateBuild(i, b)}
+              />
             ))}
           </div>
 
