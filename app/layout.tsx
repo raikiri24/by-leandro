@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   title: "Leandro's Tournament Card Generator",
@@ -17,7 +18,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <SessionProvider>{children}</SessionProvider>
+      </body>
     </html>
   );
 }

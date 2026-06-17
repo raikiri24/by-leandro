@@ -12,6 +12,8 @@ import {
   Clock,
   Crown,
   Download,
+  Eye,
+  EyeOff,
   Flame,
   Gift,
   Grip,
@@ -42,6 +44,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
+import { UserNav } from "@/components/auth/user-nav";
+import {
+  type BeybladeBuild,
+  type DeckSize,
+  type PartOption,
+  DECK_SIZES,
+  STANDARD_BLADES,
+  STANDARD_RATCHETS,
+  STANDARD_BITS,
+  CX_LOCK_CHIPS,
+  CX_MAIN_BLADES,
+  CX_ARMOR,
+  CX_RATCHETS,
+  CX_BITS,
+  findPart,
+  createStandardBuild,
+  createCxBuild,
+} from "@/lib/beybladeParts";
 
 // ─── types ────────────────────────────────────────────────────────────────────
 type CardType = "swiss" | "topcut";
@@ -158,12 +178,19 @@ type FormState = {
   champTitle: string;
   tcRecord: string;
 };
+type DeckInfo = {
+  show: boolean;
+  name: string;
+  deckSize: DeckSize;
+  builds: BeybladeBuild[];
+};
 type CardProps = {
   form: FormState;
   rounds: Round[];
   topCut: TopCutMatch[];
   cardType: CardType;
   palette: Design;
+  deck?: DeckInfo;
 };
 type Sponsor = { text: string; image: string };
 type ImageSlotKey =
@@ -1067,6 +1094,12 @@ export default function ToolPage() {
     { stage: "Quarterfinals", opp: "", score: "1 - 0", result: "win" },
     { stage: "Semifinals", opp: "", score: "1 - 0", result: "win" },
   ]);
+  const [deck, setDeck] = useState<DeckInfo>({
+    show: false,
+    name: "",
+    deckSize: "3G",
+    builds: [createStandardBuild()],
+  });
 
   const palette = designs[design];
   const canvasWidth = generatorMode === "cards" ? 680 : 780;
@@ -1378,24 +1411,42 @@ export default function ToolPage() {
   }
 
   return (
-    <main className="flex min-h-dvh flex-col bg-background text-foreground lg:grid lg:min-h-screen lg:grid-cols-[300px_minmax(0,1fr)_440px] xl:grid-cols-[340px_minmax(0,1fr)_480px]">
+    <main className="flex min-h-dvh flex-col bg-background text-foreground">
       {showSplash && <SplashScreen />}
-      <aside className="hidden border-r bg-card lg:block lg:h-screen lg:overflow-y-auto">
-        <div className="sticky top-0 z-20 border-b bg-card/95 px-6 py-5 backdrop-blur">
-          <div className="mb-4 flex items-center justify-between gap-3">
+      <nav className="sticky top-0 z-40 border-b border-white/10 bg-[#090909]/90 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-10">
+          <a href="/" className="flex items-center gap-3">
+            <img
+              src="/icon.png"
+              alt="Leandro's Tournament Card Generator"
+              className="h-10 w-10"
+              draggable={false}
+            />
+            <span className="font-condensed text-sm font-black uppercase tracking-[0.18em] text-white">
+              Leandro's Tool
+            </span>
+          </a>
+          <div className="flex items-center gap-2">
             <a
-              href="/"
-              className="font-condensed text-xs font-black uppercase tracking-[0.18em] text-muted-foreground transition hover:text-primary"
+              href="/bg-remover"
+              className="hidden px-3 py-2 font-condensed text-xs font-black uppercase tracking-[0.18em] text-white/60 transition hover:text-primary sm:inline-flex"
             >
-              Home
+              BG Remover
             </a>
             <a
-              href="/tool"
-              className="rounded-md border border-primary/25 bg-primary/10 px-3 py-1.5 font-condensed text-xs font-black uppercase tracking-[0.18em] text-primary"
+              href="/deck-builder"
+              className="hidden px-3 py-2 font-condensed text-xs font-black uppercase tracking-[0.18em] text-white/60 transition hover:text-primary sm:inline-flex"
             >
-              Tool
+              Deck Builder
             </a>
+            <div className="mx-1 hidden h-6 w-px bg-white/10 sm:block" />
+            <UserNav />
           </div>
+        </div>
+      </nav>
+      <div className="flex flex-1 flex-col lg:grid lg:grid-cols-[300px_minmax(0,1fr)_440px] lg:overflow-hidden xl:grid-cols-[340px_minmax(0,1fr)_480px]">
+      <aside className="hidden border-r bg-card lg:block lg:h-full lg:overflow-y-auto">
+        <div className="sticky top-0 z-20 border-b bg-card/95 px-6 py-5 backdrop-blur">
           <h1 className="font-display text-3xl tracking-[0.15em] text-primary">
             Leandro's Tournament Card Generator
           </h1>
@@ -1502,7 +1553,7 @@ export default function ToolPage() {
         )}
       </aside>
 
-      <aside className="hidden border-l bg-card lg:col-start-3 lg:row-start-1 lg:block lg:h-screen lg:overflow-y-auto">
+      <aside className="hidden border-l bg-card lg:col-start-3 lg:row-start-1 lg:block lg:h-full lg:overflow-y-auto">
         <div className="sticky top-0 z-20 border-b bg-card/95 px-6 py-5 backdrop-blur">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -1706,7 +1757,7 @@ export default function ToolPage() {
               {rounds.map((round, i) => (
                 <div
                   key={i}
-                  className="grid grid-cols-[48px_1fr_76px_68px] gap-2"
+                  className="grid grid-cols-[48px_1fr_76px_68px_36px] gap-2"
                 >
                   <Input
                     value={round.rnd}
@@ -1741,6 +1792,17 @@ export default function ToolPage() {
                     }
                   >
                     {round.result === "win" ? "W" : "L"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    aria-label={`Remove round ${i + 1}`}
+                    onClick={() =>
+                      setRounds(rounds.filter((_, idx) => idx !== i))
+                    }
+                  >
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               ))}
@@ -1898,6 +1960,89 @@ export default function ToolPage() {
             </div>
           </Section>
         )}
+
+        <Section title="Deck Used">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label className="font-condensed text-xs font-black uppercase">Show on Card</Label>
+              <Button
+                size="sm"
+                variant={deck.show ? "default" : "outline"}
+                onClick={() => setDeck({ ...deck, show: !deck.show })}
+                className="h-7 gap-1.5 px-3 font-condensed text-xs uppercase"
+              >
+                {deck.show ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                {deck.show ? "Visible" : "Hidden"}
+              </Button>
+            </div>
+            <Field label="Deck Size">
+              <div className="grid grid-cols-4 rounded-md border bg-secondary p-1">
+                {DECK_SIZES.map((g) => (
+                  <Button
+                    key={g}
+                    size="sm"
+                    variant={deck.deckSize === g ? "default" : "ghost"}
+                    onClick={() => setDeck({ ...deck, deckSize: g })}
+                    className="font-condensed uppercase tracking-[0.14em]"
+                  >
+                    {g}
+                  </Button>
+                ))}
+              </div>
+            </Field>
+            <Field label="Deck Name (optional)">
+              <Input
+                value={deck.name}
+                onChange={(e) => setDeck({ ...deck, name: e.target.value })}
+                placeholder="e.g. Hellscythe Deck"
+              />
+            </Field>
+            <div className="space-y-3">
+              {deck.builds.map((build, i) => (
+                <div key={i} className="rounded-lg border bg-secondary/50 p-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="font-condensed text-xs font-bold uppercase text-muted-foreground">
+                      Build {i + 1}
+                    </span>
+                    {deck.builds.length > 1 && (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6"
+                        onClick={() =>
+                          setDeck({ ...deck, builds: deck.builds.filter((_, j) => j !== i) })
+                        }
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                  <DeckBuildEditor
+                    build={build}
+                    onChange={(b) =>
+                      setDeck({
+                        ...deck,
+                        builds: deck.builds.map((bd, j) => (j === i ? b : bd)),
+                      })
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+            {deck.builds.length < 3 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() =>
+                  setDeck({ ...deck, builds: [...deck.builds, createStandardBuild()] })
+                }
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Build
+              </Button>
+            )}
+          </div>
+        </Section>
           </>
         )}
 
@@ -1913,7 +2058,7 @@ export default function ToolPage() {
         </div>
       </aside>
 
-      <section className="card-stage flex flex-1 flex-col items-center gap-4 overflow-auto p-4 pb-28 sm:gap-6 sm:p-5 sm:pb-28 lg:col-start-2 lg:row-start-1 lg:min-h-screen lg:gap-6 lg:p-8 lg:pb-8 xl:p-10">
+      <section className="card-stage flex flex-1 flex-col items-center gap-4 overflow-auto p-4 pb-28 sm:gap-6 sm:p-5 sm:pb-28 lg:col-start-2 lg:row-start-1 lg:h-full lg:gap-6 lg:p-8 lg:pb-8 xl:p-10">
         <div
           className={cn(
             "flex w-full items-center justify-between gap-3",
@@ -1987,6 +2132,7 @@ export default function ToolPage() {
                       topCut={topCut}
                       cardType={cardType}
                       palette={palette}
+                      deck={deck}
                     />
                   )}
                 </div>
@@ -1994,6 +2140,7 @@ export default function ToolPage() {
             </div>
         </div>
       </section>
+      </div>
       <MobileToolbox
         generatorMode={generatorMode}
         setGeneratorMode={setGeneratorMode}
@@ -2030,6 +2177,8 @@ export default function ToolPage() {
         applyScrape={applyScrape}
         downloadCard={downloadCard}
         exporting={exporting}
+        deck={deck}
+        setDeck={setDeck}
       />
       <FloatingFeedbackTool
         open={feedbackOpen}
@@ -2469,6 +2618,8 @@ function MobileToolbox({
   applyScrape,
   downloadCard,
   exporting,
+  deck,
+  setDeck,
 }: {
   generatorMode: GeneratorMode;
   setGeneratorMode: (m: GeneratorMode) => void;
@@ -2505,6 +2656,8 @@ function MobileToolbox({
   applyScrape: () => void;
   downloadCard: () => void;
   exporting: boolean;
+  deck: DeckInfo;
+  setDeck: React.Dispatch<React.SetStateAction<DeckInfo>>;
 }) {
   const [activeTab, setActiveTab] = useState<MobileTab>(null);
 
@@ -2844,7 +2997,7 @@ function MobileToolbox({
                 <div className="px-5 pt-4">
                   <div className="space-y-2">
                     {rounds.map((round, i) => (
-                      <div key={i} className="grid grid-cols-[44px_1fr_68px_52px] gap-2">
+                      <div key={i} className="grid grid-cols-[44px_1fr_68px_52px_40px] gap-2">
                         <Input
                           value={round.rnd}
                           onChange={(e) => setRounds(update(rounds, i, { rnd: e.target.value }))}
@@ -2869,6 +3022,15 @@ function MobileToolbox({
                           className="px-2"
                         >
                           {round.result === "win" ? "W" : "L"}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          aria-label={`Remove round ${i + 1}`}
+                          onClick={() => setRounds(rounds.filter((_, idx) => idx !== i))}
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     ))}
@@ -2982,6 +3144,91 @@ function MobileToolbox({
                   </div>
                 </div>
               )}
+
+              {/* Deck Used (mobile) */}
+              <div className="mt-4 space-y-3 border-t border-white/10 px-5 pt-4">
+                <div className="font-condensed text-xs font-bold uppercase tracking-[0.28em] text-muted-foreground">
+                  Deck Used
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label className="font-condensed text-xs font-black uppercase">Show on Card</Label>
+                  <Button
+                    size="sm"
+                    variant={deck.show ? "default" : "outline"}
+                    onClick={() => setDeck({ ...deck, show: !deck.show })}
+                    className="h-7 gap-1.5 px-3 font-condensed text-xs uppercase"
+                  >
+                    {deck.show ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                    {deck.show ? "Visible" : "Hidden"}
+                  </Button>
+                </div>
+                <Field label="Deck Size">
+                  <div className="grid grid-cols-4 rounded-md border bg-secondary p-1">
+                    {DECK_SIZES.map((g) => (
+                      <Button
+                        key={g}
+                        size="sm"
+                        variant={deck.deckSize === g ? "default" : "ghost"}
+                        onClick={() => setDeck({ ...deck, deckSize: g })}
+                        className="font-condensed uppercase tracking-[0.14em]"
+                      >
+                        {g}
+                      </Button>
+                    ))}
+                  </div>
+                </Field>
+                <Field label="Deck Name (optional)">
+                  <Input
+                    value={deck.name}
+                    onChange={(e) => setDeck({ ...deck, name: e.target.value })}
+                    placeholder="e.g. Hellscythe Deck"
+                  />
+                </Field>
+                <div className="space-y-3">
+                  {deck.builds.map((build, i) => (
+                    <div key={i} className="rounded-lg border bg-secondary/50 p-3">
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="font-condensed text-xs font-bold uppercase text-muted-foreground">
+                          Build {i + 1}
+                        </span>
+                        {deck.builds.length > 1 && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-6 w-6"
+                            onClick={() =>
+                              setDeck({ ...deck, builds: deck.builds.filter((_, j) => j !== i) })
+                            }
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                      <DeckBuildEditor
+                        build={build}
+                        onChange={(b) =>
+                          setDeck({
+                            ...deck,
+                            builds: deck.builds.map((bd, j) => (j === i ? b : bd)),
+                          })
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+                {deck.builds.length < 3 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() =>
+                      setDeck({ ...deck, builds: [...deck.builds, createStandardBuild()] })
+                    }
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Add Build
+                  </Button>
+                )}
+              </div>
             </div>
           )}
 
@@ -7354,26 +7601,27 @@ function LayoutPreview({
 
 // ─── card renderer ────────────────────────────────────────────────────────────
 function CardRenderer(props: CardProps) {
-  switch (props.palette.layout) {
-    case "arcade":
-      return <ArcadeCard {...props} />;
-    case "blade":
-      return <BladeCard {...props} />;
-    case "award":
-      return <AwardCard {...props} />;
-    case "minimal":
-      return <MinimalCard {...props} />;
-    case "terminal":
-      return <TerminalCard {...props} />;
-    case "ticket":
-      return <TicketCard {...props} />;
-    case "split":
-      return <SplitCard {...props} />;
-    case "circuit":
-      return <CircuitCard {...props} />;
-    default:
-      return <ReportCard {...props} />;
-  }
+  const layout = (() => {
+    switch (props.palette.layout) {
+      case "arcade":   return <ArcadeCard {...props} />;
+      case "blade":    return <BladeCard {...props} />;
+      case "award":    return <AwardCard {...props} />;
+      case "minimal":  return <MinimalCard {...props} />;
+      case "terminal": return <TerminalCard {...props} />;
+      case "ticket":   return <TicketCard {...props} />;
+      case "split":    return <SplitCard {...props} />;
+      case "circuit":  return <CircuitCard {...props} />;
+      default:         return <ReportCard {...props} />;
+    }
+  })();
+  return (
+    <>
+      {layout}
+      {props.deck?.show && props.deck.builds.length > 0 && (
+        <DeckSection deck={props.deck} palette={props.palette} />
+      )}
+    </>
+  );
 }
 
 // ─── layout: report (current style) ──────────────────────────────────────────
@@ -9436,6 +9684,293 @@ function CircuitCard({ form, rounds, topCut, cardType, palette }: CardProps) {
         </div>
       </div>
     </>
+  );
+}
+
+// ─── deck feature: canvas components ─────────────────────────────────────────
+
+function getBuildParts(build: BeybladeBuild): PartOption[] {
+  if (build.type === "cx") {
+    return [
+      findPart(CX_LOCK_CHIPS, build.lockChipId),
+      findPart(CX_MAIN_BLADES, build.mainBladeId),
+      findPart(CX_ARMOR, build.armorId),
+      findPart(CX_RATCHETS, build.ratchetId),
+      findPart(CX_BITS, build.bitId),
+    ].filter((p): p is PartOption => !!p && !!p.image);
+  }
+  const blade = findPart(STANDARD_BLADES, build.bladeId);
+  const parts: PartOption[] = blade ? [blade] : [];
+  if (blade && !blade.integratedRatchet) {
+    const ratchet = findPart(STANDARD_RATCHETS, build.ratchetId);
+    if (ratchet) parts.push(ratchet);
+  }
+  const bit = findPart(STANDARD_BITS, build.bitId);
+  if (bit) parts.push(bit);
+  return parts.filter((p) => !!p.image);
+}
+
+function DeckBuildTile({
+  build,
+  index,
+  palette,
+}: {
+  build: BeybladeBuild;
+  index: number;
+  palette: Design;
+}) {
+  const parts = getBuildParts(build);
+  const typeLabel = build.type === "cx" ? "CX" : "UX / BX";
+  return (
+    <div className="rounded-lg p-2.5" style={{ background: palette.panel }}>
+      <div
+        className="mb-2 text-center font-mono text-[9px] font-bold uppercase tracking-widest"
+        style={{ color: palette.a }}
+      >
+        B{index + 1} · {typeLabel}
+      </div>
+      <div className="flex flex-wrap justify-center gap-1.5">
+        {parts.map((part) => (
+          <div key={part.id} className="flex flex-col items-center gap-0.5">
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-md"
+              style={{ background: `${palette.a}18` }}
+            >
+              <img
+                src={part.image}
+                alt={part.name}
+                className="h-6 w-6 object-contain"
+              />
+            </div>
+            <span
+              className="max-w-[38px] text-center font-condensed text-[7px] leading-tight"
+              style={{ color: `${palette.text}99` }}
+            >
+              {part.name}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DeckSection({ deck, palette }: { deck: DeckInfo; palette: Design }) {
+  const cols =
+    deck.builds.length === 1
+      ? "grid-cols-1"
+      : deck.builds.length === 2
+        ? "grid-cols-2"
+        : "grid-cols-3";
+  return (
+    <div
+      className="relative border-t px-8 py-5"
+      style={{ borderColor: `${palette.a}33` }}
+    >
+      <div className="mb-3 flex items-center justify-between">
+        <CardHeading title="Deck Used" color={palette.a} />
+        <span
+          className="rounded border px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase"
+          style={{ borderColor: `${palette.a}44`, color: palette.a }}
+        >
+          {deck.deckSize}
+        </span>
+      </div>
+      {deck.name && (
+        <div
+          className="mb-3 font-condensed text-sm font-bold tracking-widest"
+          style={{ color: palette.text }}
+        >
+          {deck.name}
+        </div>
+      )}
+      <div className={cn("grid gap-3", cols)}>
+        {deck.builds.map((build, i) => (
+          <DeckBuildTile key={i} build={build} index={i} palette={palette} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── deck feature: inspector components ──────────────────────────────────────
+
+function DeckPartSelect({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: PartOption[];
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+
+  const selected = findPart(options, value);
+  const filtered = options.filter((o) =>
+    o.name.toLowerCase().includes(query.toLowerCase()),
+  );
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+        setQuery("");
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <Label className="mb-1 block font-condensed text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </Label>
+      <button
+        type="button"
+        onClick={() => { setOpen((o) => !o); setQuery(""); }}
+        className="flex h-8 w-full items-center gap-2 rounded-md border bg-background px-2 text-left text-xs hover:bg-secondary"
+      >
+        {selected?.image ? (
+          <img src={selected.image} alt="" className="h-5 w-5 shrink-0 object-contain" />
+        ) : (
+          <div className="h-5 w-5 shrink-0 rounded bg-muted" />
+        )}
+        <span className="flex-1 truncate font-condensed">{selected?.name ?? "Select…"}</span>
+      </button>
+      {open && (
+        <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-48 overflow-auto rounded-md border bg-card shadow-xl">
+          <div className="sticky top-0 border-b bg-card p-2">
+            <Input
+              autoFocus
+              placeholder="Search…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="h-7 text-xs"
+            />
+          </div>
+          {filtered.map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => { onChange(opt.id); setOpen(false); setQuery(""); }}
+              className={cn(
+                "flex w-full items-center gap-2 px-2 py-1.5 text-left text-xs hover:bg-secondary",
+                value === opt.id && "bg-primary/10 text-primary",
+              )}
+            >
+              {opt.image ? (
+                <img src={opt.image} alt="" className="h-5 w-5 shrink-0 object-contain" />
+              ) : (
+                <div className="h-5 w-5 shrink-0 rounded bg-muted" />
+              )}
+              <span className="font-condensed">{opt.name}</span>
+            </button>
+          ))}
+          {filtered.length === 0 && (
+            <div className="px-3 py-4 text-center text-xs text-muted-foreground">No results</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DeckBuildEditor({
+  build,
+  onChange,
+}: {
+  build: BeybladeBuild;
+  onChange: (b: BeybladeBuild) => void;
+}) {
+  const selectedBlade =
+    build.type === "standard" ? findPart(STANDARD_BLADES, build.bladeId) : undefined;
+
+  return (
+    <div className="space-y-2">
+      {/* Type toggle */}
+      <div className="grid grid-cols-2 rounded-md border bg-secondary p-0.5">
+        <Button
+          size="sm"
+          variant={build.type === "standard" ? "default" : "ghost"}
+          onClick={() => onChange(createStandardBuild())}
+          className="h-6 font-condensed text-[11px] uppercase tracking-[0.14em]"
+        >
+          UX / BX
+        </Button>
+        <Button
+          size="sm"
+          variant={build.type === "cx" ? "default" : "ghost"}
+          onClick={() => onChange(createCxBuild())}
+          className="h-6 font-condensed text-[11px] uppercase tracking-[0.14em]"
+        >
+          CX
+        </Button>
+      </div>
+
+      {build.type === "standard" ? (
+        <>
+          <DeckPartSelect
+            label="Blade"
+            options={STANDARD_BLADES}
+            value={build.bladeId}
+            onChange={(id) => onChange({ ...build, bladeId: id })}
+          />
+          {!selectedBlade?.integratedRatchet && (
+            <DeckPartSelect
+              label="Ratchet"
+              options={STANDARD_RATCHETS}
+              value={build.ratchetId}
+              onChange={(id) => onChange({ ...build, ratchetId: id })}
+            />
+          )}
+          <DeckPartSelect
+            label="Bit"
+            options={STANDARD_BITS}
+            value={build.bitId}
+            onChange={(id) => onChange({ ...build, bitId: id })}
+          />
+        </>
+      ) : (
+        <>
+          <DeckPartSelect
+            label="Lock Chip"
+            options={CX_LOCK_CHIPS}
+            value={build.lockChipId}
+            onChange={(id) => onChange({ ...build, lockChipId: id })}
+          />
+          <DeckPartSelect
+            label="Main Blade"
+            options={CX_MAIN_BLADES}
+            value={build.mainBladeId}
+            onChange={(id) => onChange({ ...build, mainBladeId: id })}
+          />
+          <DeckPartSelect
+            label="Armor"
+            options={CX_ARMOR}
+            value={build.armorId}
+            onChange={(id) => onChange({ ...build, armorId: id })}
+          />
+          <DeckPartSelect
+            label="Ratchet"
+            options={CX_RATCHETS}
+            value={build.ratchetId}
+            onChange={(id) => onChange({ ...build, ratchetId: id })}
+          />
+          <DeckPartSelect
+            label="Bit"
+            options={CX_BITS}
+            value={build.bitId}
+            onChange={(id) => onChange({ ...build, bitId: id })}
+          />
+        </>
+      )}
+    </div>
   );
 }
 

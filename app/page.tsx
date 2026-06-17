@@ -2,6 +2,7 @@ import {
   ArrowRight,
   CalendarDays,
   Download,
+  Disc3,
   Eraser,
   Gift,
   ImagePlus,
@@ -10,6 +11,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { UserNav } from "@/components/auth/user-nav";
 
 const features = [
   {
@@ -37,6 +39,12 @@ const features = [
     copy: "Remove image backgrounds instantly in your browser — no upload, no account, no API key. Download a clean transparent PNG.",
     icon: Eraser,
     href: "/bg-remover",
+  },
+  {
+    title: "Deck Builder",
+    copy: "Build your own 3G/4G/5G/6G Beyblade X deck from scraped part images — UX & BX standard combos or full CX custom builds.",
+    icon: Disc3,
+    href: "/deck-builder",
   },
 ];
 
@@ -69,7 +77,15 @@ export default function HomePage() {
             >
               BG Remover
             </a>
-            <Button asChild className="font-condensed uppercase tracking-[0.12em]">
+            <a
+              href="/deck-builder"
+              className="hidden px-3 py-2 font-condensed text-xs font-black uppercase tracking-[0.18em] text-white/60 transition hover:text-primary sm:inline-flex"
+            >
+              Deck Builder
+            </a>
+            <div className="mx-1 hidden h-6 w-px bg-white/10 sm:block" />
+            <UserNav />
+            <Button asChild className="ml-2 font-condensed uppercase tracking-[0.12em]">
               <a href="/tool">
                 Open Tool
                 <ArrowRight className="h-4 w-4" />
