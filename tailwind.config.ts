@@ -14,7 +14,8 @@ const config: Config = {
         sans: ["var(--font-inter)", "Inter", "sans-serif"],
         display: ["var(--font-bebas)", "Bebas Neue", "sans-serif"],
         condensed: ["var(--font-barlow)", "Barlow Condensed", "sans-serif"],
-        mono: ["var(--font-plex)", "IBM Plex Mono", "monospace"]
+        mono: ["var(--font-plex)", "IBM Plex Mono", "monospace"],
+        graffiti: ["var(--font-graffiti)", "Brush Script MT", "fantasy"]
       },
       colors: {
         border: "hsl(var(--border))",

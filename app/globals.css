@@ -8,6 +8,7 @@
     --font-bebas: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
     --font-barlow: "Arial Narrow", Arial, sans-serif;
     --font-plex: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    --font-graffiti: "Sedgwick Ave", "Brush Script MT", "Segoe Print", fantasy;
     --background: 0 0% 5%;
     --foreground: 0 0% 98%;
     --card: 0 0% 8%;
@@ -39,12 +40,132 @@
   }
 }
 
+.font-graffiti {
+  font-family: var(--font-graffiti);
+  font-weight: 900;
+  letter-spacing: .02em;
+}
+
 .card-stage {
   background:
     linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px),
     #0d0d0d;
   background-size: 32px 32px;
+}
+
+.graffiti-card-bg {
+  background:
+    radial-gradient(circle at 16% 20%, rgba(255,59,212,.34), transparent 26%),
+    radial-gradient(circle at 78% 24%, rgba(48,242,255,.28), transparent 24%),
+    radial-gradient(circle at 52% 84%, rgba(246,255,65,.22), transparent 28%),
+    repeating-linear-gradient(-18deg, transparent 0 32px, rgba(255,255,255,.08) 33px 35px, transparent 36px 88px),
+    repeating-linear-gradient(84deg, rgba(255,255,255,.035) 0 2px, transparent 2px 14px),
+    linear-gradient(135deg, rgba(255,255,255,.08), transparent 34%),
+    #09070b;
+}
+
+.graffiti-card-bg::before,
+.graffiti-card-bg::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.graffiti-card-bg::before {
+  inset: 0;
+  background:
+    radial-gradient(circle, rgba(255,255,255,.22) 0 1px, transparent 1px),
+    radial-gradient(circle, rgba(0,0,0,.34) 0 1px, transparent 1px);
+  background-position: 0 0, 7px 9px;
+  background-size: 18px 18px, 22px 22px;
+  mix-blend-mode: overlay;
+  opacity: .55;
+}
+
+.graffiti-card-bg::after {
+  left: -12%;
+  right: -12%;
+  top: 42%;
+  height: 76px;
+  transform: rotate(-6deg);
+  background:
+    linear-gradient(90deg, transparent 0 8%, rgba(255,59,212,.82) 8% 30%, transparent 30% 34%, rgba(48,242,255,.74) 34% 62%, transparent 62% 66%, rgba(246,255,65,.72) 66% 86%, transparent 86%);
+  filter: blur(.2px);
+  opacity: .42;
+}
+
+.graffiti-card-bg-subway {
+  background:
+    linear-gradient(0deg, rgba(0,0,0,.45), transparent 36%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.08) 0 3px, transparent 3px 26px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 2px, transparent 2px 54px),
+    radial-gradient(circle at 50% 22%, rgba(246,255,65,.24), transparent 30%),
+    #0b0906;
+}
+
+.graffiti-card-bg-acid {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(140,255,61,.34), transparent 28%),
+    radial-gradient(circle at 76% 26%, rgba(48,242,255,.30), transparent 24%),
+    repeating-linear-gradient(78deg, transparent 0 22px, rgba(140,255,61,.12) 23px 26px, transparent 27px 70px),
+    radial-gradient(circle, rgba(255,255,255,.12) 0 1px, transparent 1px),
+    #050b07;
+  background-size: 100% 100%, 100% 100%, auto, 20px 20px, 100% 100%;
+}
+
+.graffiti-card-bg-throwup {
+  background:
+    radial-gradient(circle at 18% 28%, rgba(255,59,95,.34), transparent 30%),
+    radial-gradient(circle at 76% 18%, rgba(255,255,255,.22), transparent 24%),
+    repeating-radial-gradient(circle at 54% 50%, rgba(255,255,255,.08) 0 8px, transparent 9px 24px),
+    repeating-linear-gradient(-26deg, transparent 0 36px, rgba(255,59,95,.14) 37px 40px, transparent 41px 98px),
+    #0d0710;
+}
+
+.graffiti-export-subway::after,
+.graffiti-export-acid::after,
+.graffiti-export-throwup::after {
+  border-color: rgba(255,255,255,.18);
+}
+
+.graffiti-module-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: rgba(255,255,255,.16);
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.74), rgba(0,0,0,.56)),
+    radial-gradient(circle at 12% 18%, rgba(255,59,212,.28), transparent 28%),
+    radial-gradient(circle at 90% 12%, rgba(48,242,255,.24), transparent 24%),
+    #100d12;
+  box-shadow: 0 18px 42px rgba(0,0,0,.26);
+}
+
+.graffiti-module-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    repeating-linear-gradient(-22deg, transparent 0 34px, rgba(255,255,255,.08) 35px 37px, transparent 38px 92px),
+    radial-gradient(circle, rgba(255,255,255,.16) 0 1px, transparent 1px);
+  background-size: auto, 16px 16px;
+  opacity: .55;
+}
+
+.graffiti-module-card::after {
+  content: "TAG";
+  position: absolute;
+  right: -6px;
+  bottom: -12px;
+  z-index: -1;
+  color: transparent;
+  font-family: var(--font-bebas);
+  font-size: 76px;
+  line-height: 1;
+  -webkit-text-stroke: 1px rgba(48,242,255,.36);
+  transform: rotate(-8deg);
 }
 
 .report-card {
@@ -356,6 +477,35 @@
     radial-gradient(circle at 70% 60%, rgba(255,215,0,.12), transparent 35%);
 }
 
+.pubmat-graffiti-wall {
+  background:
+    radial-gradient(circle at 18% 20%, rgba(255,59,212,.30), transparent 28%),
+    radial-gradient(circle at 78% 28%, rgba(48,242,255,.24), transparent 24%),
+    repeating-linear-gradient(-18deg, transparent 0 36px, rgba(255,255,255,.08) 37px 39px, transparent 40px 98px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.03) 0 1px, transparent 1px 28px);
+}
+
+.pubmat-graffiti-subway {
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.07) 0 3px, transparent 3px 34px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 2px, transparent 2px 72px),
+    radial-gradient(circle at 50% 22%, rgba(246,255,65,.22), transparent 30%);
+}
+
+.pubmat-graffiti-acid {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(140,255,61,.30), transparent 30%),
+    radial-gradient(circle at 78% 26%, rgba(48,242,255,.24), transparent 26%),
+    repeating-linear-gradient(80deg, transparent 0 28px, rgba(140,255,61,.15) 29px 33px, transparent 34px 86px);
+}
+
+.pubmat-graffiti-throwup {
+  background:
+    radial-gradient(circle at 18% 30%, rgba(255,59,95,.30), transparent 32%),
+    radial-gradient(circle at 78% 18%, rgba(255,255,255,.20), transparent 26%),
+    repeating-radial-gradient(circle at 52% 48%, rgba(255,255,255,.08) 0 8px, transparent 9px 28px);
+}
+
 .pubmat-cosmic-stars {
   background:
     radial-gradient(circle, rgba(255,255,255,.7) 1px, transparent 1px) 12px 18px / 80px 80px,
@@ -472,6 +622,41 @@
   background:
     linear-gradient(135deg, rgba(255,255,255,.08) 0 12%, transparent 12% 30%, rgba(255,255,255,.06) 30% 42%, transparent 42%),
     repeating-linear-gradient(0deg, transparent 0 36px, rgba(255,255,255,.08) 37px 38px, transparent 39px 78px);
+}
+
+.winner-bg-graffiti {
+  background:
+    radial-gradient(circle at 18% 24%, color-mix(in srgb, var(--winner-a) 42%, transparent), transparent 30%),
+    radial-gradient(circle at 78% 22%, color-mix(in srgb, var(--winner-b) 36%, transparent), transparent 24%),
+    radial-gradient(circle at 48% 86%, rgba(246,255,65,.22), transparent 30%),
+    repeating-linear-gradient(-18deg, transparent 0 38px, rgba(255,255,255,.13) 39px 42px, transparent 43px 102px),
+    radial-gradient(circle, rgba(255,255,255,.16) 0 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, auto, 18px 18px;
+}
+
+.winner-bg-graffiti_mint {
+  background:
+    radial-gradient(circle at 18% 24%, color-mix(in srgb, var(--winner-a) 45%, transparent), transparent 32%),
+    radial-gradient(circle at 78% 22%, color-mix(in srgb, var(--winner-b) 38%, transparent), transparent 26%),
+    repeating-linear-gradient(78deg, transparent 0 28px, color-mix(in srgb, var(--winner-a) 22%, transparent) 29px 34px, transparent 35px 88px),
+    radial-gradient(circle, rgba(255,255,255,.16) 0 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, auto, 18px 18px;
+}
+
+.winner-bg-graffiti_gold {
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.09) 0 3px, transparent 3px 36px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 2px, transparent 2px 76px),
+    radial-gradient(circle at 50% 18%, color-mix(in srgb, var(--winner-a) 32%, transparent), transparent 34%),
+    linear-gradient(180deg, transparent 0 58%, rgba(0,0,0,.54) 58% 100%);
+}
+
+.winner-bg-graffiti_crimson {
+  background:
+    radial-gradient(circle at 20% 30%, color-mix(in srgb, var(--winner-a) 42%, transparent), transparent 34%),
+    radial-gradient(circle at 78% 18%, rgba(255,255,255,.24), transparent 26%),
+    repeating-radial-gradient(circle at 52% 48%, rgba(255,255,255,.09) 0 8px, transparent 9px 30px),
+    repeating-linear-gradient(-26deg, transparent 0 36px, color-mix(in srgb, var(--winner-a) 20%, transparent) 37px 42px, transparent 43px 100px);
 }
 
 .winner-bg-clean {

@@ -70,7 +70,7 @@ import {
 type CardType = "swiss" | "topcut";
 type GeneratorMode = "cards" | "pubmat" | "winners";
 type FeedbackCategory = "problem" | "feature" | "suggestion";
-type LayoutKey = "report" | "arcade" | "blade" | "award" | "minimal" | "terminal" | "ticket" | "split" | "circuit";
+type LayoutKey = "report" | "arcade" | "blade" | "award" | "minimal" | "terminal" | "ticket" | "split" | "circuit" | "graffiti";
 type PubMatThemeKey =
   | "hyper"
   | "arena"
@@ -85,6 +85,10 @@ type PubMatThemeKey =
   | "manga"
   | "gold"
   | "street"
+  | "graffiti"
+  | "graffiti_mint"
+  | "graffiti_gold"
+  | "graffiti_crimson"
   | "cosmic"
   | "volcanic";
 type DesignKey =
@@ -127,12 +131,17 @@ type DesignKey =
   | "ember_circuit"
   | "lime_circuit"
   | "gold_circuit"
-  | "void_circuit";
+  | "void_circuit"
+  | "graffiti_wall"
+  | "graffiti_subway"
+  | "graffiti_acid"
+  | "graffiti_throwup";
 
 type Design = {
   label: string;
   tagline: string;
   layout: LayoutKey;
+  graffitiStyle?: "wall" | "subway" | "acid" | "throwup";
   a: string;
   b: string;
   bg: string;
@@ -225,6 +234,8 @@ type PubMatState = {
 type PubMatTheme = {
   label: string;
   template?: "classic" | "futuristic" | "arena" | "tribe" | "contact" | "catchup" | "cup" | "neon" | "manga" | "gold" | "street" | "cosmic" | "volcanic";
+  texture?: "graffiti";
+  graffitiStyle?: "wall" | "subway" | "acid" | "throwup";
   bg: string;
   paper: string;
   ink: string;
@@ -243,6 +254,10 @@ type WinnerTemplateKey =
   | "splitfire"
   | "royal"
   | "posterwall"
+  | "graffiti"
+  | "graffiti_mint"
+  | "graffiti_gold"
+  | "graffiti_crimson"
   | "blueprint"
   | "prism"
   | "clean";
@@ -282,10 +297,12 @@ type WinnerFontKey =
   | "tech"
   | "editorial"
   | "arcade"
+  | "graffiti"
   | "clean";
 type WinnerTemplate = {
   label: string;
   mood: string;
+  graffitiStyle?: "wall" | "subway" | "acid" | "throwup";
   bg: string;
   accent: string;
   accent2: string;
@@ -674,6 +691,50 @@ const designs: Record<DesignKey, Design> = {
     panel: "rgba(129,140,248,.07)",
     text: "#eeeeff",
   },
+  graffiti_wall: {
+    label: "Graffiti",
+    tagline: "Wall Tag",
+    layout: "graffiti",
+    graffitiStyle: "wall",
+    a: "#ff3bd4",
+    b: "#30f2ff",
+    bg: "#09070b",
+    panel: "rgba(255,255,255,.1)",
+    text: "#fff8ee",
+  },
+  graffiti_subway: {
+    label: "Subway",
+    tagline: "Tunnel Throwie",
+    layout: "graffiti",
+    graffitiStyle: "subway",
+    a: "#f6ff41",
+    b: "#ff6a00",
+    bg: "#0b0906",
+    panel: "rgba(246,255,65,.1)",
+    text: "#fffbed",
+  },
+  graffiti_acid: {
+    label: "Acid Tag",
+    tagline: "Fresh Paint",
+    layout: "graffiti",
+    graffitiStyle: "acid",
+    a: "#8cff3d",
+    b: "#30f2ff",
+    bg: "#050b07",
+    panel: "rgba(140,255,61,.1)",
+    text: "#f4ffe9",
+  },
+  graffiti_throwup: {
+    label: "Throw-Up",
+    tagline: "Bubble Marker",
+    layout: "graffiti",
+    graffitiStyle: "throwup",
+    a: "#ffffff",
+    b: "#ff3b5f",
+    bg: "#0d0710",
+    panel: "rgba(255,255,255,.1)",
+    text: "#fff4fa",
+  },
 };
 
 const initialRounds: Round[] = [
@@ -826,6 +887,58 @@ const pubMatThemes: Record<PubMatThemeKey, PubMatTheme> = {
     accent2: "#ffd700",
     block: "#0e0018",
   },
+  graffiti: {
+    label: "Graffiti Wall",
+    template: "street",
+    texture: "graffiti",
+    graffitiStyle: "wall",
+    bg: "#070609",
+    paper: "#09070b",
+    ink: "#fff8ee",
+    muted: "#b8b0be",
+    accent: "#ff3bd4",
+    accent2: "#30f2ff",
+    block: "#151018",
+  },
+  graffiti_mint: {
+    label: "Mint Tag",
+    template: "street",
+    texture: "graffiti",
+    graffitiStyle: "acid",
+    bg: "#030b08",
+    paper: "#050c09",
+    ink: "#f2fff3",
+    muted: "#9cc4ad",
+    accent: "#8cff3d",
+    accent2: "#30f2ff",
+    block: "#07140d",
+  },
+  graffiti_gold: {
+    label: "Subway Gold",
+    template: "street",
+    texture: "graffiti",
+    graffitiStyle: "subway",
+    bg: "#0d0802",
+    paper: "#100a03",
+    ink: "#fff8df",
+    muted: "#c3ad78",
+    accent: "#f6ff41",
+    accent2: "#ff6a00",
+    block: "#1a1004",
+  },
+  graffiti_crimson: {
+    label: "Crimson Tag",
+    template: "street",
+    texture: "graffiti",
+    graffitiStyle: "throwup",
+    bg: "#0d0508",
+    paper: "#100508",
+    ink: "#fff1f5",
+    muted: "#c28b9a",
+    accent: "#ff3b5f",
+    accent2: "#ffffff",
+    block: "#1a080d",
+  },
   cosmic: {
     label: "Cosmic Arena",
     template: "cosmic",
@@ -956,6 +1069,42 @@ const winnerTemplates: Record<WinnerTemplateKey, WinnerTemplate> = {
     accent2: "#f5d547",
     text: "#ffffff",
   },
+  graffiti: {
+    label: "Graffiti Wall",
+    mood: "Spray-paint winner wall",
+    graffitiStyle: "wall",
+    bg: "#09070b",
+    accent: "#ff3bd4",
+    accent2: "#30f2ff",
+    text: "#fff8ee",
+  },
+  graffiti_mint: {
+    label: "Mint Tag",
+    mood: "Fresh paint winner wall",
+    graffitiStyle: "acid",
+    bg: "#050c09",
+    accent: "#8cff3d",
+    accent2: "#30f2ff",
+    text: "#f2fff3",
+  },
+  graffiti_gold: {
+    label: "Subway Gold",
+    mood: "Warm tunnel poster",
+    graffitiStyle: "subway",
+    bg: "#100a03",
+    accent: "#f6ff41",
+    accent2: "#ff6a00",
+    text: "#fff8df",
+  },
+  graffiti_crimson: {
+    label: "Crimson Tag",
+    mood: "Red marker champion wall",
+    graffitiStyle: "throwup",
+    bg: "#100508",
+    accent: "#ff3b5f",
+    accent2: "#ffffff",
+    text: "#fff1f5",
+  },
   blueprint: {
     label: "Blueprint",
     mood: "Technical bracket board",
@@ -1007,6 +1156,11 @@ const winnerFontPresets: Record<WinnerFontKey, { label: string; display: string;
     label: "Arcade Block",
     display: '"Arial Black", Impact, sans-serif',
     body: '"Trebuchet MS", Arial, sans-serif',
+  },
+  graffiti: {
+    label: "Graffiti Tag",
+    display: 'var(--font-graffiti), "Brush Script MT", Impact, fantasy',
+    body: '"Arial Narrow", Arial, sans-serif',
   },
   clean: {
     label: "Clean Club",
@@ -4258,6 +4412,7 @@ function WinnersPoster({
   const runnerUps = players.slice(1, 4);
   const bgImage = winners.background ? `url(${winners.background})` : undefined;
   const isLight = templateKey === "anime" || templateKey === "clean";
+  const isGraffitiTemplate = templateKey.startsWith("graffiti");
   const fonts = getWinnerFonts(winners);
   const rootStyle = {
     background: template.bg,
@@ -4322,25 +4477,30 @@ function WinnersPoster({
     );
   }
 
-  if (templateKey === "anime" || templateKey === "posterwall" || templateKey === "blueprint") {
+  if (templateKey === "anime" || templateKey === "posterwall" || templateKey === "blueprint" || isGraffitiTemplate) {
     return (
       <div className="winner-font-scope relative h-[780px] w-[780px] overflow-hidden" style={rootStyle}>
         <WinnerCustomFontStyle winners={winners} />
         <WinnerBackdrop templateKey={templateKey} template={template} image={bgImage} />
+        {isGraffitiTemplate && (
+          <div className="pointer-events-none absolute -left-6 top-[86px] z-10 -rotate-6 font-graffiti text-[118px] leading-none opacity-35" style={{ color: accent, WebkitTextStroke: "3px #000", textShadow: `10px 10px 0 ${accent2}` }}>
+            {template.graffitiStyle === "subway" ? "RAIL" : template.graffitiStyle === "acid" ? "DRIP" : template.graffitiStyle === "throwup" ? "POP" : "TAG"}
+          </div>
+        )}
         <div className="absolute left-8 right-8 top-7 flex items-center justify-between gap-4">
           <WinnerLogo src={winners.logoLeft} fallback={winners.organizer} />
           <div className="text-center">
             <div className="winner-line-lock font-condensed text-sm font-black uppercase tracking-[0.18em]" style={{ color: muted }}>
               {winners.game}
             </div>
-            <div className="winner-line-lock font-display text-5xl leading-none" style={{ color: accent }}>
+            <div className={cn("winner-line-lock text-5xl leading-none", isGraffitiTemplate ? "font-graffiti" : "font-display")} style={{ color: accent, textShadow: isGraffitiTemplate ? `4px 4px 0 #000, 7px 7px 0 ${accent2}` : undefined }}>
               {winners.eventName}
             </div>
           </div>
           <WinnerLogo src={winners.logoRight} fallback={winners.venue} />
         </div>
         <div className="absolute inset-x-8 top-28 grid grid-cols-[1.1fr_.9fr] gap-5">
-          <div className="relative h-[500px] overflow-hidden rounded-md border-[6px]" style={{ borderColor: accent }}>
+          <div className={cn("relative h-[500px] overflow-hidden border-[6px]", isGraffitiTemplate ? "-rotate-1 rounded-none shadow-[10px_10px_0_rgba(0,0,0,.72)]" : "rounded-md")} style={{ borderColor: accent }}>
             <WinnerPhoto player={featured} scale={winners.playerScale} />
             <div className="absolute left-4 top-5 -rotate-2">
               <WinnerPlacementLabel
@@ -4354,7 +4514,7 @@ function WinnersPoster({
           </div>
           <div className="flex flex-col gap-3 pt-8">
             {runnerUps.map((player, index) => (
-              <div key={`${player.name}-${index}`} className="grid grid-cols-[96px_1fr] overflow-hidden rounded-md border bg-black/40" style={{ borderColor: `${accent2}bb` }}>
+              <div key={`${player.name}-${index}`} className={cn("grid grid-cols-[96px_1fr] overflow-hidden border bg-black/40", isGraffitiTemplate ? "rotate-1 rounded-none shadow-[5px_5px_0_rgba(0,0,0,.7)]" : "rounded-md")} style={{ borderColor: `${accent2}bb` }}>
                 <div className="relative h-28">
                   <WinnerPhoto player={player} scale={winners.playerScale} />
                 </div>
@@ -4374,8 +4534,8 @@ function WinnersPoster({
                 </div>
               </div>
             ))}
-            <div className="mt-auto rounded-md p-4" style={{ background: isLight ? "#ffffffcc" : "#00000088" }}>
-              <div className="winner-lock font-display text-5xl leading-none" style={{ color: accent }}>
+            <div className={cn("mt-auto p-4", isGraffitiTemplate ? "-rotate-1 border-4 border-black shadow-[8px_8px_0_rgba(0,0,0,.8)]" : "rounded-md")} style={{ background: isLight ? "#ffffffcc" : isGraffitiTemplate ? accent2 : "#00000088" }}>
+              <div className={cn("winner-lock text-5xl leading-none", isGraffitiTemplate ? "font-graffiti text-black" : "font-display")} style={{ color: isGraffitiTemplate ? "#080808" : accent }}>
                 {winners.headline}
               </div>
               <div className="winner-line-lock mt-2 font-condensed text-xl font-black uppercase tracking-[0.08em]">
@@ -6498,12 +6658,45 @@ function StreetBattlePubMatPoster({ pubMat, theme }: { pubMat: PubMatState; them
   const gallery = [pubMat.images.gallery1, pubMat.images.gallery2, pubMat.images.gallery3, pubMat.images.gallery4];
   const visibleSponsors = pubMat.sponsors.filter((s) => s.text || s.image);
   const visibleNotes = pubMat.notes.filter(Boolean);
+  const graffitiClass =
+    theme.graffitiStyle === "subway"
+      ? "pubmat-graffiti-subway"
+      : theme.graffitiStyle === "acid"
+        ? "pubmat-graffiti-acid"
+        : theme.graffitiStyle === "throwup"
+          ? "pubmat-graffiti-throwup"
+          : "pubmat-graffiti-wall";
 
   return (
     <div className="relative min-h-[1080px] overflow-hidden" style={{ background: theme.paper, color: theme.ink }}>
-      <div className="pubmat-street-grid absolute inset-0 opacity-60" />
+      <div className={cn(theme.texture === "graffiti" ? graffitiClass : "pubmat-street-grid", "absolute inset-0 opacity-70")} />
       <div className="absolute left-0 top-0 h-full w-1/2" style={{ background: `radial-gradient(ellipse at 20% 40%, ${theme.accent}22, transparent 60%)` }} />
       <div className="absolute right-0 top-0 h-full w-1/2" style={{ background: `radial-gradient(ellipse at 80% 40%, ${theme.accent2}18, transparent 60%)` }} />
+      {theme.texture === "graffiti" && (
+        <div className="pointer-events-none absolute inset-x-5 top-24 z-0 flex items-center justify-between opacity-25">
+          {theme.graffitiStyle === "subway" ? (
+            <div className="h-20 flex-1 border-y-4 border-black bg-white/25">
+              <div className="grid h-full grid-cols-6 gap-2 p-3">
+                {[0, 1, 2, 3, 4, 5].map((item) => (
+                  <span key={item} className="border-2 border-black" style={{ background: item % 2 ? theme.accent : theme.accent2 }} />
+                ))}
+              </div>
+            </div>
+          ) : theme.graffitiStyle === "acid" ? (
+            <div className="font-graffiti text-[116px] leading-none" style={{ color: theme.accent, WebkitTextStroke: "2px #000", textShadow: `8px 8px 0 ${theme.accent2}` }}>
+              DRIP
+            </div>
+          ) : theme.graffitiStyle === "throwup" ? (
+            <div className="font-graffiti text-[116px] leading-none" style={{ color: theme.accent2, WebkitTextStroke: `5px ${theme.accent}`, textShadow: "8px 8px 0 #000" }}>
+              POP
+            </div>
+          ) : (
+            <div className="font-graffiti text-[116px] leading-none" style={{ color: theme.accent, WebkitTextStroke: "2px #000", textShadow: `8px 8px 0 ${theme.accent2}` }}>
+              WALL
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="relative z-10">
         {/* Health-bar style top header */}
@@ -7618,6 +7811,63 @@ function LayoutPreview({
       </>
     );
 
+  if (layout === "graffiti") {
+    const style = d.graffitiStyle || "wall";
+    if (style === "subway")
+      return (
+        <>
+          <div className="graffiti-card-bg graffiti-card-bg-subway absolute inset-0 opacity-95" />
+          <div className="absolute left-2 right-2 top-12 h-16 rounded-sm border-2 border-black bg-white/12">
+            <div className="grid h-full grid-cols-4 gap-1 p-1.5">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="rounded-sm border border-black/70" style={{ background: i % 2 ? d.b : d.a }} />
+              ))}
+            </div>
+          </div>
+          <div className="font-graffiti absolute left-3 top-6 -rotate-6 text-4xl leading-none" style={{ color: d.a, WebkitTextStroke: "1px #000", textShadow: `3px 3px 0 ${d.b}` }}>
+            RAIL
+          </div>
+          <div className="absolute bottom-11 left-3 right-3 h-3 bg-black" />
+        </>
+      );
+    if (style === "acid")
+      return (
+        <>
+          <div className="graffiti-card-bg graffiti-card-bg-acid absolute inset-0 opacity-95" />
+          <div className="font-graffiti absolute left-1 top-7 -rotate-3 text-5xl leading-none" style={{ color: d.a, WebkitTextStroke: "1px #000", textShadow: `3px 3px 0 ${d.b}` }}>
+            DRIP
+          </div>
+          {[24, 42, 66].map((left, i) => (
+            <div key={left} className="absolute top-[76px] w-3 rounded-b-full" style={{ left, height: 24 + i * 10, background: i % 2 ? d.b : d.a }} />
+          ))}
+          <div className="absolute bottom-12 left-4 right-7 h-12 -skew-x-12 border-2 border-black" style={{ background: `${d.a}aa` }} />
+        </>
+      );
+    if (style === "throwup")
+      return (
+        <>
+          <div className="graffiti-card-bg graffiti-card-bg-throwup absolute inset-0 opacity-95" />
+          <div className="font-graffiti absolute -left-1 top-8 rotate-[-8deg] text-5xl leading-none" style={{ color: d.a, WebkitTextStroke: `2px ${d.b}`, textShadow: "4px 4px 0 #000" }}>
+            POP
+          </div>
+          <div className="absolute right-3 top-16 h-12 w-12 rounded-full border-[7px] border-black" style={{ background: d.b }} />
+          <div className="absolute bottom-12 left-3 right-3 rotate-2 border-2 border-black bg-white/85 p-1">
+            <div className="h-2" style={{ background: d.b }} />
+          </div>
+        </>
+      );
+    return (
+      <>
+        <div className="graffiti-card-bg absolute inset-0 opacity-95" />
+        <div className="font-graffiti absolute -left-5 top-8 rotate-[-12deg] text-4xl leading-none" style={{ color: d.a, WebkitTextStroke: "1px #000", textShadow: `3px 3px 0 ${d.b}` }}>
+          TAG
+        </div>
+        <div className="absolute right-2 top-10 h-10 w-16 -rotate-6 rounded-full border-4" style={{ borderColor: d.b }} />
+        <div className="absolute bottom-12 left-4 right-4 h-2 -skew-x-12" style={{ background: d.a, boxShadow: `0 8px 0 ${d.b}` }} />
+      </>
+    );
+  }
+
   // minimal
   return (
     <>
@@ -7650,6 +7900,7 @@ function CardRenderer(props: CardProps) {
       case "ticket":   return <TicketCard {...props} />;
       case "split":    return <SplitCard {...props} />;
       case "circuit":  return <CircuitCard {...props} />;
+      case "graffiti": return <GraffitiCard {...props} />;
       default:         return <ReportCard {...props} />;
     }
   })();
@@ -7664,6 +7915,216 @@ function CardRenderer(props: CardProps) {
 }
 
 // ─── layout: report (current style) ──────────────────────────────────────────
+function GraffitiCard({ form, rounds, topCut, cardType, palette }: CardProps) {
+  const wins = rounds.filter((r) => r.result === "win").length;
+  const losses = rounds.length - wins;
+  const graffitiStyle = palette.graffitiStyle || "wall";
+  const isSubway = graffitiStyle === "subway";
+  const isAcid = graffitiStyle === "acid";
+  const isThrowup = graffitiStyle === "throwup";
+  const titleColor =
+    form.champTitle.toUpperCase() === "ELIMINATED" ? "#ff3b3b" : palette.a;
+  const rows = cardType === "swiss"
+    ? rounds.map((round, index) => ({
+        label: round.rnd || `R${index + 1}`,
+        opp: round.opp || "Opponent",
+        score: round.score || "0 - 0",
+        result: round.result,
+      }))
+    : [
+        ...topCut.map((match) => ({
+          label: match.stage || "Bracket",
+          opp: match.opp || "Opponent",
+          score: match.score || "0 - 0",
+          result: match.result,
+        })),
+        ...(form.finalsOpp
+          ? [{
+              label: "Finals",
+              opp: form.finalsOpp,
+              score: form.finalsSc,
+              result: form.finalsResult,
+            }]
+          : []),
+      ];
+
+  return (
+    <div
+      className={cn(
+        "report-card relative min-h-[760px] overflow-hidden p-7",
+        isSubway && "graffiti-export-subway",
+        isAcid && "graffiti-export-acid",
+        isThrowup && "graffiti-export-throwup",
+      )}
+      style={{ background: palette.bg, color: palette.text }}
+    >
+      <div
+        className={cn(
+          "graffiti-card-bg absolute inset-0",
+          isSubway && "graffiti-card-bg-subway",
+          isAcid && "graffiti-card-bg-acid",
+          isThrowup && "graffiti-card-bg-throwup",
+        )}
+      />
+      {isSubway ? (
+        <>
+          <div className="absolute inset-x-0 top-[118px] h-[118px] border-y-4 border-black bg-white/10">
+            <div className="grid h-full grid-cols-5 gap-3 px-8 py-5">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div key={i} className="rounded border-4 border-black/80" style={{ background: i % 2 ? `${palette.b}cc` : `${palette.a}cc` }} />
+              ))}
+            </div>
+          </div>
+          <div className="absolute inset-x-0 top-[246px] h-5 bg-black" />
+          <div className="absolute inset-x-0 top-[270px] h-2" style={{ background: palette.a }} />
+        </>
+      ) : isAcid ? (
+        <>
+          {[72, 132, 482, 560].map((left, index) => (
+            <div key={left} className="absolute top-0 w-8 rounded-b-full" style={{ left, height: 86 + index * 18, background: index % 2 ? palette.b : palette.a }} />
+          ))}
+          <div className="absolute -right-20 top-28 h-64 w-64 rounded-full blur-sm opacity-40" style={{ background: palette.a }} />
+          <div className="absolute left-8 right-8 bottom-28 h-16 -skew-x-12 border-4 border-black" style={{ background: `${palette.a}88` }} />
+        </>
+      ) : isThrowup ? (
+        <>
+          <div className="absolute -left-16 top-24 h-52 w-80 rotate-[-14deg] rounded-[50%] border-[18px] border-black bg-white/85 opacity-30" />
+          <div className="absolute -right-12 top-40 h-56 w-56 rounded-full border-[22px] border-black" style={{ background: `${palette.b}99` }} />
+          <div className="absolute inset-x-8 bottom-24 rotate-1 border-4 border-black bg-white/85 p-3 shadow-[10px_10px_0_rgba(0,0,0,.8)]">
+            <div className="h-3" style={{ background: palette.b }} />
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="absolute -left-20 top-16 h-44 w-44 rotate-12 rounded-full border-[18px] opacity-60" style={{ borderColor: palette.b }} />
+          <div className="absolute -right-16 bottom-20 h-52 w-52 -rotate-12 rounded-full border-[22px] opacity-50" style={{ borderColor: palette.a }} />
+        </>
+      )}
+      <div className="font-graffiti absolute left-5 top-6 -rotate-6 text-[118px] leading-none opacity-[0.08]" style={{ WebkitTextStroke: `2px ${palette.text}`, color: "transparent" }}>
+        {isSubway ? "SUBWAY" : isAcid ? "DRIP" : isThrowup ? "THROW" : "STREET"}
+      </div>
+
+      <div className="relative z-10 flex items-start justify-between gap-5">
+        <div className="min-w-0">
+          <div className={cn("inline-flex border-2 border-black bg-white px-3 py-1 font-condensed text-xs font-black uppercase tracking-[0.18em] text-black shadow-[5px_5px_0_rgba(0,0,0,.85)]", isSubway ? "rotate-0" : "-rotate-1", isAcid && "rounded-b-xl", isThrowup && "rounded-full")}>
+            {form.game}
+          </div>
+          <h1
+            className={cn("font-graffiti mt-5 break-words leading-[0.82] uppercase", isSubway ? "text-[82px]" : "text-[92px]", isThrowup && "text-[98px]")}
+            style={{
+              color: isThrowup ? palette.a : palette.text,
+              WebkitTextStroke: isThrowup ? `4px ${palette.b}` : "2px #000",
+              textShadow: isSubway
+                ? `0 8px 0 #000, 0 12px 0 ${palette.a}`
+                : isAcid
+                  ? `3px 7px 0 ${palette.a}, 7px 12px 0 #000`
+                  : `5px 5px 0 ${palette.a}, 9px 9px 0 ${palette.b}`,
+            }}
+          >
+            {form.player || "Player"}
+          </h1>
+          <div className="mt-4 flex flex-wrap gap-2 font-condensed text-sm font-black uppercase tracking-[0.12em]">
+            {[form.tournament, form.organizer, form.date].filter(Boolean).map((item, index) => (
+              <span
+                key={`${item}-${index}`}
+                className="max-w-[260px] truncate border border-white/20 bg-black/70 px-3 py-1"
+                style={{ color: index % 2 ? palette.b : palette.a }}
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="shrink-0 rotate-3 border-4 border-black bg-white px-4 py-3 text-center shadow-[7px_7px_0_rgba(0,0,0,.9)]">
+          <div className="font-display text-4xl leading-none text-black">
+            {form.cardNum}
+          </div>
+          <div className="font-condensed text-[10px] font-black uppercase tracking-[0.18em] text-black/60">
+            Card No.
+          </div>
+        </div>
+      </div>
+
+      <div className="relative z-10 mt-8 grid grid-cols-[1fr_150px] gap-5">
+        <div className="space-y-3">
+          <div
+            className={cn(
+              "px-4 py-2 font-condensed text-xl font-black uppercase tracking-[0.18em] text-black shadow-[5px_5px_0_rgba(0,0,0,.85)]",
+              isSubway ? "border-y-4 border-black" : "-rotate-1",
+              isAcid && "rounded-b-2xl",
+              isThrowup && "rounded-full border-4 border-black bg-white",
+            )}
+            style={{ background: palette.a }}
+          >
+            {cardType === "swiss" ? "Swiss Round Results" : "Top Cut Results"}
+          </div>
+          {rows.map((row, index) => {
+            const good = row.result === "win";
+            const resultColor = good ? palette.b : "#ff4b5f";
+            return (
+              <div
+                key={`${row.label}-${index}`}
+                className={cn(
+                  "grid grid-cols-[82px_1fr_70px_48px] items-center gap-3 border-2 border-black bg-black/72 px-3 py-3 shadow-[4px_4px_0_rgba(255,255,255,.12)]",
+                  isSubway && "rounded-sm border-white/20 bg-black/82",
+                  isAcid && "rounded-b-xl",
+                  isThrowup && "rotate-[-1deg] rounded-full bg-white/90 text-black",
+                )}
+              >
+                <span className={cn("truncate font-mono text-xs", isThrowup ? "text-black/45" : "text-white/45")}>{row.label}</span>
+                <span className="truncate font-condensed text-2xl font-black uppercase" style={{ color: isThrowup ? "#111111" : palette.text }}>
+                  {row.opp}
+                </span>
+                <span className="font-mono text-sm font-black" style={{ color: resultColor }}>
+                  {row.score}
+                </span>
+                <span className="text-center font-condensed text-lg font-black uppercase" style={{ color: resultColor }}>
+                  {good ? "W" : "L"}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="space-y-3">
+          {[
+            ["Wins", cardType === "swiss" ? wins : topCutWins(topCut, form), palette.a],
+            ["Loss", cardType === "swiss" ? losses : topCutLosses(topCut, form), "#ff4b5f"],
+            ["Type", cardType === "swiss" ? "Swiss" : "Cut", palette.b],
+          ].map(([label, value, color], index) => (
+            <div
+              key={label}
+              className={cn("border-2 border-black bg-white p-3 text-right shadow-[5px_5px_0_rgba(0,0,0,.9)]", isSubway && "rounded-none", isAcid && "rounded-b-2xl", isThrowup && "rounded-[24px]")}
+              style={{ transform: isSubway ? "none" : `rotate(${index % 2 ? 2 : -2}deg)` }}
+            >
+              <div className="font-condensed text-xs font-black uppercase tracking-[0.16em] text-black/55">
+                {label}
+              </div>
+              <div className="font-display text-5xl leading-none text-black" style={{ textShadow: `3px 3px 0 ${color}` }}>
+                {value}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="relative z-10 mt-7 flex items-end justify-between gap-5">
+        <div
+          className="font-graffiti max-w-[360px] -rotate-1 border-4 border-black px-5 py-3 text-5xl leading-none uppercase text-black shadow-[7px_7px_0_rgba(0,0,0,.9)]"
+          style={{ background: titleColor }}
+        >
+          {form.champTitle || "Champion"}
+        </div>
+        {form.advMsg && (
+          <div className="max-w-[220px] rotate-2 border-2 border-white/20 bg-black/75 px-4 py-3 text-right font-condensed text-2xl font-black uppercase leading-none" style={{ color: palette.b }}>
+            {form.advMsg}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function ReportCard({ form, rounds, topCut, cardType, palette }: CardProps) {
   const wins = rounds.filter((r) => r.result === "win").length;
   const losses = rounds.length - wins;

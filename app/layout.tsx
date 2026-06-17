@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
+import { Sedgwick_Ave } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
+
+const sedgwickAve = Sedgwick_Ave({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-graffiti",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Leandro's Tournament Card Generator",
@@ -18,7 +26,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body suppressHydrationWarning>
+      <body className={sedgwickAve.variable} suppressHydrationWarning>
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>

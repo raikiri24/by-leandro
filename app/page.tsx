@@ -222,18 +222,34 @@ export default function HomePage() {
             event recaps.
           </p>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          {features.map((feature) => {
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((feature, index) => {
             const Icon = feature.icon;
+            const accents = [
+              ["#ff3bd4", "#30f2ff"],
+              ["#f6ff41", "#ff6a00"],
+              ["#30f2ff", "#ff3bd4"],
+              ["#8cff3d", "#30f2ff"],
+              ["#ff6a00", "#f6ff41"],
+              ["#ffffff", "#ff3bd4"],
+            ][index % 6];
             return (
               <div
                 key={feature.title}
-                className="flex flex-col rounded-lg border border-white/10 bg-white/[0.04] p-5"
+                className="graffiti-module-card flex min-h-[230px] flex-col rounded-lg border p-5 transition duration-200 hover:-translate-y-0.5 hover:border-white/25"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/12 text-primary">
+                <div
+                  className="flex h-11 w-11 -rotate-3 items-center justify-center rounded-md border-2 border-black shadow-[4px_4px_0_rgba(0,0,0,.85)]"
+                  style={{ background: accents[0], color: "#090909" }}
+                >
                   <Icon className="h-5 w-5" />
                 </div>
-                <h3 className="mt-4 font-condensed text-2xl font-black uppercase text-white">
+                <h3
+                  className="font-graffiti mt-5 text-4xl uppercase leading-none text-white"
+                  style={{
+                    textShadow: `3px 3px 0 ${accents[1]}, 5px 5px 0 #000`,
+                  }}
+                >
                   {feature.title}
                 </h3>
                 <p className="mt-2 flex-1 text-sm leading-6 text-white/60">
@@ -242,7 +258,8 @@ export default function HomePage() {
                 {"href" in feature && feature.href && (
                   <a
                     href={feature.href}
-                    className="mt-4 inline-flex items-center gap-1 font-condensed text-xs font-black uppercase tracking-[0.12em] text-primary transition hover:text-primary/80"
+                    className="mt-4 inline-flex items-center gap-1 self-start border border-white/15 bg-black/55 px-3 py-2 font-condensed text-xs font-black uppercase tracking-[0.12em] transition hover:border-white/30"
+                    style={{ color: accents[0] }}
                   >
                     Try it
                     <ArrowRight className="h-3 w-3" />
