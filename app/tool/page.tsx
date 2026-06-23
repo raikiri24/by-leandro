@@ -70,7 +70,7 @@ import {
 type CardType = "swiss" | "topcut";
 type GeneratorMode = "cards" | "pubmat" | "winners";
 type FeedbackCategory = "problem" | "feature" | "suggestion";
-type LayoutKey = "report" | "arcade" | "blade" | "award" | "minimal" | "terminal" | "ticket" | "split" | "circuit" | "graffiti";
+type LayoutKey = "report" | "arcade" | "retro" | "blade" | "award" | "minimal" | "terminal" | "ticket" | "split" | "circuit" | "graffiti";
 type PubMatThemeKey =
   | "hyper"
   | "arena"
@@ -346,13 +346,13 @@ const designs: Record<DesignKey, Design> = {
   // arcade layout
   retro: {
     label: "Retro",
-    tagline: "Retro Score",
-    layout: "arcade",
-    a: "#ffe066",
-    b: "#7a5e00",
-    bg: "#0c0900",
-    panel: "rgba(255,224,102,.08)",
-    text: "#fff9dd",
+    tagline: "Vintage Playoff",
+    layout: "retro",
+    a: "#f65d35",
+    b: "#138a8a",
+    bg: "#f4dfb8",
+    panel: "rgba(62,42,24,.12)",
+    text: "#2f2118",
   },
   neon: {
     label: "Neon",
@@ -7630,6 +7630,43 @@ function LayoutPreview({
       </>
     );
 
+  if (layout === "retro")
+    return (
+      <>
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(circle at 20% 18%, rgba(246,93,53,.28), transparent 22%), radial-gradient(circle at 82% 78%, rgba(19,138,138,.24), transparent 24%), repeating-linear-gradient(0deg, transparent 0 13px, rgba(47,33,24,.08) 13px 14px)",
+          }}
+        />
+        <div
+          className="absolute -right-8 top-5 h-20 w-20 rounded-full border-[14px]"
+          style={{ borderColor: d.b }}
+        />
+        <div
+          className="absolute -left-6 bottom-8 h-16 w-16 rotate-45"
+          style={{ background: `${d.a}cc` }}
+        />
+        <div
+          className="absolute left-4 right-4 top-5 h-8 border-y-2"
+          style={{ borderColor: d.text }}
+        />
+        <div className="absolute left-5 right-8 top-16 space-y-2">
+          {[0.72, 0.52, 0.64].map((w, i) => (
+            <div
+              key={i}
+              className="h-2"
+              style={{
+                background: i === 1 ? d.b : d.a,
+                width: `${w * 100}%`,
+              }}
+            />
+          ))}
+        </div>
+      </>
+    );
+
   if (layout === "blade")
     return (
       <>
@@ -7893,6 +7930,7 @@ function CardRenderer(props: CardProps) {
   const layout = (() => {
     switch (props.palette.layout) {
       case "arcade":   return <ArcadeCard {...props} />;
+      case "retro":    return <RetroCard {...props} />;
       case "blade":    return <BladeCard {...props} />;
       case "award":    return <AwardCard {...props} />;
       case "minimal":  return <MinimalCard {...props} />;
@@ -7906,10 +7944,10 @@ function CardRenderer(props: CardProps) {
   })();
   return (
     <>
-      {layout}
       {props.deck?.show && props.deck.builds.length > 0 && (
         <DeckSection deck={props.deck} palette={props.palette} />
       )}
+      {layout}
     </>
   );
 }
@@ -8635,6 +8673,237 @@ function ArcadeCard({ form, rounds, topCut, cardType, palette }: CardProps) {
         <span>{form.organizer}</span>
         <span>{form.game}</span>
         <span>{form.date}</span>
+      </footer>
+    </>
+  );
+}
+
+// ─── layout: retro ────────────────────────────────────────────────────────────
+function RetroCard({ form, rounds, topCut, cardType, palette }: CardProps) {
+  const wins = rounds.filter((r) => r.result === "win").length;
+  const losses = rounds.length - wins;
+  const titleColor =
+    form.champTitle.toUpperCase() === "ELIMINATED" ? "#d13b32" : palette.a;
+  const stageLabel = cardType === "swiss" ? "Swiss Stage" : "Top Cut";
+  const trim = "#3b2418";
+
+  const recordRows =
+    cardType === "swiss"
+      ? rounds.map((r, i) => ({
+          label: r.rnd || `R${i + 1}`,
+          opp: r.opp || "Opponent",
+          score: r.score || "---",
+          result: r.result,
+        }))
+      : [
+          ...topCut.map((m) => ({
+            label: m.stage,
+            opp: m.opp || "Opponent",
+            score: m.score || "---",
+            result: m.result,
+          })),
+          ...(form.finalsOpp
+            ? [
+                {
+                  label: "Finals",
+                  opp: form.finalsOpp,
+                  score: form.finalsSc || "---",
+                  result: form.finalsResult,
+                },
+              ]
+            : []),
+        ];
+
+  const played =
+    cardType === "swiss" ? rounds.length : topCut.length + (form.finalsOpp ? 1 : 0);
+  const winCount = cardType === "swiss" ? wins : topCutWins(topCut, form);
+  const lossCount = cardType === "swiss" ? losses : topCutLosses(topCut, form);
+
+  const RetroRow = ({
+    label,
+    opp,
+    score,
+    result,
+  }: {
+    label: string;
+    opp: string;
+    score: string;
+    result: Round["result"];
+  }) => {
+    const good = result === "win";
+    const color = good ? palette.b : "#d13b32";
+    return (
+      <div
+        className="grid grid-cols-[74px_1fr_70px_58px] items-center gap-3 border-b py-2.5 font-condensed"
+        style={{ borderColor: "rgba(59,36,24,.2)" }}
+      >
+        <span
+          className="rounded-full border px-2 py-1 text-center text-[11px] font-black uppercase"
+          style={{ borderColor: `${trim}55`, color: trim }}
+        >
+          {label}
+        </span>
+        <span className="truncate text-xl font-black uppercase" style={{ color: palette.text }}>
+          {opp}
+        </span>
+        <span className="font-mono text-sm font-bold" style={{ color: trim }}>
+          {score}
+        </span>
+        <span
+          className="rounded-sm px-2 py-1 text-center text-[11px] font-black uppercase"
+          style={{ background: color, color: good ? "#f7e6c2" : "#fff3e5" }}
+        >
+          {good ? "Win" : "Loss"}
+        </span>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(circle at 13% 18%, rgba(246,93,53,.2), transparent 24%), radial-gradient(circle at 86% 30%, rgba(19,138,138,.18), transparent 26%), radial-gradient(circle at 58% 88%, rgba(250,185,80,.22), transparent 24%), repeating-linear-gradient(0deg, transparent 0 11px, rgba(59,36,24,.055) 11px 12px)",
+        }}
+      />
+      <div
+        className="pointer-events-none absolute -right-24 top-8 h-56 w-56 rounded-full border-[38px]"
+        style={{ borderColor: `${palette.b}33` }}
+      />
+      <div
+        className="pointer-events-none absolute -left-20 bottom-20 h-44 w-44 rotate-45"
+        style={{ background: `${palette.a}22` }}
+      />
+      <div
+        className="pointer-events-none absolute inset-4 border-2"
+        style={{ borderColor: `${trim}33` }}
+      />
+
+      <header className="relative px-8 pt-8">
+        <div className="flex items-start justify-between gap-5 border-b-4 pb-5" style={{ borderColor: trim }}>
+          <div className="min-w-0 flex-1">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <span
+                className="rounded-full px-3 py-1 font-condensed text-xs font-black uppercase tracking-[0.18em]"
+                style={{ background: trim, color: "#f7e6c2" }}
+              >
+                {stageLabel}
+              </span>
+              <span
+                className="font-mono text-[11px] font-bold uppercase tracking-[0.18em]"
+                style={{ color: trim, opacity: 0.72 }}
+              >
+                Card #{form.cardNum}
+              </span>
+            </div>
+            <h2
+              className="break-words font-display text-[82px] leading-[0.82]"
+              style={{
+                color: palette.a,
+                textShadow: `3px 3px 0 ${trim}, 6px 6px 0 ${palette.b}`,
+              }}
+            >
+              {form.player || "PLAYER"}
+            </h2>
+          </div>
+          <div
+            className="w-28 shrink-0 border-2 p-3 text-center"
+            style={{ borderColor: trim, background: "rgba(255,255,255,.16)" }}
+          >
+            <div className="font-display text-5xl leading-none" style={{ color: palette.b }}>
+              {String(winCount).padStart(2, "0")}
+            </div>
+            <div className="font-condensed text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: trim }}>
+              Wins
+            </div>
+          </div>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 font-condensed text-sm font-black uppercase tracking-[0.12em]" style={{ color: trim }}>
+          {[form.tournament, form.date, form.game, form.organizer].filter(Boolean).map((item) => (
+            <span key={item}>{item}</span>
+          ))}
+        </div>
+      </header>
+
+      <main className="relative px-8 py-7">
+        <div className="mb-4 grid grid-cols-3 gap-3">
+          {[
+            ["Wins", winCount, palette.b],
+            ["Losses", lossCount, "#d13b32"],
+            ["Played", played, trim],
+          ].map(([label, value, color]) => (
+            <div
+              key={String(label)}
+              className="border-2 px-4 py-3"
+              style={{ borderColor: `${String(color)}88`, background: "rgba(255,255,255,.16)" }}
+            >
+              <div className="font-display text-4xl leading-none" style={{ color: String(color) }}>
+                {value}
+              </div>
+              <div className="font-condensed text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: trim }}>
+                {String(label)}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <section
+          className="border-2 px-4 py-3"
+          style={{ borderColor: trim, background: "rgba(255,255,255,.18)" }}
+        >
+          <div className="mb-1 flex items-center justify-between">
+            <h3 className="font-condensed text-sm font-black uppercase tracking-[0.28em]" style={{ color: trim }}>
+              Match Ledger
+            </h3>
+            <span className="font-mono text-[10px] font-bold uppercase" style={{ color: palette.b }}>
+              {cardType === "swiss" ? "Round Results" : "Bracket Results"}
+            </span>
+          </div>
+          {recordRows.map((row, index) => (
+            <RetroRow key={`${row.label}-${index}`} {...row} />
+          ))}
+        </section>
+
+        {cardType === "swiss" && form.advMsg && (
+          <div
+            className="mt-5 border-l-[10px] px-5 py-3 font-condensed text-2xl font-black uppercase tracking-[0.08em]"
+            style={{ borderColor: palette.a, background: palette.panel, color: trim }}
+          >
+            {form.advMsg}
+          </div>
+        )}
+
+        {cardType === "topcut" && form.champTitle && (
+          <div
+            className="mt-5 border-4 px-5 py-4 text-center"
+            style={{ borderColor: titleColor, background: "rgba(255,255,255,.18)" }}
+          >
+            <div className="font-condensed text-xs font-black uppercase tracking-[0.25em]" style={{ color: trim }}>
+              Final Result
+            </div>
+            <div
+              className="font-display text-7xl leading-none"
+              style={{
+                color: titleColor,
+                textShadow: `3px 3px 0 ${trim}`,
+              }}
+            >
+              {form.champTitle}
+            </div>
+            {form.tcRecord && (
+              <div className="mt-1 font-mono text-sm font-bold uppercase" style={{ color: trim }}>
+                Record: {form.tcRecord}
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      <footer className="relative flex items-center justify-between px-8 pb-7 font-mono text-[10px] font-bold uppercase tracking-[0.22em]" style={{ color: trim }}>
+        <span>Retro Series</span>
+        <span>{palette.tagline}</span>
       </footer>
     </>
   );
@@ -10222,28 +10491,31 @@ function DeckBuildTile({
   const parts = getBuildParts(build);
   const typeLabel = build.type === "cx" ? "CX" : "UX / BX";
   return (
-    <div className="rounded-lg p-2.5" style={{ background: palette.panel }}>
+    <div
+      className="rounded-lg border p-3.5"
+      style={{ borderColor: `${palette.a}26`, background: palette.panel }}
+    >
       <div
-        className="mb-2 text-center font-mono text-[9px] font-bold uppercase tracking-widest"
+        className="mb-3 text-center font-mono text-[11px] font-bold uppercase tracking-widest"
         style={{ color: palette.a }}
       >
         B{index + 1} · {typeLabel}
       </div>
-      <div className="flex flex-wrap justify-center gap-1.5">
+      <div className="flex flex-wrap justify-center gap-2.5">
         {parts.map((part) => (
-          <div key={part.id} className="flex flex-col items-center gap-0.5">
+          <div key={part.id} className="flex flex-col items-center gap-1.5">
             <div
-              className="flex h-8 w-8 items-center justify-center rounded-md"
+              className="flex h-14 w-14 items-center justify-center rounded-md"
               style={{ background: `${palette.a}18` }}
             >
               <img
                 src={part.image}
                 alt={part.name}
-                className="h-6 w-6 object-contain"
+                className="h-12 w-12 object-contain"
               />
             </div>
             <span
-              className="max-w-[38px] text-center font-condensed text-[7px] leading-tight"
+              className="max-w-[64px] text-center font-condensed text-[10px] font-bold uppercase leading-tight"
               style={{ color: `${palette.text}99` }}
             >
               {part.name}
@@ -10264,26 +10536,34 @@ function DeckSection({ deck, palette }: { deck: DeckInfo; palette: Design }) {
         : "grid-cols-3";
   return (
     <div
-      className="relative border-t px-8 py-5"
-      style={{ borderColor: `${palette.a}33` }}
+      className="relative z-20 border-b px-8 py-6"
+      style={{
+        borderColor: `${palette.a}44`,
+        background: `linear-gradient(135deg, ${palette.panel}, ${palette.a}08)`,
+      }}
     >
-      <div className="mb-3 flex items-center justify-between">
-        <CardHeading title="Deck Used" color={palette.a} />
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <div>
+          <div
+            className="font-condensed text-[11px] font-black uppercase tracking-[0.28em]"
+            style={{ color: palette.a, opacity: 0.68 }}
+          >
+            Deck Used
+          </div>
+          <div
+            className="mt-0.5 font-display text-4xl leading-none"
+            style={{ color: palette.text }}
+          >
+            {deck.name || "Battle Deck"}
+          </div>
+        </div>
         <span
-          className="rounded border px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase"
-          style={{ borderColor: `${palette.a}44`, color: palette.a }}
+          className="shrink-0 rounded border px-3 py-1.5 font-mono text-xs font-bold uppercase"
+          style={{ borderColor: `${palette.a}66`, color: palette.a }}
         >
           {deck.deckSize}
         </span>
       </div>
-      {deck.name && (
-        <div
-          className="mb-3 font-condensed text-sm font-bold tracking-widest"
-          style={{ color: palette.text }}
-        >
-          {deck.name}
-        </div>
-      )}
       <div className={cn("grid gap-3", cols)}>
         {deck.builds.map((build, i) => (
           <DeckBuildTile key={i} build={build} index={i} palette={palette} />
