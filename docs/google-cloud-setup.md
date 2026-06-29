@@ -86,6 +86,12 @@ AUTH_SECRET=the-generated-value
 
 For production, add these same three variables to your hosting provider's environment variable settings (Vercel, Railway, etc.).
 
+On AWS Amplify, also set:
+
+```bash
+AUTH_TRUST_HOST=true
+```
+
 ---
 
 ## Summary of Environment Variables
@@ -95,6 +101,7 @@ For production, add these same three variables to your hosting provider's enviro
 | `AUTH_SECRET` | Run `npx auth secret` in your terminal |
 | `AUTH_GOOGLE_ID` | Google Cloud Console → Credentials → your OAuth client |
 | `AUTH_GOOGLE_SECRET` | Same as above |
+| `AUTH_TRUST_HOST` | Set to `true` on AWS Amplify |
 | `MONGODB_URI` | Your existing MongoDB Atlas connection string |
 | `MONGODB_DB` | Your existing database name (default: `byleandro`) |
 

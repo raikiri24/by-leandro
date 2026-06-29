@@ -161,6 +161,7 @@ type TopCutMatch = {
   score: string;
   result: Round["result"];
 };
+type TournamentFormat = "swiss" | "round_robin" | "single_elimination" | "double_elimination" | "unknown";
 type ScrapedMatch = {
   round: number;
   p1: string;
@@ -175,6 +176,7 @@ type ScrapedData = {
   date: string;
   participants: string[];
   matches: ScrapedMatch[];
+  tournamentFormat: TournamentFormat;
 };
 type FormState = {
   player: string;
@@ -203,6 +205,7 @@ type CardProps = {
   cardType: CardType;
   palette: Design;
   deck?: DeckInfo;
+  swissLabel: string;
 };
 type Sponsor = { text: string; image: string };
 type ImageSlotKey =
@@ -1268,6 +1271,7 @@ export default function ToolPage() {
   }
 
   const palette = designs[design];
+  const swissLabel = scraped?.tournamentFormat === "round_robin" ? "Round Robin" : "Swiss";
   const canvasWidth = generatorMode === "cards" ? 680 : 780;
   const fallbackCanvasHeight =
     generatorMode === "pubmat" ? 1080 : generatorMode === "winners" ? 780 : 760;
@@ -1481,19 +1485,40 @@ export default function ToolPage() {
 
   function applyScrape() {
     if (!scraped || playerMatches.length === 0) return;
-    const hasStage = playerMatches.some(
-      (m) => m.stage === "group" || m.stage === "final",
-    );
-    const swiss = hasStage
-      ? playerMatches.filter((m) => m.stage !== "final")
-      : playerMatches.slice(0, 6);
-    const cut = hasStage
-      ? playerMatches.filter((m) => m.stage === "final")
-      : playerMatches.slice(6);
-    const finalRound = Math.max(
-      0,
-      ...scraped.matches.filter((m) => m.stage === "final").map((m) => m.round),
-    );
+    const fmt = scraped.tournamentFormat;
+    const hasGroupStage = playerMatches.some((m) => m.stage === "group");
+    const hasFinalStage = playerMatches.some((m) => m.stage === "final");
+    const isMixed = hasGroupStage && hasFinalStage;
+    const isDE = fmt === "double_elimination" && !isMixed;
+
+    let swiss: typeof playerMatches;
+    let cut: typeof playerMatches;
+
+    if (isMixed) {
+      swiss = playerMatches.filter((m) => m.stage === "group");
+      cut = playerMatches.filter((m) => m.stage === "final");
+    } else if (fmt === "swiss" || fmt === "round_robin") {
+      swiss = playerMatches;
+      cut = [];
+    } else if (fmt === "single_elimination" || fmt === "double_elimination") {
+      swiss = [];
+      cut = playerMatches;
+    } else {
+      // unknown/fallback: use old heuristic
+      swiss = hasGroupStage || hasFinalStage
+        ? playerMatches.filter((m) => m.stage !== "final")
+        : playerMatches.slice(0, 6);
+      cut = hasGroupStage || hasFinalStage
+        ? playerMatches.filter((m) => m.stage === "final")
+        : playerMatches.slice(6);
+    }
+
+    // finalRound: for DE use only positive rounds; otherwise all "final" stage rounds
+    const finalRoundSource = isDE
+      ? scraped.matches.filter((m) => m.stage === "final" && m.round > 0)
+      : scraped.matches.filter((m) => m.stage === "final");
+    const finalRound = Math.max(0, ...finalRoundSource.map((m) => m.round));
+
     const lastCut = cut.at(-1);
     const reachedFinals = Boolean(
       lastCut && finalRound > 0 && lastCut.round === finalRound,
@@ -1509,12 +1534,31 @@ export default function ToolPage() {
           : "ELIMINATED";
     const tcW = cut.filter((m) => m.result === "win").length;
     const tcL = cut.filter((m) => m.result === "loss").length;
+
+    // Build format-aware advMsg
+    let advMsg: string;
+    if (isDE) {
+      const wbMatches = playerMatches.filter((m) => m.round > 0);
+      const lbMatches = playerMatches.filter((m) => m.round < 0);
+      const wbW = wbMatches.filter((m) => m.result === "win").length;
+      const wbL = wbMatches.filter((m) => m.result === "loss").length;
+      const lbW = lbMatches.filter((m) => m.result === "win").length;
+      const lbL = lbMatches.filter((m) => m.result === "loss").length;
+      advMsg = lbMatches.length > 0
+        ? `WB: ${wbW}-${wbL} | LB: ${lbW}-${lbL}`
+        : `${wbW}W - ${wbL}L`;
+    } else {
+      const swissW = swiss.filter((m) => m.result === "win").length;
+      const swissL = swiss.filter((m) => m.result === "loss").length;
+      advMsg = `${swissW}W - ${swissL}L`;
+    }
+
     setForm((c) => ({
       ...c,
       player: scrapePlayer,
       tournament: scraped.name || c.tournament,
       date: scraped.date || c.date,
-      advMsg: `${swiss.filter((m) => m.result === "win").length}W - ${swiss.filter((m) => m.result === "loss").length}L`,
+      advMsg,
       finalsOpp: finalsMatch?.opp || "",
       finalsSc: finalsMatch
         ? `${finalsMatch.mySc} - ${finalsMatch.oppSc}`
@@ -1535,7 +1579,7 @@ export default function ToolPage() {
       setCardType("topcut");
       setTopCut(
         preFinalCut.map((m, i) => ({
-          stage: topCutStageLabel(m.round, finalRound, i),
+          stage: topCutStageLabel(m.round, finalRound, i, isDE),
           opp: m.opp,
           score: `${m.mySc} - ${m.oppSc}`,
           result: m.result,
@@ -1918,7 +1962,7 @@ export default function ToolPage() {
         </Section>
 
         {cardType === "swiss" ? (
-          <Section title="Swiss Rounds">
+          <Section title={`${swissLabel} Rounds`}>
             <div className="space-y-2">
               {rounds.map((round, i) => (
                 <div
@@ -2308,6 +2352,7 @@ export default function ToolPage() {
                       cardType={cardType}
                       palette={palette}
                       deck={deck}
+                      swissLabel={swissLabel}
                     />
                   )}
                 </div>
@@ -7953,7 +7998,7 @@ function CardRenderer(props: CardProps) {
 }
 
 // ─── layout: report (current style) ──────────────────────────────────────────
-function GraffitiCard({ form, rounds, topCut, cardType, palette }: CardProps) {
+function GraffitiCard({ form, rounds, topCut, cardType, palette, swissLabel }: CardProps) {
   const wins = rounds.filter((r) => r.result === "win").length;
   const losses = rounds.length - wins;
   const graffitiStyle = palette.graffitiStyle || "wall";
@@ -8094,7 +8139,7 @@ function GraffitiCard({ form, rounds, topCut, cardType, palette }: CardProps) {
             )}
             style={{ background: palette.a }}
           >
-            {cardType === "swiss" ? "Swiss Round Results" : "Top Cut Results"}
+            {cardType === "swiss" ? `${swissLabel} Round Results` : "Top Cut Results"}
           </div>
           {rows.map((row, index) => {
             const good = row.result === "win";
@@ -8128,7 +8173,7 @@ function GraffitiCard({ form, rounds, topCut, cardType, palette }: CardProps) {
           {[
             ["Wins", cardType === "swiss" ? wins : topCutWins(topCut, form), palette.a],
             ["Loss", cardType === "swiss" ? losses : topCutLosses(topCut, form), "#ff4b5f"],
-            ["Type", cardType === "swiss" ? "Swiss" : "Cut", palette.b],
+            ["Type", cardType === "swiss" ? swissLabel : "Cut", palette.b],
           ].map(([label, value, color], index) => (
             <div
               key={label}
@@ -8163,7 +8208,7 @@ function GraffitiCard({ form, rounds, topCut, cardType, palette }: CardProps) {
   );
 }
 
-function ReportCard({ form, rounds, topCut, cardType, palette }: CardProps) {
+function ReportCard({ form, rounds, topCut, cardType, palette, swissLabel }: CardProps) {
   const wins = rounds.filter((r) => r.result === "win").length;
   const losses = rounds.length - wins;
   const titleColor =
@@ -8220,14 +8265,14 @@ function ReportCard({ form, rounds, topCut, cardType, palette }: CardProps) {
         </h2>
         <p className="mt-3 font-condensed text-lg font-semibold uppercase tracking-[0.13em] text-white/55">
           {form.tournament} / {form.date} /{" "}
-          {cardType === "swiss" ? "Swiss Stage" : "Top Cut"}
+          {cardType === "swiss" ? `${swissLabel} Stage` : "Top Cut"}
         </p>
       </header>
 
       <div className="relative space-y-3 p-8">
         {cardType === "swiss" ? (
           <>
-            <CardHeading title="Swiss Round Results" color={palette.a} />
+            <CardHeading title={`${swissLabel} Round Results`} color={palette.a} />
             {rounds.map((r, i) => (
               <MatchLine
                 key={i}
@@ -8342,7 +8387,7 @@ function ReportCard({ form, rounds, topCut, cardType, palette }: CardProps) {
 }
 
 // ─── layout: arcade ───────────────────────────────────────────────────────────
-function ArcadeCard({ form, rounds, topCut, cardType, palette }: CardProps) {
+function ArcadeCard({ form, rounds, topCut, cardType, palette, swissLabel }: CardProps) {
   const wins = rounds.filter((r) => r.result === "win").length;
   const losses = rounds.length - wins;
   const titleColor =
@@ -8435,7 +8480,7 @@ function ArcadeCard({ form, rounds, topCut, cardType, palette }: CardProps) {
               className="mb-3 font-mono text-[10px] uppercase tracking-[0.3em]"
               style={{ color: palette.b }}
             >
-              {`[ ${cardType === "swiss" ? "SWISS" : "TOP CUT"} ROUNDS ]`}
+              {`[ ${cardType === "swiss" ? swissLabel.toUpperCase() : "TOP CUT"} ROUNDS ]`}
             </div>
             <div className="space-y-2">
               {rounds.map((r, i) => {
@@ -8679,12 +8724,12 @@ function ArcadeCard({ form, rounds, topCut, cardType, palette }: CardProps) {
 }
 
 // ─── layout: retro ────────────────────────────────────────────────────────────
-function RetroCard({ form, rounds, topCut, cardType, palette }: CardProps) {
+function RetroCard({ form, rounds, topCut, cardType, palette, swissLabel }: CardProps) {
   const wins = rounds.filter((r) => r.result === "win").length;
   const losses = rounds.length - wins;
   const titleColor =
     form.champTitle.toUpperCase() === "ELIMINATED" ? "#d13b32" : palette.a;
-  const stageLabel = cardType === "swiss" ? "Swiss Stage" : "Top Cut";
+  const stageLabel = cardType === "swiss" ? `${swissLabel} Stage` : "Top Cut";
   const trim = "#3b2418";
 
   const recordRows =
@@ -8910,7 +8955,7 @@ function RetroCard({ form, rounds, topCut, cardType, palette }: CardProps) {
 }
 
 // ─── layout: blade ────────────────────────────────────────────────────────────
-function BladeCard({ form, rounds, topCut, cardType, palette }: CardProps) {
+function BladeCard({ form, rounds, topCut, cardType, palette, swissLabel }: CardProps) {
   const wins = rounds.filter((r) => r.result === "win").length;
   const losses = rounds.length - wins;
   const titleColor =
@@ -8962,7 +9007,7 @@ function BladeCard({ form, rounds, topCut, cardType, palette }: CardProps) {
               className="mb-4 font-condensed text-xs uppercase tracking-[0.28em]"
               style={{ color: palette.a, opacity: 0.65 }}
             >
-              Swiss Round Results
+              {swissLabel} Round Results
             </p>
             {rounds.map((r, i) => {
               const good = r.result === "win";
@@ -9177,7 +9222,7 @@ function BladeCard({ form, rounds, topCut, cardType, palette }: CardProps) {
 }
 
 // ─── layout: award (prestige) ─────────────────────────────────────────────────
-function AwardCard({ form, rounds, topCut, cardType, palette }: CardProps) {
+function AwardCard({ form, rounds, topCut, cardType, palette, swissLabel }: CardProps) {
   const wins = rounds.filter((r) => r.result === "win").length;
   const losses = rounds.length - wins;
   const titleColor =
@@ -9260,7 +9305,7 @@ function AwardCard({ form, rounds, topCut, cardType, palette }: CardProps) {
           className="mt-3 font-condensed text-xs uppercase tracking-[0.22em]"
           style={{ color: palette.text, opacity: 0.35 }}
         >
-          {cardType === "swiss" ? "Swiss Stage" : "Top Cut"} · #{form.cardNum}
+          {cardType === "swiss" ? `${swissLabel} Stage` : "Top Cut"} · #{form.cardNum}
         </p>
       </header>
 
@@ -9491,7 +9536,7 @@ function AwardCard({ form, rounds, topCut, cardType, palette }: CardProps) {
 }
 
 // ─── layout: minimal ──────────────────────────────────────────────────────────
-function MinimalCard({ form, rounds, topCut, cardType, palette }: CardProps) {
+function MinimalCard({ form, rounds, topCut, cardType, palette, swissLabel }: CardProps) {
   const wins = rounds.filter((r) => r.result === "win").length;
   const losses = rounds.length - wins;
   const titleColor =
@@ -9557,7 +9602,7 @@ function MinimalCard({ form, rounds, topCut, cardType, palette }: CardProps) {
             className="font-condensed text-[10px] uppercase tracking-[0.4em]"
             style={{ color: palette.a, opacity: 0.55 }}
           >
-            {cardType === "swiss" ? "Swiss Rounds" : "Top Cut"}
+            {cardType === "swiss" ? `${swissLabel} Rounds` : "Top Cut"}
           </span>
           <div
             className="flex-1"
@@ -9924,7 +9969,7 @@ function TerminalCard({ form, rounds, topCut, cardType, palette }: CardProps) {
 }
 
 // ─── layout: ticket ───────────────────────────────────────────────────────────
-function TicketCard({ form, rounds, topCut, cardType, palette }: CardProps) {
+function TicketCard({ form, rounds, topCut, cardType, palette, swissLabel }: CardProps) {
   const wins = rounds.filter((r) => r.result === "win").length;
   const losses = rounds.length - wins;
   const titleColor = form.champTitle.toUpperCase() === "ELIMINATED" ? "#ff3b3b" : palette.a;
@@ -10006,7 +10051,7 @@ function TicketCard({ form, rounds, topCut, cardType, palette }: CardProps) {
 
           {/* rounds section */}
           <div className="font-condensed text-xs font-bold uppercase tracking-[0.25em] mb-3" style={{ color: palette.a }}>
-            {cardType === "swiss" ? "Swiss Round Results" : "Top Cut Results"}
+            {cardType === "swiss" ? `${swissLabel} Round Results` : "Top Cut Results"}
           </div>
 
           <div className="space-y-2">
@@ -10084,7 +10129,7 @@ function TicketCard({ form, rounds, topCut, cardType, palette }: CardProps) {
 }
 
 // ─── layout: split ────────────────────────────────────────────────────────────
-function SplitCard({ form, rounds, topCut, cardType, palette }: CardProps) {
+function SplitCard({ form, rounds, topCut, cardType, palette, swissLabel }: CardProps) {
   const wins = rounds.filter((r) => r.result === "win").length;
   const losses = rounds.length - wins;
   const titleColor = form.champTitle.toUpperCase() === "ELIMINATED" ? "#ff3b3b" : palette.a;
@@ -10147,7 +10192,7 @@ function SplitCard({ form, rounds, topCut, cardType, palette }: CardProps) {
         <div className="px-8 pb-8">
           {cardType === "swiss" ? (
             <>
-              <div className="mb-3 font-condensed text-xs uppercase tracking-[0.28em]" style={{ color: palette.a, opacity: 0.65 }}>Swiss Round Results</div>
+              <div className="mb-3 font-condensed text-xs uppercase tracking-[0.28em]" style={{ color: palette.a, opacity: 0.65 }}>{swissLabel} Round Results</div>
               <div className="grid grid-cols-2 gap-2">
                 {rounds.map((r, i) => {
                   const win = r.result === "win";
@@ -10259,7 +10304,7 @@ function SplitCard({ form, rounds, topCut, cardType, palette }: CardProps) {
 }
 
 // ─── layout: circuit ──────────────────────────────────────────────────────────
-function CircuitCard({ form, rounds, topCut, cardType, palette }: CardProps) {
+function CircuitCard({ form, rounds, topCut, cardType, palette, swissLabel }: CardProps) {
   const wins = rounds.filter((r) => r.result === "win").length;
   const losses = rounds.length - wins;
   const titleColor = form.champTitle.toUpperCase() === "ELIMINATED" ? "#ff3b3b" : palette.a;
@@ -10358,7 +10403,7 @@ function CircuitCard({ form, rounds, topCut, cardType, palette }: CardProps) {
           </div>
 
           <p className="font-condensed text-xs font-bold uppercase tracking-[0.38em]" style={{ color: palette.a, opacity: 0.55 }}>
-            {cardType === "swiss" ? "Swiss Stage" : "Top Cut"} · Node {form.cardNum}
+            {cardType === "swiss" ? `${swissLabel} Stage` : "Top Cut"} · Node {form.cardNum}
           </p>
           <h2
             className="mt-2 break-words font-display text-[76px] leading-none tracking-[0.02em]"
@@ -10907,7 +10952,13 @@ function Stats({
 }
 
 // ─── helper functions ─────────────────────────────────────────────────────────
-function topCutStageLabel(round: number, finalRound: number, index: number) {
+function topCutStageLabel(round: number, finalRound: number, index: number, isDoubleElim = false) {
+  if (isDoubleElim) {
+    if (round < 0) return `LB Round ${Math.abs(round)}`;
+    if (finalRound > 0 && round === finalRound) return "Grand Finals";
+    if (finalRound > 0 && round === finalRound - 1) return "WB Finals";
+    return `WB Round ${round}`;
+  }
   if (finalRound > 0) {
     if (round === finalRound) return "Finals";
     if (round === finalRound - 1) return "Semifinals";

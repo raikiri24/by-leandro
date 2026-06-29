@@ -20,6 +20,8 @@ type ChallongeMatch = {
   };
 };
 
+type TournamentFormat = "swiss" | "round_robin" | "single_elimination" | "double_elimination" | "unknown";
+
 type ScrapedMatch = {
   round: number;
   p1: string;
@@ -29,6 +31,15 @@ type ScrapedMatch = {
   winner: string;
   stage?: "group" | "final";
 };
+
+function detectFormat(type?: string): TournamentFormat {
+  const t = (type || "").toLowerCase();
+  if (t.includes("double")) return "double_elimination";
+  if (t.includes("single")) return "single_elimination";
+  if (t.includes("swiss")) return "swiss";
+  if (t.includes("round") && t.includes("robin")) return "round_robin";
+  return "unknown";
+}
 
 const HEADERS = {
   "user-agent":
@@ -107,7 +118,8 @@ function parseChallongeJson(json: any) {
     name: tournament.name || tournament.full_challonge_url || "",
     date: tournament.started_at ? String(tournament.started_at).slice(0, 10) : "",
     participants: Object.values(pMap).sort((a, b) => a.localeCompare(b)),
-    matches
+    matches,
+    tournamentFormat: detectFormat(tournament.tournament_type)
   };
 }
 
@@ -134,7 +146,8 @@ function parseEmbeddedHtml(html: string, slug: string) {
     name: title,
     date: "",
     participants: Array.from(participants).sort((a, b) => a.localeCompare(b)),
-    matches: [] as ScrapedMatch[]
+    matches: [] as ScrapedMatch[],
+    tournamentFormat: "unknown" as TournamentFormat
   };
 }
 
@@ -155,7 +168,7 @@ function parseModuleHtml(html: string, slug: string) {
   if (!storeMatch) throw new Error("No TournamentStore data found in module HTML.");
 
   const store = JSON.parse(storeMatch[1]) as {
-    tournament?: { name?: string; started_at?: string };
+    tournament?: { name?: string; started_at?: string; tournament_type?: string };
     matches_by_round?: Record<string, Array<Record<string, any>>>;
     groups?: Array<{
       matches_by_round?: Record<string, Array<Record<string, any>>>;
@@ -227,7 +240,8 @@ function parseModuleHtml(html: string, slug: string) {
     name: store.tournament?.name || title,
     date: store.tournament?.started_at ? String(store.tournament.started_at).slice(0, 10) : "",
     participants: Array.from(participants.values()).sort((a, b) => a.localeCompare(b)),
-    matches
+    matches,
+    tournamentFormat: detectFormat(store.tournament?.tournament_type)
   };
 }
 

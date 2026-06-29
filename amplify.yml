@@ -4,8 +4,13 @@ frontend:
     preBuild:
       commands:
         - npm ci
+        - printf "AUTH_SECRET=%s\n" "$AUTH_SECRET" >> .env.production
+        - printf "AUTH_GOOGLE_ID=%s\n" "$AUTH_GOOGLE_ID" >> .env.production
+        - printf "AUTH_GOOGLE_SECRET=%s\n" "$AUTH_GOOGLE_SECRET" >> .env.production
+        - printf "AUTH_TRUST_HOST=%s\n" "${AUTH_TRUST_HOST:-true}" >> .env.production
         - printf "MONGODB_URI=%s\n" "$MONGODB_URI" >> .env.production
         - printf "MONGODB_DB=%s\n" "$MONGODB_DB" >> .env.production
+        - printf "CHALLONGE_API_KEY=%s\n" "$CHALLONGE_API_KEY" >> .env.production
     build:
       commands:
         - npm run build
