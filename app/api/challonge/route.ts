@@ -17,6 +17,7 @@ type ChallongeMatch = {
     player2_id?: number | string | null;
     winner_id?: number | string | null;
     round?: number;
+    group_id?: number | string | null;
   };
 };
 
@@ -110,7 +111,8 @@ function parseChallongeJson(json: any) {
       p2,
       s1,
       s2,
-      winner: pMap[String(match.winner_id)] || (s1 >= s2 ? p1 : p2)
+      winner: pMap[String(match.winner_id)] || (s1 >= s2 ? p1 : p2),
+      stage: match.group_id ? "group" : "final"
     });
   }
 
@@ -171,6 +173,7 @@ function parseModuleHtml(html: string, slug: string) {
     tournament?: { name?: string; started_at?: string; tournament_type?: string };
     matches_by_round?: Record<string, Array<Record<string, any>>>;
     groups?: Array<{
+      tournament?: { tournament_type?: string };
       matches_by_round?: Record<string, Array<Record<string, any>>>;
     }>;
   };
@@ -236,12 +239,17 @@ function parseModuleHtml(html: string, slug: string) {
       .replace(/\s*-\s*Challonge\s*$/i, "")
       .trim() || slug;
 
+  // For multi-stage brackets, the root tournament_type reflects the Top Cut
+  // (final) stage's format, not the Swiss/Round Robin group stage's format.
+  // Prefer the first group's own type so the "Swiss"/"Round Robin" label is accurate.
+  const groupStageType = store.groups?.[0]?.tournament?.tournament_type;
+
   return {
     name: store.tournament?.name || title,
     date: store.tournament?.started_at ? String(store.tournament.started_at).slice(0, 10) : "",
     participants: Array.from(participants.values()).sort((a, b) => a.localeCompare(b)),
     matches,
-    tournamentFormat: detectFormat(store.tournament?.tournament_type)
+    tournamentFormat: detectFormat(groupStageType || store.tournament?.tournament_type)
   };
 }
 
@@ -271,10 +279,14 @@ export async function POST(request: Request) {
     const publicResponse = await fetchWithTimeout(publicJson);
     if (publicResponse.ok) {
       const data = parseChallongeJson(await publicResponse.json());
-      logs.push(`[1/4] OK: ${data.participants.length} players, ${data.matches.length} completed matches`);
-      return NextResponse.json({ ok: true, slug, logs, data });
+      if (data.participants.length > 0 || data.matches.length > 0) {
+        logs.push(`[1/4] OK: ${data.participants.length} players, ${data.matches.length} completed matches`);
+        return NextResponse.json({ ok: true, slug, logs, data });
+      }
+      logs.push("[1/4] Empty payload (no participants/matches) -> falling back");
+    } else {
+      logs.push(`[1/4] HTTP ${publicResponse.status}`);
     }
-    logs.push(`[1/4] HTTP ${publicResponse.status}`);
 
     const apiKey = process.env.CHALLONGE_API_KEY;
     if (apiKey) {
@@ -285,10 +297,14 @@ export async function POST(request: Request) {
       const apiResponse = await fetchWithTimeout(apiUrl);
       if (apiResponse.ok) {
         const data = parseChallongeJson(await apiResponse.json());
-        logs.push(`[2/4] OK: ${data.participants.length} players, ${data.matches.length} completed matches`);
-        return NextResponse.json({ ok: true, slug, logs, data });
+        if (data.participants.length > 0 || data.matches.length > 0) {
+          logs.push(`[2/4] OK: ${data.participants.length} players, ${data.matches.length} completed matches`);
+          return NextResponse.json({ ok: true, slug, logs, data });
+        }
+        logs.push("[2/4] Empty payload (no participants/matches) -> falling back");
+      } else {
+        logs.push(`[2/4] HTTP ${apiResponse.status}`);
       }
-      logs.push(`[2/4] HTTP ${apiResponse.status}`);
     } else {
       logs.push("[2/4] Challonge API -> skipped");
     }
@@ -297,11 +313,19 @@ export async function POST(request: Request) {
     logs.push(`[3/4] Challonge bracket module -> ${moduleUrl}`);
     const moduleResponse = await fetchWithTimeout(moduleUrl);
     if (moduleResponse.ok) {
-      const data = parseModuleHtml(await moduleResponse.text(), slug);
-      logs.push(`[3/4] OK: ${data.participants.length} players, ${data.matches.length} completed matches`);
-      return NextResponse.json({ ok: true, slug, logs, data });
+      try {
+        const data = parseModuleHtml(await moduleResponse.text(), slug);
+        if (data.participants.length > 0 || data.matches.length > 0) {
+          logs.push(`[3/4] OK: ${data.participants.length} players, ${data.matches.length} completed matches`);
+          return NextResponse.json({ ok: true, slug, logs, data });
+        }
+        logs.push("[3/4] Empty payload (no participants/matches) -> falling back");
+      } catch (error) {
+        logs.push(`[3/4] Parse failed: ${error instanceof Error ? error.message : "unknown error"}`);
+      }
+    } else {
+      logs.push(`[3/4] HTTP ${moduleResponse.status}`);
     }
-    logs.push(`[3/4] HTTP ${moduleResponse.status}`);
 
     const htmlUrl = `https://challonge.com/${encodeURIComponent(slug)}`;
     logs.push(`[4/4] Challonge HTML fallback -> ${htmlUrl}`);
