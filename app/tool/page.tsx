@@ -2410,6 +2410,93 @@ export default function ToolPage() {
         error={feedbackError}
         onSubmit={submitFeedback}
       />
+
+      <section className="border-t border-white/10 bg-white/[0.025]">
+        <div className="mx-auto max-w-5xl px-5 py-16 sm:px-8">
+          <p className="font-condensed text-xs font-black uppercase tracking-[0.18em] text-primary">
+            Card generator guide
+          </p>
+          <h2 className="mt-3 font-display text-4xl leading-none text-white">
+            How to build a tournament card
+          </h2>
+          <div className="mt-8 grid gap-8 text-sm leading-7 text-white/65 md:grid-cols-3">
+            <article>
+              <h3 className="font-condensed text-lg font-black uppercase text-white">
+                Pick a card type
+              </h3>
+              <p className="mt-2">
+                Choose Swiss or Top Cut result cards, a pub mat, or a winner post
+                from the Module selector, then pick a design and font that fits
+                the event.
+              </p>
+            </article>
+            <article>
+              <h3 className="font-condensed text-lg font-black uppercase text-white">
+                Enter or import results
+              </h3>
+              <p className="mt-2">
+                Type rounds, scores, and opponents manually, or paste a Challonge
+                tournament URL to pull players and completed matches automatically.
+                Always double-check imported names and scores.
+              </p>
+            </article>
+            <article>
+              <h3 className="font-condensed text-lg font-black uppercase text-white">
+                Preview, then download
+              </h3>
+              <p className="mt-2">
+                The live preview on the right matches the exported JPG. Check
+                logos, photos, and text at a small size before using the download
+                button to save the final graphic.
+              </p>
+            </article>
+          </div>
+
+          <div className="mt-14 grid gap-10 md:grid-cols-2">
+            <article>
+              <h2 className="font-display text-3xl leading-none text-white">
+                Frequently asked questions
+              </h2>
+              <div className="mt-5 space-y-5 text-sm leading-7 text-white/65">
+                <div>
+                  <h3 className="font-condensed text-sm font-black uppercase text-white">
+                    Is my tournament data uploaded anywhere?
+                  </h3>
+                  <p className="mt-1">
+                    The card preview and export render entirely in your browser.
+                    Pasting a Challonge URL asks this site&apos;s server to fetch
+                    that public tournament page on your behalf; nothing else about
+                    your card is sent anywhere unless you submit feedback.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-condensed text-sm font-black uppercase text-white">
+                    Where do the logo and photo images come from?
+                  </h3>
+                  <p className="mt-1">
+                    You upload them yourself. Use the{" "}
+                    <a className="text-primary underline" href="/bg-remover">
+                      background remover
+                    </a>{" "}
+                    first if you need a transparent logo or player photo.
+                  </p>
+                </div>
+              </div>
+            </article>
+            <article>
+              <h2 className="font-display text-3xl leading-none text-white">
+                Keep results accurate
+              </h2>
+              <p className="mt-5 text-sm leading-7 text-white/65">
+                Organizers are responsible for the accuracy of standings and for
+                having permission to publish any player name, photo, or logo shown
+                on an exported card. When in doubt, confirm details against the
+                official bracket before sharing.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

@@ -810,6 +810,85 @@ export default function BgRemoverPage() {
       )}
 
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+
+      <section className="border-t border-white/10 bg-white/[0.025]">
+        <div className="mx-auto max-w-5xl px-5 py-16 sm:px-8">
+          <p className="font-condensed text-xs font-black uppercase tracking-[0.18em] text-primary">
+            Background remover guide
+          </p>
+          <h2 className="mt-3 font-display text-4xl leading-none text-white">
+            How the background remover works
+          </h2>
+          <div className="mt-8 grid gap-8 text-sm leading-7 text-white/65 md:grid-cols-3">
+            <article>
+              <h3 className="font-condensed text-lg font-black uppercase text-white">
+                Everything runs locally
+              </h3>
+              <p className="mt-2">
+                The cutout model runs in your browser tab, so your photo is never
+                sent to a server or a third-party removal API. Closing the tab
+                discards the image completely.
+              </p>
+            </article>
+            <article>
+              <h3 className="font-condensed text-lg font-black uppercase text-white">
+                Clean up the edges
+              </h3>
+              <p className="mt-2">
+                Use the crispness slider for a fast global fix, then switch to the
+                eraser, lasso, or restore tool to correct stray hair, logos, or
+                shadows the automatic cutout missed.
+              </p>
+            </article>
+            <article>
+              <h3 className="font-condensed text-lg font-black uppercase text-white">
+                Export how you need it
+              </h3>
+              <p className="mt-2">
+                Keep the background transparent for a PNG overlay, or swap in a
+                solid color before exporting — useful for player photos dropped
+                straight into a result card or pub mat.
+              </p>
+            </article>
+          </div>
+
+          <div className="mt-14 grid gap-10 md:grid-cols-2">
+            <article>
+              <h2 className="font-display text-3xl leading-none text-white">
+                Frequently asked questions
+              </h2>
+              <div className="mt-5 space-y-5 text-sm leading-7 text-white/65">
+                <div>
+                  <h3 className="font-condensed text-sm font-black uppercase text-white">
+                    Do I need an account or API key?
+                  </h3>
+                  <p className="mt-1">No. Upload an image and the tool works immediately, free of charge.</p>
+                </div>
+                <div>
+                  <h3 className="font-condensed text-sm font-black uppercase text-white">
+                    What image formats are supported?
+                  </h3>
+                  <p className="mt-1">Standard photo formats such as JPG, PNG, and WebP. Export is a PNG so transparency is preserved.</p>
+                </div>
+              </div>
+            </article>
+            <article>
+              <h2 className="font-display text-3xl leading-none text-white">
+                Use it with the card generator
+              </h2>
+              <p className="mt-5 text-sm leading-7 text-white/65">
+                Removing a background here is often the first step before adding a
+                player photo, logo, or sponsor image to a{" "}
+                <a className="text-primary underline" href="/tool">
+                  tournament card or pub mat
+                </a>
+                . You remain responsible for having permission to use and publish
+                any photo or logo you process.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

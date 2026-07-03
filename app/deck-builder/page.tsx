@@ -555,6 +555,71 @@ export default function DeckBuilderPage() {
           </div>
         </div>
       </div>
+
+      <section className="border-t border-white/10 bg-white/[0.025]">
+        <div className="mx-auto max-w-5xl px-5 py-16 sm:px-8">
+          <p className="font-condensed text-xs font-black uppercase tracking-[0.18em] text-primary">
+            Deck builder guide
+          </p>
+          <h2 className="mt-3 font-display text-4xl leading-none text-white">
+            How to build a Beyblade X deck
+          </h2>
+          <div className="mt-8 grid gap-8 text-sm leading-7 text-white/65 md:grid-cols-3">
+            <article>
+              <h3 className="font-condensed text-lg font-black uppercase text-white">
+                Choose a deck size
+              </h3>
+              <p className="mt-2">
+                Pick 3G, 4G, 5G, or 6G depending on how many Beyblades your event
+                or format allows, then build each combo one at a time.
+              </p>
+            </article>
+            <article>
+              <h3 className="font-condensed text-lg font-black uppercase text-white">
+                Pick standard or CX
+              </h3>
+              <p className="mt-2">
+                Standard UX and BX combos use Blade + Ratchet + Bit. Full CX builds
+                add a Lock Chip and swap in an Assist, Over, or Metal Blade for
+                deeper customization.
+              </p>
+            </article>
+            <article>
+              <h3 className="font-condensed text-lg font-black uppercase text-white">
+                Preview and export
+              </h3>
+              <p className="mt-2">
+                Search each part list by name, watch the deck card update live,
+                add a deck name and logo, then download the finished graphic to
+                share.
+              </p>
+            </article>
+          </div>
+
+          <div className="mt-14 grid gap-10 md:grid-cols-2">
+            <article>
+              <h2 className="font-display text-3xl leading-none text-white">
+                Where the part images come from
+              </h2>
+              <p className="mt-5 text-sm leading-7 text-white/65">
+                Part options and images are drawn from a reference set of released
+                Beyblade X parts so you can visually match a combo before you build
+                it in real life or on a bracket sheet.
+              </p>
+            </article>
+            <article>
+              <h2 className="font-display text-3xl leading-none text-white">
+                Independent fan project
+              </h2>
+              <p className="mt-5 text-sm leading-7 text-white/65">
+                This deck builder is an independent, non-commercial fan tool. It is
+                not affiliated with or endorsed by Takara Tomy or Hasbro. Part
+                names and imagery belong to their respective owners.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
