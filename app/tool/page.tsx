@@ -44,7 +44,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
-import { UserNav } from "@/components/auth/user-nav";
 import {
   type BeybladeBuild,
   type DeckSize,
@@ -1649,8 +1648,6 @@ export default function ToolPage() {
             >
               Deck Builder
             </a>
-            <div className="mx-1 hidden h-6 w-px bg-white/10 sm:block" />
-            <UserNav />
           </div>
         </div>
       </nav>

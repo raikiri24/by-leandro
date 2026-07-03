@@ -11,7 +11,6 @@ import {
   Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { UserNav } from "@/components/auth/user-nav";
 import Script from "next/script";
 
 const features = [
@@ -90,8 +89,6 @@ export default function HomePage() {
             >
               Deck Builder
             </a>
-            <div className="mx-1 hidden h-6 w-px bg-white/10 sm:block" />
-            <UserNav />
             <Button asChild className="ml-2 font-condensed uppercase tracking-[0.12em]">
               <a href="/tool">
                 Open Tool

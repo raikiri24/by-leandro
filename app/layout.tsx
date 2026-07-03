@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Sedgwick_Ave } from "next/font/google";
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
 
 const sedgwickAve = Sedgwick_Ave({
   subsets: ["latin"],
@@ -30,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className={sedgwickAve.variable} suppressHydrationWarning>
-        <SessionProvider>{children}</SessionProvider>
+        {children}
       </body>
     </html>
   );
