@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Sedgwick_Ave } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 
@@ -30,14 +29,6 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <head>
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6633087581128659"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
-      </head>
       <body className={sedgwickAve.variable} suppressHydrationWarning>
         <SessionProvider>{children}</SessionProvider>
       </body>

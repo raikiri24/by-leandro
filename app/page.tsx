@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserNav } from "@/components/auth/user-nav";
+import Script from "next/script";
 
 const features = [
   {
@@ -51,6 +52,12 @@ const features = [
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#090909] text-foreground">
+      <Script
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6633087581128659"
+        crossOrigin="anonymous"
+        strategy="afterInteractive"
+      />
       <nav className="sticky top-0 z-40 border-b border-white/10 bg-[#090909]/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-10">
           <a href="/" className="flex items-center gap-3">
@@ -270,6 +277,85 @@ export default function HomePage() {
           })}
         </div>
       </section>
+
+      <section className="border-y border-white/10 bg-white/[0.025]">
+        <div className="mx-auto max-w-5xl px-5 py-16 sm:px-8">
+          <p className="font-condensed text-xs font-black uppercase tracking-[0.18em] text-primary">
+            Organizer guide
+          </p>
+          <h2 className="mt-3 font-display text-4xl leading-none text-white">
+            How to make a useful tournament result card
+          </h2>
+          <div className="mt-8 grid gap-8 text-sm leading-7 text-white/65 md:grid-cols-3">
+            <article>
+              <h3 className="font-condensed text-lg font-black uppercase text-white">
+                Record the event clearly
+              </h3>
+              <p className="mt-2">
+                Start with the tournament name, date, venue, player name, and
+                final placement. A viewer should understand what happened even
+                when the image is reposted without its original caption.
+              </p>
+            </article>
+            <article>
+              <h3 className="font-condensed text-lg font-black uppercase text-white">
+                Check every round
+              </h3>
+              <p className="mt-2">
+                Enter wins, losses, scores, and opponents consistently. Review
+                imported Challonge data before exporting, especially renamed
+                players, byes, and matches entered after the event.
+              </p>
+            </article>
+            <article>
+              <h3 className="font-condensed text-lg font-black uppercase text-white">
+                Design for the destination
+              </h3>
+              <p className="mt-2">
+                Use high-contrast text and a simple background for mobile feeds.
+                Keep logos away from names and scores, then inspect the preview
+                at a small size before downloading the final JPG.
+              </p>
+            </article>
+          </div>
+
+          <div className="mt-14 grid gap-10 md:grid-cols-2">
+            <article>
+              <h2 className="font-display text-3xl leading-none text-white">
+                A practical event-posting workflow
+              </h2>
+              <ol className="mt-5 list-decimal space-y-3 pl-5 text-sm leading-7 text-white/65">
+                <li>Collect the confirmed standings from the event organizer.</li>
+                <li>Choose a result card, winner post, or pub mat template.</li>
+                <li>Add only details that help players identify the event.</li>
+                <li>Preview names, scores, logos, and image crops for mistakes.</li>
+                <li>Download the graphic and add accessible context to the post.</li>
+              </ol>
+            </article>
+            <article>
+              <h2 className="font-display text-3xl leading-none text-white">
+                What this site does with your images
+              </h2>
+              <p className="mt-5 text-sm leading-7 text-white/65">
+                The card generator builds the preview in your browser. The
+                background remover also processes images locally, so the image
+                does not need to be uploaded to a removal service. You remain
+                responsible for having permission to use player photos, logos,
+                and other artwork included in an export.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <footer className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-8 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10">
+        <p>© {new Date().getFullYear()} Leandro&apos;s Tournament Card Generator</p>
+        <nav aria-label="Site information" className="flex flex-wrap gap-5">
+          <a className="hover:text-white" href="/about">About</a>
+          <a className="hover:text-white" href="/privacy">Privacy</a>
+          <a className="hover:text-white" href="/contact">Contact</a>
+        </nav>
+      </footer>
     </main>
   );
 }
