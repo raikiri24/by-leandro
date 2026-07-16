@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAppDatabase } from "@/lib/mongodb";
+import { checkRateLimit, getClientIp, isSameOriginRequest, rateLimitResponse } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
@@ -41,7 +42,12 @@ async function getCounts() {
   };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const rateLimit = await checkRateLimit("usage-read", getClientIp(request), 30, 60_000);
+  if (!rateLimit.allowed) {
+    return rateLimitResponse(rateLimit);
+  }
+
   try {
     return NextResponse.json({ ok: true, data: await getCounts() });
   } catch (error) {
@@ -57,6 +63,15 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ ok: false, error: "Invalid request origin." }, { status: 403 });
+  }
+
+  const rateLimit = await checkRateLimit("usage-write", getClientIp(request), 20, 60_000);
+  if (!rateLimit.allowed) {
+    return rateLimitResponse(rateLimit);
+  }
+
   try {
     const payload = await request.json().catch(() => ({}));
     if (!isValidSessionId(payload.sessionId)) {

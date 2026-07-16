@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { checkRateLimit, getClientIp, isSameOriginRequest, rateLimitResponse } from "@/lib/rateLimit";
 
 type ChallongeParticipant = {
   participant?: {
@@ -268,6 +269,15 @@ async function fetchWithTimeout(url: string, timeoutMs = 12000) {
 }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ ok: false, error: "Invalid request origin." }, { status: 403 });
+  }
+
+  const rateLimit = await checkRateLimit("challonge", getClientIp(request), 10, 60_000);
+  if (!rateLimit.allowed) {
+    return rateLimitResponse(rateLimit);
+  }
+
   const { url } = (await request.json().catch(() => ({}))) as { url?: string };
   const logs: string[] = [];
 

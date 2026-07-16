@@ -693,3 +693,16 @@ aside::-webkit-scrollbar-thumb {
 aside::-webkit-scrollbar-thumb:hover {
   background: rgba(255,255,255,.22);
 }
+
+/* Site-wide visible keyboard focus indicator, since many custom buttons and
+   controls throughout the tool don't set their own focus-visible ring. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAppDatabase } from "@/lib/mongodb";
+import { checkRateLimit, getClientIp, isSameOriginRequest, rateLimitResponse } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
@@ -38,6 +39,15 @@ async function getFeedbackCollection() {
 }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ ok: false, error: "Invalid request origin." }, { status: 403 });
+  }
+
+  const rateLimit = await checkRateLimit("feedback", getClientIp(request), 5, 60_000);
+  if (!rateLimit.allowed) {
+    return rateLimitResponse(rateLimit);
+  }
+
   try {
     const payload = await request.json().catch(() => ({}));
     const category = cleanText(payload.category, 32) as FeedbackCategory;

@@ -97,6 +97,7 @@ function PartSelect({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={`Search ${label.toLowerCase()}...`}
+                aria-label={`Search ${label.toLowerCase()}`}
                 className="w-full bg-transparent text-sm text-white placeholder:text-white/40 focus-visible:outline-none"
               />
             </div>

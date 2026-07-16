@@ -11,7 +11,6 @@ import {
   Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Script from "next/script";
 
 const features = [
   {
@@ -50,13 +49,7 @@ const features = [
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-[#090909] text-foreground">
-      <Script
-        async
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6633087581128659"
-        crossOrigin="anonymous"
-        strategy="afterInteractive"
-      />
+    <main id="main-content" className="min-h-screen bg-[#090909] text-foreground">
       <nav className="sticky top-0 z-40 border-b border-white/10 bg-[#090909]/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-10">
           <a href="/" className="flex items-center gap-3">
@@ -349,8 +342,11 @@ export default function HomePage() {
         <p>© {new Date().getFullYear()} Leandro&apos;s Tournament Card Generator</p>
         <nav aria-label="Site information" className="flex flex-wrap gap-5">
           <a className="hover:text-white" href="/about">About</a>
-          <a className="hover:text-white" href="/privacy">Privacy</a>
+          <a className="hover:text-white" href="/faq">Help</a>
+          <a className="hover:text-white" href="/changelog">Changelog</a>
           <a className="hover:text-white" href="/contact">Contact</a>
+          <a className="hover:text-white" href="/privacy">Privacy</a>
+          <a className="hover:text-white" href="/terms">Terms</a>
         </nav>
       </footer>
     </main>
