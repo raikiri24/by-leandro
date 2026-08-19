@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Script from "next/script";
 import { Button } from "@/components/ui/button";
-import { ADSENSE_CLIENT_ID } from "@/lib/site";
 
 type ConsentChoice = {
   analytics: boolean;
@@ -65,14 +64,6 @@ export function CookieConsent() {
 
   return (
     <>
-      {consent?.ads && (
-        <Script
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
-      )}
       {consent?.analytics && GA_MEASUREMENT_ID && (
         <>
           <Script
