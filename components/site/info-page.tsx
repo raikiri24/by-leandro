@@ -17,6 +17,7 @@ export function InfoPage({ title, intro, children }: { title: string; intro: str
       <footer className="mx-auto max-w-3xl px-5 pb-14 text-xs text-white/45">
         <nav aria-label="Site information" className="flex flex-wrap gap-5 border-t border-white/10 pt-6">
           <a className="hover:text-white" href="/about">About</a>
+          <a className="hover:text-white" href="/articles">Articles</a>
           <a className="hover:text-white" href="/faq">Help</a>
           <a className="hover:text-white" href="/changelog">Changelog</a>
           <a className="hover:text-white" href="/contact">Contact</a>

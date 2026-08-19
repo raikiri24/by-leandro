@@ -10,6 +10,7 @@ export const SUPPORT_EMAIL = "paulleandrolanot@gmail.com";
 export const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/tool", label: "Tool" },
+  { href: "/articles", label: "Articles" },
   { href: "/about", label: "About" },
   { href: "/faq", label: "Help" },
   { href: "/contact", label: "Contact" },

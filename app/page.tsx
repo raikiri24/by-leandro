@@ -10,7 +10,10 @@ import {
   Target,
   Trophy,
 } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ARTICLES } from "@/lib/articles";
+import { SUPPORT_EMAIL } from "@/lib/site";
 
 const features = [
   {
@@ -81,6 +84,12 @@ export default function HomePage() {
               className="hidden px-3 py-2 font-condensed text-xs font-black uppercase tracking-[0.18em] text-white/60 transition hover:text-primary sm:inline-flex"
             >
               Deck Builder
+            </a>
+            <a
+              href="/articles"
+              className="hidden px-3 py-2 font-condensed text-xs font-black uppercase tracking-[0.18em] text-white/60 transition hover:text-primary sm:inline-flex"
+            >
+              Articles
             </a>
             <Button asChild className="ml-2 font-condensed uppercase tracking-[0.12em]">
               <a href="/tool">
@@ -338,10 +347,72 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-7xl px-5 py-14 sm:px-8 lg:px-10">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="font-condensed text-xs font-black uppercase tracking-[0.18em] text-primary">
+              Guides
+            </p>
+            <h2 className="mt-2 font-display text-4xl leading-none text-white">Latest articles</h2>
+          </div>
+          <Link
+            href="/articles"
+            className="font-condensed text-xs font-black uppercase tracking-[0.18em] text-white/60 hover:text-primary"
+          >
+            All articles
+          </Link>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {ARTICLES.slice(0, 3).map((article) => (
+            <Link
+              key={article.slug}
+              href={`/articles/${article.slug}`}
+              className="group flex flex-col rounded-lg border border-white/10 bg-white/[0.03] p-5 transition hover:border-primary/40 hover:bg-white/[0.05]"
+            >
+              <p className="font-condensed text-xs font-black uppercase tracking-[0.16em] text-primary">
+                {article.category}
+              </p>
+              <h3 className="mt-2 font-display text-xl leading-tight text-white group-hover:text-primary">
+                {article.title}
+              </h3>
+              <p className="mt-2 flex-1 text-sm leading-6 text-white/60">{article.description}</p>
+              <p className="mt-4 text-xs text-white/40">{article.readingTime}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="border-t border-white/10 bg-white/[0.025]">
+        <div className="mx-auto max-w-3xl px-5 py-16 sm:px-8">
+          <p className="font-condensed text-xs font-black uppercase tracking-[0.18em] text-primary">
+            About the creator
+          </p>
+          <h2 className="mt-3 font-display text-4xl leading-none text-white">
+            Built by Leandro, a developer and player
+          </h2>
+          <p className="mt-5 text-sm leading-7 text-white/65">
+            I&apos;m Leandro — I build this site in my spare time. I play and help out around
+            Beyblade X locals, and this project started as a way to solve my own problem: making
+            clean result cards and event graphics without opening a full design app between
+            rounds. That&apos;s still the goal — free, fast tools for the actual work of running
+            and documenting an event.
+          </p>
+          <p className="mt-8 flex flex-wrap gap-5 text-xs">
+            <a className="font-condensed font-black uppercase tracking-[0.16em] text-primary hover:underline" href="/about">
+              Read the full about page
+            </a>
+            <a className="font-condensed font-black uppercase tracking-[0.16em] text-white/60 hover:text-white" href={`mailto:${SUPPORT_EMAIL}`}>
+              Email {SUPPORT_EMAIL}
+            </a>
+          </p>
+        </div>
+      </section>
+
       <footer className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-8 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10">
         <p>© {new Date().getFullYear()} Leandro&apos;s Tournament Card Generator</p>
         <nav aria-label="Site information" className="flex flex-wrap gap-5">
           <a className="hover:text-white" href="/about">About</a>
+          <a className="hover:text-white" href="/articles">Articles</a>
           <a className="hover:text-white" href="/faq">Help</a>
           <a className="hover:text-white" href="/changelog">Changelog</a>
           <a className="hover:text-white" href="/contact">Contact</a>
