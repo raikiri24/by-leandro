@@ -1,5 +1,7 @@
 "use client";
 
+import { analyticsAllowed, CONSENT_EVENT, USAGE_KEY } from "@/lib/consent";
+
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { toJpeg } from "html-to-image";
 import {
@@ -1285,9 +1287,12 @@ export default function ToolPage() {
 
   useEffect(() => {
     let cancelled = false;
+    let registered = false;
 
     async function registerUsage() {
       try {
+        if (!analyticsAllowed() || registered) return;
+        registered = true;
         const sessionId = getBrowserSessionId();
 
         const response = await fetch("/api/usage", {
@@ -1313,7 +1318,9 @@ export default function ToolPage() {
     }
 
     registerUsage();
+    window.addEventListener(CONSENT_EVENT, registerUsage);
     return () => {
+      window.removeEventListener(CONSENT_EVENT, registerUsage);
       cancelled = true;
     };
   }, []);
@@ -1329,8 +1336,8 @@ export default function ToolPage() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           ...feedback,
-          sessionId: getBrowserSessionId(),
-          page: window.location.href,
+          ...(analyticsAllowed() ? { sessionId: getBrowserSessionId() } : {}),
+          page: window.location.pathname,
         }),
       });
       const payload = await readJsonResponse(response);
@@ -1620,7 +1627,7 @@ export default function ToolPage() {
   }
 
   return (
-    <main className="flex min-h-dvh flex-col bg-background text-foreground">
+    <main id="main-content" className="flex min-h-dvh flex-col bg-background text-foreground">
       {showSplash && <SplashScreen />}
       <nav className="sticky top-0 z-40 border-b border-white/10 bg-[#090909]/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-10">
@@ -2756,7 +2763,7 @@ async function readJsonResponse(response: Response) {
 }
 
 function getBrowserSessionId() {
-  const storageKey = "leandro-tool-session-id";
+  const storageKey = USAGE_KEY;
   let sessionId = window.localStorage.getItem(storageKey);
   if (!sessionId) {
     sessionId =
@@ -9985,7 +9992,7 @@ function TerminalCard({ form, rounds, topCut, cardType, palette }: CardProps) {
         {/* system info */}
         <div className="font-mono text-xs space-y-0.5" style={{ color: `${palette.a}60` }}>
           <div>$ ./report --card {form.cardNum} --game "{form.game}"</div>
-          <div style={{ color: `${palette.a}35` }}>// {form.tournament} · {form.date}</div>
+          <div style={{ color: `${palette.a}35` }}>{"// "}{form.tournament} · {form.date}</div>
         </div>
 
         {/* player */}

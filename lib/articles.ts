@@ -13,6 +13,16 @@ export interface ArticleMeta {
 
 export const ARTICLES: ArticleMeta[] = [
   {
+    slug: "background-removal-and-export",
+    title: "Remove a Photo Background, Fix the Edges and Export a PNG",
+    description: "Use this site’s background remover to prepare a player photo: check the automatic cutout, erase or restore details, and export it for a tournament card.",
+    category: "Tool Guides",
+    publishedAt: "2026-09-08",
+    updatedAt: "2026-09-08",
+    readingTime: "4 min read",
+    relatedSlugs: ["designing-a-tournament-result-card-people-repost", "challonge-import-guide-for-organizers"],
+  },
+  {
     slug: "beyblade-x-standard-vs-cx-builds",
     title: "Standard vs. CX Builds in Beyblade X: How the Parts System Works",
     description:
@@ -52,7 +62,7 @@ export const ARTICLES: ArticleMeta[] = [
       "A technical walkthrough of how the tool pulls participants and match results from Challonge, why some matches don't import, and when to switch to Manual mode.",
     category: "Tool Guides",
     publishedAt: "2026-08-20",
-    updatedAt: "2026-08-20",
+    updatedAt: "2026-09-08",
     readingTime: "7 min read",
     relatedSlugs: ["beyblade-x-tournament-formats-explained", "designing-a-tournament-result-card-people-repost"],
   },

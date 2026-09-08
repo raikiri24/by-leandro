@@ -50,12 +50,12 @@ export async function GET(request: Request) {
 
   try {
     return NextResponse.json({ ok: true, data: await getCounts() });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         ok: false,
         error:
-          error instanceof Error ? error.message : "Unable to fetch usage data.",
+          "Unable to fetch usage data.",
       },
       { status: 500 },
     );
@@ -100,12 +100,12 @@ export async function POST(request: Request) {
     );
 
     return NextResponse.json({ ok: true, data: await getCounts() });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         ok: false,
         error:
-          error instanceof Error ? error.message : "Unable to update usage data.",
+          "Unable to update usage data.",
       },
       { status: 500 },
     );

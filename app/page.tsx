@@ -1,3 +1,6 @@
+import { pageMetadata, serializeJsonLd } from "@/lib/seo";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+import { ContentNav } from "@/components/site/content-nav";
 import {
   ArrowRight,
   CalendarDays,
@@ -14,6 +17,15 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ARTICLES } from "@/lib/articles";
 import { SUPPORT_EMAIL } from "@/lib/site";
+
+export const metadata = { ...pageMetadata(SITE_NAME, SITE_DESCRIPTION, "/"), title: { absolute: SITE_NAME } };
+
+const applicationSchema = {
+  "@context": "https://schema.org", "@type": "WebApplication",
+  name: SITE_NAME, url: SITE_URL, applicationCategory: "DesignApplication",
+  operatingSystem: "Any (browser-based)", description: SITE_DESCRIPTION,
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+};
 
 const features = [
   {
@@ -38,13 +50,13 @@ const features = [
   },
   {
     title: "Background Remover",
-    copy: "Remove image backgrounds instantly in your browser — no upload, no account, no API key. Download a clean transparent PNG.",
+    copy: "Remove image backgrounds in your browser — no upload, no account, no API key. Download a clean transparent PNG.",
     icon: Eraser,
     href: "/bg-remover",
   },
   {
     title: "Deck Builder",
-    copy: "Build your own 3G/4G/5G/6G Beyblade X deck from scraped part images — UX & BX standard combos or full CX custom builds.",
+    copy: "Build your own 3G/4G/5G/6G Beyblade X deck from the built-in part catalog — UX & BX standard combos or full CX custom builds.",
     icon: Disc3,
     href: "/deck-builder",
   },
@@ -53,10 +65,11 @@ const features = [
 export default function HomePage() {
   return (
     <main id="main-content" className="min-h-screen bg-[#090909] text-foreground">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(applicationSchema) }} />
       <nav className="sticky top-0 z-40 border-b border-white/10 bg-[#090909]/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-10">
           <a href="/" className="flex items-center gap-3">
-            <img
+            <img width={40} height={40}
               src="/icon.png"
               alt="Leandro's Tournament Card Generator"
               className="h-10 w-10"
@@ -101,6 +114,7 @@ export default function HomePage() {
         </div>
       </nav>
 
+      <ContentNav />
       <section className="relative overflow-hidden border-b border-white/10">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.035)_1px,transparent_1px)] bg-[size:34px_34px]" />
         <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(0,212,232,.14),transparent_36%,rgba(245,34,54,.16)_68%,rgba(216,144,35,.12))]" />
@@ -142,7 +156,7 @@ export default function HomePage() {
             <div className="overflow-hidden rounded-lg border border-white/12 bg-black shadow-2xl shadow-primary/10">
               <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.04] px-4 py-3">
                 <div className="flex items-center gap-3">
-                  <img
+                  <img width={40} height={40}
                     src="/icon.png"
                     alt="Leandro's Tournament Card Generator"
                     className="h-10 w-10"
@@ -153,7 +167,7 @@ export default function HomePage() {
                       Tool Preview
                     </div>
                     <div className="text-xs text-white/48">
-                      Cards, pub mats, exports
+                      Illustrative layout — no real player results
                     </div>
                   </div>
                 </div>
@@ -184,7 +198,7 @@ export default function HomePage() {
                     </div>
                   </div>
                   <div className="mt-5 grid gap-2">
-                    {["R1  Win  4 - 1", "R2  Win  4 - 2", "R3  Loss  2 - 4"].map(
+                    {["Round and opponent", "Confirmed score", "Result checked by you"].map(
                       (row) => (
                         <div
                           key={row}
@@ -380,6 +394,17 @@ export default function HomePage() {
             </Link>
           ))}
         </div>
+      </section>
+
+      <section className="mx-auto max-w-3xl px-5 py-12 text-sm leading-7 text-white/80">
+        <h2 className="font-display text-3xl text-white">Before you start</h2>
+        <h3 className="mt-6 font-bold text-white">Do I need an account?</h3>
+        <p>No. The tools work without signing in. Download your graphics before leaving; the editors do not provide saved account projects.</p>
+        <h3 className="mt-6 font-bold text-white">Does the site track my win rate?</h3>
+        <p>The result card presents entered or imported match information. It does not maintain a player performance database or independently verify standings. Check your source results before publishing.</p>
+        <h3 className="mt-6 font-bold text-white">What if Challonge import is unavailable?</h3>
+        <p>You can enter the confirmed results manually and use the same card designs. The <a href="/articles/challonge-import-guide-for-organizers" className="text-primary underline">import guide</a> explains missing matches and fallback behavior.</p>
+        <p className="mt-6"><a href="/faq" className="text-primary underline">More help and common questions</a></p>
       </section>
 
       <section className="border-t border-white/10 bg-white/[0.025]">

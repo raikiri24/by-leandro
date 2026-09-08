@@ -1,3 +1,5 @@
+import { ContentNav } from "@/components/site/content-nav";
+import { serializeJsonLd } from "@/lib/seo";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { ARTICLES, getRelatedArticles, type ArticleMeta } from "@/lib/articles";
@@ -49,13 +51,14 @@ export function ArticlePage({
     <main id="main-content" className="min-h-screen bg-[#090909] text-white">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
       />
 
+      <ContentNav />
       <nav className="border-b border-white/10">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-5">
           <a href="/" className="font-condensed text-sm font-black uppercase tracking-[0.16em]">

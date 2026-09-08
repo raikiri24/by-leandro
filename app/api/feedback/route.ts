@@ -99,12 +99,12 @@ export async function POST(request: Request) {
       ok: true,
       data: { id: result.insertedId.toString() },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         ok: false,
         error:
-          error instanceof Error ? error.message : "Unable to submit feedback.",
+          "Unable to submit feedback.",
       },
       { status: 500 },
     );

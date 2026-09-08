@@ -1,17 +1,15 @@
+import { ContentNav } from "@/components/site/content-nav";
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ARTICLES } from "@/lib/articles";
 
-export const metadata: Metadata = {
-  title: "Articles & Guides",
-  description:
-    "Guides on Beyblade X deck building, tournament formats, Challonge imports, and event design — written around how this site's tools actually work.",
-  alternates: { canonical: "/articles" },
-};
+export const metadata: Metadata = pageMetadata("Articles & Guides", "Guides on Beyblade X deck building, tournament formats, Challonge imports, and event design — written around how this site's tools actually work.", "/articles", true);
 
 export default function ArticlesPage() {
   return (
     <main id="main-content" className="min-h-screen bg-[#090909] text-white">
+      <ContentNav />
       <nav className="border-b border-white/10">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-5">
           <a href="/" className="font-condensed text-sm font-black uppercase tracking-[0.16em]">

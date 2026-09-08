@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArticlePage, ArticleSection } from "@/components/site/article-page";
@@ -5,17 +6,7 @@ import { getArticle } from "@/lib/articles";
 
 const meta = getArticle("challonge-import-guide-for-organizers")!;
 
-export const metadata: Metadata = {
-  title: meta.title,
-  description: meta.description,
-  alternates: { canonical: `/articles/${meta.slug}` },
-  openGraph: {
-    type: "article",
-    title: meta.title,
-    description: meta.description,
-    url: `/articles/${meta.slug}`,
-  },
-};
+export const metadata: Metadata = pageMetadata(meta.title, meta.description, `/articles/${meta.slug}`, true);
 
 const toc = [
   { id: "what-you-paste-in", label: "What you paste in" },
@@ -135,7 +126,7 @@ export default function Article() {
           <Link className="text-primary underline" href="/privacy">
             privacy policy
           </Link>{" "}
-          for what the site does store (anonymous usage totals and feedback you submit
+          for what the site does store (optional browser usage records and feedback you submit
           deliberately).
         </p>
         <p>

@@ -1,12 +1,10 @@
+import { serializeJsonLd } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import { InfoPage, InfoSection } from "@/components/site/info-page";
 import { SITE_URL, SUPPORT_EMAIL } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "FAQ & Help",
-  description: "Answers to common questions about the tournament card generator, Challonge import, background remover, and deck builder.",
-  alternates: { canonical: "/faq" },
-};
+export const metadata: Metadata = pageMetadata("FAQ & Help", "Answers to common questions about the tournament card generator, Challonge import, background remover, and deck builder.", "/faq");
 
 const faqs = [
   {
@@ -31,15 +29,15 @@ const faqs = [
   },
   {
     q: "What image formats can I use?",
-    a: "JPG, PNG, and WEBP are supported for uploads. Exports are downloaded as JPG files sized for social posts and chat apps.",
+    a: "JPG, PNG, and WEBP are supported for uploads. Cards and decks export as JPG files; the background remover exports PNG files with your chosen background.",
   },
   {
     q: "Can I use this for games other than Beyblade?",
     a: "Yes — the result card, pub mat, and winner post tools are generic and work for any tournament or event. The deck builder is specific to Beyblade X parts.",
   },
   {
-    q: "Why do I see ads on this site?",
-    a: "Ads through Google AdSense help cover hosting costs so the tool can stay free. You can control ad personalization from the cookie banner or Google's ad settings — see the Privacy Policy for details.",
+    q: "Does the site show advertising?",
+    a: "Advertising is currently paused while consent and placements are reviewed. Optional analytics can be changed using Cookie preferences at the bottom of every page. The tools remain free to use.",
   },
   {
     q: "How do I report a bug or request a feature?",
@@ -65,7 +63,7 @@ export default function FaqPage() {
     >
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify({ ...faqJsonLd, url: `${SITE_URL}/faq` }) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd({ ...faqJsonLd, url: `${SITE_URL}/faq` }) }}
       />
       {faqs.map((item) => (
         <InfoSection key={item.q} title={item.q}>

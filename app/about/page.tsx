@@ -1,12 +1,10 @@
+import { serializeJsonLd } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import { InfoPage, InfoSection } from "@/components/site/info-page";
 import { SITE_URL, SUPPORT_EMAIL } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "About",
-  description: "Who builds byleandro.space, why it exists, and how organizers can use its tools.",
-  alternates: { canonical: "/about" },
-};
+export const metadata: Metadata = pageMetadata("About", "Who builds byleandro.space, why it exists, and how organizers can use its tools.", "/about");
 
 const personJsonLd = {
   "@context": "https://schema.org",
@@ -25,7 +23,7 @@ export default function AboutPage() {
     >
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(personJsonLd) }}
       />
       <InfoSection title="Who's behind it">
         <p>

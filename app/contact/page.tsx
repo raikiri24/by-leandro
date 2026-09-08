@@ -1,12 +1,9 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import { InfoPage, InfoSection } from "@/components/site/info-page";
 import { SUPPORT_EMAIL } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description: "Contact and feedback options for the tournament card generator.",
-  alternates: { canonical: "/contact" },
-};
+export const metadata: Metadata = pageMetadata("Contact", "Contact and feedback options for the tournament card generator.", "/contact");
 
 export default function ContactPage() {
   return <InfoPage title="Contact and feedback" intro="Report a problem, suggest an improvement, or ask a privacy question through the feedback form built into the card generator, or email us directly.">

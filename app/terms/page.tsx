@@ -1,12 +1,9 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import { InfoPage, InfoSection } from "@/components/site/info-page";
 import { SUPPORT_EMAIL } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Terms of Service",
-  description: "Terms of Service for the tournament card generator and image tools.",
-  alternates: { canonical: "/terms" },
-};
+export const metadata: Metadata = pageMetadata("Terms of Service", "Terms of Service for the tournament card generator and image tools.", "/terms");
 
 export default function TermsPage() {
   return (
@@ -54,8 +51,7 @@ export default function TermsPage() {
 
       <InfoSection title="Third-party services">
         <p>
-          The site may connect to Challonge to import tournament data, and uses Google AdSense
-          and, where enabled, Google Analytics. Those services operate under their own terms and
+          The site may connect to Challonge to import tournament data, and, with analytics consent and configuration, Google Analytics. Advertising is currently paused. Those services operate under their own terms and
           privacy policies, which are outside our control. See the{" "}
           <a className="text-primary underline" href="/privacy">
             privacy policy

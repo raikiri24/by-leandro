@@ -16,6 +16,7 @@ export default function ErrorPage({
 
   return (
     <main id="main-content" className="flex min-h-screen flex-col items-center justify-center bg-[#090909] px-5 py-16 text-center text-white">
+      <meta name="robots" content="noindex, nofollow" />
       <p className="font-condensed text-sm font-black uppercase tracking-[0.2em] text-destructive">
         Something broke
       </p>

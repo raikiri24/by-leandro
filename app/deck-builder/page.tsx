@@ -389,7 +389,7 @@ export default function DeckBuilderPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#090909] text-foreground">
+    <main id="main-content" className="min-h-screen bg-[#090909] text-foreground">
       <nav className="sticky top-0 z-40 border-b border-white/10 bg-[#090909]/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-10">
           <a href="/" className="flex items-center gap-3">

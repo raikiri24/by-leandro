@@ -18,14 +18,12 @@ export async function GET() {
         databaseName,
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         ok: false,
         error:
-          error instanceof Error
-            ? error.message
-            : "Unable to connect to MongoDB.",
+          "Unable to connect to MongoDB.",
         data: {
           hasMongoUri,
           databaseName,

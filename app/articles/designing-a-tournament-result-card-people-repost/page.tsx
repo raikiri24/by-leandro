@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArticlePage, ArticleSection } from "@/components/site/article-page";
@@ -5,17 +6,7 @@ import { getArticle } from "@/lib/articles";
 
 const meta = getArticle("designing-a-tournament-result-card-people-repost")!;
 
-export const metadata: Metadata = {
-  title: meta.title,
-  description: meta.description,
-  alternates: { canonical: `/articles/${meta.slug}` },
-  openGraph: {
-    type: "article",
-    title: meta.title,
-    description: meta.description,
-    url: `/articles/${meta.slug}`,
-  },
-};
+export const metadata: Metadata = pageMetadata(meta.title, meta.description, `/articles/${meta.slug}`, true);
 
 const toc = [
   { id: "stands-alone", label: "Start with what the image says on its own" },

@@ -1,14 +1,11 @@
+import { pageMetadata } from "@/lib/seo";
 import fs from "node:fs";
 import path from "node:path";
 import type { Metadata } from "next";
 import { InfoPage } from "@/components/site/info-page";
 import { parseChangelog } from "@/lib/changelog";
 
-export const metadata: Metadata = {
-  title: "Changelog",
-  description: "Version history and recent updates to the tournament card generator.",
-  alternates: { canonical: "/changelog" },
-};
+export const metadata: Metadata = pageMetadata("Changelog", "Version history and recent updates to the tournament card generator.", "/changelog");
 
 function renderInline(text: string, key: number) {
   const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).filter(Boolean);

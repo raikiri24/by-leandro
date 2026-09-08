@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Sedgwick_Ave } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import { serializeJsonLd } from "@/lib/seo";
 import { CookieConsent } from "@/components/site/cookie-consent";
 import { ADSENSE_CLIENT_ID, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -20,9 +21,6 @@ export const metadata: Metadata = {
   },
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
-  alternates: {
-    canonical: "/",
-  },
   icons: {
     icon: [
       { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
@@ -60,19 +58,10 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "WebApplication",
+      "@type": "WebSite",
       name: SITE_NAME,
       url: SITE_URL,
-      applicationCategory: "DesignApplication",
-      operatingSystem: "Any (browser-based)",
-      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-      description: SITE_DESCRIPTION,
-    },
-    {
-      "@type": "Organization",
-      name: SITE_NAME,
-      url: SITE_URL,
-      logo: `${SITE_URL}/icon.png`,
+
     },
   ],
 };
@@ -85,7 +74,7 @@ export default function RootLayout({
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
         />
         <Script id="consent-mode-default" strategy="beforeInteractive">
           {`
@@ -101,12 +90,6 @@ export default function RootLayout({
             window.gtag = gtag;
           `}
         </Script>
-        <Script
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
       </head>
       <body className={sedgwickAve.variable} suppressHydrationWarning>
         <a

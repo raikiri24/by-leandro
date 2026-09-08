@@ -36,8 +36,15 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   outputFileTracingRoot: appDir,
+  async redirects() {
+    // Only the known equivalent apex host redirects; never redirect arbitrary
+    // subdomains or alter localhost/deployment previews.
+    if (process.env.NEXT_PUBLIC_SITE_URL && process.env.NEXT_PUBLIC_SITE_URL.replace(/\/+$/, "") !== "https://www.byleandro.space") return [];
+    return [{ source: "/:path*", has: [{ type: "host", value: "byleandro.space" }], destination: "https://www.byleandro.space/:path*", permanent: true }];
+  },
   async headers() {
     return [
+      { source: "/api/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
       {
         source: "/:path*",
         headers: securityHeaders

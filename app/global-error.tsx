@@ -15,6 +15,7 @@ export default function GlobalError({
 
   return (
     <html lang="en" className="dark">
+      <head><meta name="robots" content="noindex, nofollow" /></head>
       <body>
         <main
           style={{

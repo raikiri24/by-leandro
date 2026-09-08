@@ -473,7 +473,7 @@ export default function BgRemoverPage() {
 
   // ─── JSX ──────────────────────────────────────────────────────────────────
   return (
-    <main className="min-h-screen bg-[#090909] text-foreground">
+    <main id="main-content" className="min-h-screen bg-[#090909] text-foreground">
       {adj.sharpness > 0 && (
         <svg style={{ position: "absolute", width: 0, height: 0 }}>
           <defs>
