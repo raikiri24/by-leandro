@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Facebook } from "lucide-react";
 
 export function Footer() {
   return (
@@ -13,6 +14,17 @@ export function Footer() {
             <p className="text-secondaryText text-sm max-w-xs">
               Ideas. Applications. Real Solutions.
             </p>
+            <div className="flex items-center gap-4 mt-2">
+              <a 
+                href="https://www.facebook.com/byld.space" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-secondaryText hover:text-foreground transition-colors"
+                aria-label="Facebook"
+              >
+                <Facebook className="w-5 h-5" />
+              </a>
+            </div>
           </div>
 
           {/* Navigation */}
@@ -42,7 +54,7 @@ export function Footer() {
 
         <div className="mt-16 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-secondaryText text-center md:text-left">
-            &copy; {new Date().getFullYear()} BYLD SPACE. All rights reserved.
+            &copy; {new Date().getFullYear()} BYLD SPACE. All rights reserved. · Tool by ByLeandro
           </p>
           <div className="text-xs font-display tracking-[0.2em] text-foreground opacity-50">
             BUILD · CREATE · AUTOMATE · EXPLORE

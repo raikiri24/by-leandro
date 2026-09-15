@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { ContactForm } from "@/components/site/ContactForm";
+import { Facebook } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -24,6 +25,9 @@ export default function ContactPage() {
             <h2 className="font-display tracking-widest text-xs text-foreground uppercase">Other ways to reach us</h2>
             <p className="text-secondaryText text-sm">
               Email: <a href="mailto:paulleandrolanot@gmail.com" className="text-foreground hover:underline">paulleandrolanot@gmail.com</a>
+            </p>
+            <p className="text-secondaryText text-sm flex items-center gap-2">
+              Facebook: <a href="https://www.facebook.com/byld.space" target="_blank" rel="noopener noreferrer" className="text-foreground hover:underline flex items-center gap-1.5"><Facebook className="w-4 h-4 text-foreground/80" /> byld.space</a>
             </p>
           </div>
         </div>
