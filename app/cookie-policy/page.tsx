@@ -65,7 +65,7 @@ export default function CookiePolicyPage() {
             If you have any questions about our use of cookies or other technologies, please contact us at:
           </p>
           <p>
-            Email: <a href="mailto:hello@byldspace.com">hello@byldspace.com</a>
+            Email: <a href="mailto:paulleandrolanot@gmail.com">paulleandrolanot@gmail.com</a>
           </p>
           
           <div className="mt-16 pt-8 border-t border-border">

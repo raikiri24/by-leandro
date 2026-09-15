@@ -64,7 +64,7 @@ export default function DisclaimerPage() {
             If you require clarification regarding any information presented on this website, please contact us at:
           </p>
           <p>
-            Email: <a href="mailto:hello@byldspace.com">hello@byldspace.com</a>
+            Email: <a href="mailto:paulleandrolanot@gmail.com">paulleandrolanot@gmail.com</a>
           </p>
           
           <div className="mt-16 pt-8 border-t border-border">

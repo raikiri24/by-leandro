@@ -90,7 +90,7 @@ export default function PrivacyPolicyPage() {
           </p>
           <div className="p-4 border border-border bg-surface font-mono text-xs text-foreground w-fit rounded-sm">
             BYLD SPACE Compliance Team<br />
-            Email: info@byldspace.com
+            Email: <a href="mailto:paulleandrolanot@gmail.com" className="underline hover:text-white">paulleandrolanot@gmail.com</a>
           </div>
         </div>
       </section>
