@@ -32,6 +32,10 @@ export const metadata: Metadata = {
   keywords: ["software development", "app development", "cloud deployment", "data engineering", "AI development", "tech consultation"],
   authors: [{ name: "BYLD SPACE" }],
   creator: "BYLD SPACE",
+  icons: {
+    icon: "/nav-icon.png",
+    apple: "/nav-icon.png",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",

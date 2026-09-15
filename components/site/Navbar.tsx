@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 
@@ -21,8 +22,9 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
       <div className="container mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-        <Link href="/" className="font-display font-bold text-xl tracking-widest text-foreground hover:text-accent transition-colors">
-          BYLD SPACE
+        <Link href="/" className="flex items-center gap-2 font-display font-bold text-xl tracking-widest text-foreground hover:text-accent transition-colors">
+          <Image src="/nav-icon.png" alt="BYLD SPACE Logo" width={32} height={32} className="object-contain" />
+          <span>BYLD SPACE</span>
         </Link>
 
         {/* Desktop Navigation */}
