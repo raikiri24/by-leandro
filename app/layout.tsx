@@ -1,110 +1,65 @@
 import type { Metadata, Viewport } from "next";
-import { Sedgwick_Ave } from "next/font/google";
-import Script from "next/script";
+import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
-import { serializeJsonLd } from "@/lib/seo";
-import { CookieConsent } from "@/components/site/cookie-consent";
-import { ADSENSE_CLIENT_ID, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+import { Navbar } from "@/components/site/Navbar";
+import { Footer } from "@/components/site/Footer";
 
-const sedgwickAve = Sedgwick_Ave({
+const inter = Inter({ 
   subsets: ["latin"],
-  weight: "400",
-  variable: "--font-graffiti",
+  variable: "--font-inter",
   display: "swap",
 });
 
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+});
+
+export const viewport: Viewport = {
+  themeColor: "#000000",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
   title: {
-    default: SITE_NAME,
-    template: `%s | ${SITE_NAME}`,
+    default: "BYLD SPACE | Ideas. Applications. Real Solutions.",
+    template: "%s | BYLD SPACE",
   },
-  description: SITE_DESCRIPTION,
-  applicationName: SITE_NAME,
-  icons: {
-    icon: [
-      { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icons/favicon-16.png", sizes: "16x16", type: "image/png" },
-    ],
-    shortcut: "/icon.png",
-    apple: "/icons/apple-touch-icon.png",
-  },
+  description: "We help turn ideas into practical digital solutions. Software development, cloud deployment, data engineering, and AI for real-world problems.",
+  keywords: ["software development", "app development", "cloud deployment", "data engineering", "AI development", "tech consultation"],
+  authors: [{ name: "BYLD SPACE" }],
+  creator: "BYLD SPACE",
   openGraph: {
     type: "website",
-    url: "/",
-    siteName: SITE_NAME,
-    title: SITE_NAME,
-    description: SITE_DESCRIPTION,
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: SITE_NAME }],
+    locale: "en_US",
+    url: "https://byldspace.com",
+    title: "BYLD SPACE | Ideas. Applications. Real Solutions.",
+    description: "We help turn ideas into practical digital solutions.",
+    siteName: "BYLD SPACE",
   },
   twitter: {
     card: "summary_large_image",
-    title: SITE_NAME,
-    description: SITE_DESCRIPTION,
-    images: ["/og-image.png"],
+    title: "BYLD SPACE",
+    description: "We help turn ideas into practical digital solutions.",
   },
-  other: {
-    "google-adsense-account": ADSENSE_CLIENT_ID,
-  },
-};
-
-export const viewport: Viewport = {
-  themeColor: "#090909",
-  width: "device-width",
-  initialScale: 1,
-};
-
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebSite",
-      name: SITE_NAME,
-      url: SITE_URL,
-
-    },
-  ],
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
-      <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
-        />
-        <script
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
-          crossOrigin="anonymous"
-        />
-        <Script id="consent-mode-default" strategy="beforeInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('consent', 'default', {
-              'ad_storage': 'denied',
-              'ad_user_data': 'denied',
-              'ad_personalization': 'denied',
-              'analytics_storage': 'denied',
-              'wait_for_update': 500
-            });
-            window.gtag = gtag;
-          `}
-        </Script>
-      </head>
-      <body className={sedgwickAve.variable} suppressHydrationWarning>
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-primary-foreground"
-        >
-          Skip to main content
-        </a>
-        {children}
-        <CookieConsent />
+    <html lang="en" className="dark">
+      <body className={`${inter.variable} ${spaceGrotesk.variable} bg-background text-foreground antialiased min-h-screen flex flex-col`}>
+        <Navbar />
+        <main className="flex-1 flex flex-col relative overflow-hidden">
+          {children}
+        </main>
+        <Footer />
       </body>
     </html>
   );

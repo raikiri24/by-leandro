@@ -12,46 +12,33 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ["var(--font-inter)", "Inter", "sans-serif"],
-        display: ["var(--font-bebas)", "Bebas Neue", "sans-serif"],
-        condensed: ["var(--font-barlow)", "Barlow Condensed", "sans-serif"],
-        mono: ["var(--font-plex)", "IBM Plex Mono", "monospace"],
-        graffiti: ["var(--font-graffiti)", "Brush Script MT", "fantasy"]
+        display: ["var(--font-space-grotesk)", "Space Grotesk", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "monospace"]
       },
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        background: "#000000",
+        foreground: "#FFFFFF",
+        surface: "#0A0A0A",
+        secondaryText: "#B5B5B5",
+        border: "#242424",
+        accent: "#E2E8F0", // subtle cool gray
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))"
+          DEFAULT: "#FFFFFF",
+          foreground: "#000000"
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))"
+          DEFAULT: "#1A1A1A",
+          foreground: "#FFFFFF"
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))"
+          DEFAULT: "#111111",
+          foreground: "#B5B5B5"
         },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))"
-        },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))"
-        },
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))"
-        }
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)"
+        lg: "0.5rem",
+        md: "0.375rem",
+        sm: "0.25rem"
       }
     }
   },
