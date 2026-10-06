@@ -1,10 +1,12 @@
+import { serializeJsonLd } from "@/lib/seo";
+import { SITE_URL, SITE_DESCRIPTION } from "@/lib/site";
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
@@ -20,35 +22,17 @@ export const viewport: Viewport = {
   themeColor: "#000000",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "BYLD SPACE | Ideas. Applications. Real Solutions.",
+    default: "BYLD SPACE | Custom software & ERP development",
     template: "%s | BYLD SPACE",
   },
-  description: "We help turn ideas into practical digital solutions. Software development, cloud deployment, data engineering, and AI for real-world problems.",
-  keywords: ["software development", "app development", "cloud deployment", "data engineering", "AI development", "tech consultation"],
+  description: SITE_DESCRIPTION,
   authors: [{ name: "BYLD SPACE" }],
-  creator: "BYLD SPACE",
-  icons: {
-    icon: "/nav-icon.png",
-    apple: "/nav-icon.png",
-  },
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://byldspace.com",
-    title: "BYLD SPACE | Ideas. Applications. Real Solutions.",
-    description: "We help turn ideas into practical digital solutions.",
-    siteName: "BYLD SPACE",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "BYLD SPACE",
-    description: "We help turn ideas into practical digital solutions.",
-  },
+  icons: { icon: "/nav-icon.png", apple: "/nav-icon.png" },
 };
 
 export default function RootLayout({
@@ -58,9 +42,30 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.variable} ${spaceGrotesk.variable} bg-background text-foreground antialiased min-h-screen flex flex-col`}>
+      <body
+        className={`${inter.variable} ${spaceGrotesk.variable} bg-background text-foreground antialiased min-h-screen flex flex-col`}
+      >
+        <a href="#main-content" className="skip-link">
+          Skip to content
+        </a>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: serializeJsonLd({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "BYLD SPACE",
+              url: SITE_URL,
+              email: "paulleandrolanot@gmail.com",
+              sameAs: ["https://www.facebook.com/byld.space"],
+            }),
+          }}
+        />
         <Navbar />
-        <main className="flex-1 flex flex-col relative overflow-hidden">
+        <main
+          id="main-content"
+          className="flex-1 flex flex-col relative overflow-hidden"
+        >
           {children}
         </main>
         <Footer />

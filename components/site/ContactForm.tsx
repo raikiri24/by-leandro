@@ -13,7 +13,11 @@ export function ContactForm() {
     timeline: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -21,17 +25,19 @@ export function ContactForm() {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
-    const subject = encodeURIComponent(`Project Inquiry: ${formData.build.slice(0, 40)}${formData.build.length > 40 ? "..." : ""}`);
+    const subject = encodeURIComponent(
+      `Project Inquiry: ${formData.build.slice(0, 40)}${formData.build.length > 40 ? "..." : ""}`,
+    );
     const body = encodeURIComponent(
       `Hello Paul,\n\n` +
-      `A new project inquiry has been submitted with the following details:\n\n` +
-      `Name: ${formData.name}\n` +
-      `Email: ${formData.email}\n` +
-      `Company/Organization: ${formData.company || "N/A"}\n\n` +
-      `What would you like to build:\n${formData.build}\n\n` +
-      `What problem are you trying to solve:\n${formData.problem}\n\n` +
-      `Estimated budget: ${formData.budget || "N/A"}\n` +
-      `Preferred timeline: ${formData.timeline || "N/A"}\n`
+        `I would like to discuss the following project:\n\n` +
+        `Name: ${formData.name}\n` +
+        `Email: ${formData.email}\n` +
+        `Company/Organization: ${formData.company || "N/A"}\n\n` +
+        `What would you like to build:\n${formData.build}\n\n` +
+        `What problem are you trying to solve:\n${formData.problem}\n\n` +
+        `Estimated budget: ${formData.budget || "N/A"}\n` +
+        `Preferred timeline: ${formData.timeline || "N/A"}\n`,
     );
 
     window.location.href = `mailto:paulleandrolanot@gmail.com?subject=${subject}&body=${body}`;
@@ -41,25 +47,32 @@ export function ContactForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="flex flex-col gap-2">
-          <label htmlFor="name" className="text-sm font-medium text-foreground">Name <span className="text-red-500">*</span></label>
-          <input 
-            type="text" 
-            id="name" 
-            name="name" 
-            required 
+          <label htmlFor="name" className="text-sm font-medium text-foreground">
+            Name <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            required
             value={formData.name}
             onChange={handleChange}
             className="bg-background border border-border p-3 rounded-sm text-sm focus:outline-none focus:border-foreground transition-colors"
           />
         </div>
-        
+
         <div className="flex flex-col gap-2">
-          <label htmlFor="email" className="text-sm font-medium text-foreground">Email <span className="text-red-500">*</span></label>
-          <input 
-            type="email" 
-            id="email" 
-            name="email" 
-            required 
+          <label
+            htmlFor="email"
+            className="text-sm font-medium text-foreground"
+          >
+            Email <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            required
             value={formData.email}
             onChange={handleChange}
             className="bg-background border border-border p-3 rounded-sm text-sm focus:outline-none focus:border-foreground transition-colors"
@@ -68,11 +81,17 @@ export function ContactForm() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="company" className="text-sm font-medium text-foreground">Company / Organization <span className="text-secondaryText font-normal">(optional)</span></label>
-        <input 
-          type="text" 
-          id="company" 
-          name="company" 
+        <label
+          htmlFor="company"
+          className="text-sm font-medium text-foreground"
+        >
+          Company / Organization{" "}
+          <span className="text-secondaryText font-normal">(optional)</span>
+        </label>
+        <input
+          type="text"
+          id="company"
+          name="company"
           value={formData.company}
           onChange={handleChange}
           className="bg-background border border-border p-3 rounded-sm text-sm focus:outline-none focus:border-foreground transition-colors"
@@ -80,12 +99,16 @@ export function ContactForm() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="build" className="text-sm font-medium text-foreground">What would you like to build? <span className="text-red-500">*</span></label>
-        <textarea 
-          id="build" 
-          name="build" 
-          required 
+        <label htmlFor="build" className="text-sm font-medium text-foreground">
+          What would you like to build or improve?{" "}
+          <span className="text-red-500">*</span>
+        </label>
+        <textarea
+          id="build"
+          name="build"
+          required
           rows={4}
+          placeholder="For example: an ERP with HRIS, accounting, and warehouse modules. Include required features, users, and integrations."
           value={formData.build}
           onChange={handleChange}
           className="bg-background border border-border p-3 rounded-sm text-sm focus:outline-none focus:border-foreground transition-colors resize-y"
@@ -93,11 +116,17 @@ export function ContactForm() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="problem" className="text-sm font-medium text-foreground">What problem are you trying to solve? <span className="text-red-500">*</span></label>
-        <textarea 
-          id="problem" 
-          name="problem" 
-          required 
+        <label
+          htmlFor="problem"
+          className="text-sm font-medium text-foreground"
+        >
+          What problem are you trying to solve?{" "}
+          <span className="text-red-500">*</span>
+        </label>
+        <textarea
+          id="problem"
+          name="problem"
+          required
           rows={4}
           value={formData.problem}
           onChange={handleChange}
@@ -107,9 +136,15 @@ export function ContactForm() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="flex flex-col gap-2">
-          <label htmlFor="budget" className="text-sm font-medium text-foreground">Estimated budget <span className="text-secondaryText font-normal">(optional)</span></label>
-          <select 
-            id="budget" 
+          <label
+            htmlFor="budget"
+            className="text-sm font-medium text-foreground"
+          >
+            Estimated budget{" "}
+            <span className="text-secondaryText font-normal">(optional)</span>
+          </label>
+          <select
+            id="budget"
             name="budget"
             value={formData.budget}
             onChange={handleChange}
@@ -123,11 +158,17 @@ export function ContactForm() {
             <option value="Not sure yet">Not sure yet</option>
           </select>
         </div>
-        
+
         <div className="flex flex-col gap-2">
-          <label htmlFor="timeline" className="text-sm font-medium text-foreground">Preferred timeline <span className="text-secondaryText font-normal">(optional)</span></label>
-          <select 
-            id="timeline" 
+          <label
+            htmlFor="timeline"
+            className="text-sm font-medium text-foreground"
+          >
+            Preferred timeline{" "}
+            <span className="text-secondaryText font-normal">(optional)</span>
+          </label>
+          <select
+            id="timeline"
             name="timeline"
             value={formData.timeline}
             onChange={handleChange}
@@ -145,13 +186,18 @@ export function ContactForm() {
 
       <div className="mt-4 pt-6 border-t border-border flex flex-col gap-4">
         <p className="text-xs text-secondaryText">
-          By submitting this form, you agree to our <a href="/privacy-policy" className="underline hover:text-foreground">Privacy Policy</a>. We will never share your information.
+          This form prepares an email in your email application. You must send
+          it there to complete your inquiry. Read our{" "}
+          <a href="/privacy-policy" className="underline hover:text-foreground">
+            Privacy Policy
+          </a>
+          . Please do not include passwords or confidential business records.
         </p>
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           className="w-full bg-foreground text-background px-8 py-4 rounded-sm font-bold tracking-[0.1em] text-sm hover:bg-accent transition-colors"
         >
-          SEND PROJECT INQUIRY
+          PREPARE INQUIRY EMAIL
         </button>
       </div>
     </form>

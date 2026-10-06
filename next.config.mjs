@@ -17,7 +17,7 @@ const csp = [
   "worker-src 'self' blob:",
   "child-src blob:",
   "frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com",
-  "upgrade-insecure-requests"
+  "upgrade-insecure-requests",
 ].join("; ");
 
 const securityHeaders = [
@@ -27,9 +27,12 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+    value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
   },
-  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" }
+  {
+    key: "Strict-Transport-Security",
+    value: "max-age=63072000; includeSubDomains; preload",
+  },
 ];
 
 /** @type {import('next').NextConfig} */
@@ -37,20 +40,45 @@ const nextConfig = {
   reactStrictMode: true,
   outputFileTracingRoot: appDir,
   async redirects() {
-    // Only the known equivalent apex host redirects; never redirect arbitrary
-    // subdomains or alter localhost/deployment previews.
-    if (process.env.NEXT_PUBLIC_SITE_URL && process.env.NEXT_PUBLIC_SITE_URL.replace(/\/+$/, "") !== "https://www.byleandro.space") return [];
-    return [{ source: "/:path*", has: [{ type: "host", value: "byleandro.space" }], destination: "https://www.byleandro.space/:path*", permanent: true }];
+    const equivalentRoutes = [
+      ["/projects", "/services"],
+      ["/projects/personal-beyblade-tracker", "/services/software-development"],
+      ["/journey", "/requirements"],
+      ["/journey/how-an-idea-becomes-an-application", "/requirements"],
+      ["/insights", "/requirements"],
+      ["/services/cloud-deployment", "/services/integrations-maintenance"],
+      ["/services/data-engineering", "/services/integrations-maintenance"],
+      ["/services/ai-development", "/services/software-development"],
+      ["/services/tech-consultation", "/contact"],
+    ].map(([source, destination]) => ({
+      source,
+      destination,
+      permanent: true,
+    }));
+    const canonical =
+      process.env.NEXT_PUBLIC_SITE_URL || "https://www.byleandro.space";
+    if (canonical.replace(/\/+$/, "") === "https://www.byleandro.space") {
+      equivalentRoutes.unshift({
+        source: "/:path*",
+        has: [{ type: "host", value: "byleandro.space" }],
+        destination: "https://www.byleandro.space/:path*",
+        permanent: true,
+      });
+    }
+    return equivalentRoutes;
   },
   async headers() {
     return [
-      { source: "/api/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
+      {
+        source: "/api/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
       {
         source: "/:path*",
-        headers: securityHeaders
-      }
+        headers: securityHeaders,
+      },
     ];
-  }
+  },
 };
 
 export default nextConfig;
