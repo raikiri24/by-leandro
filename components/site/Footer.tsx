@@ -1,118 +1,54 @@
 import Link from "next/link";
-import { Facebook } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="w-full border-t border-border bg-surface mt-20">
-      <div className="container mx-auto px-4 md:px-8 py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          {/* Brand */}
-          <div className="flex flex-col gap-4">
-            <Link
-              href="/"
-              className="font-display font-bold text-2xl tracking-widest text-foreground"
-            >
-              BYLD SPACE
-            </Link>
-            <p className="text-secondaryText text-sm max-w-xs">
-              Custom software and ERP systems built around your requirements.
-            </p>
-            <div className="flex items-center gap-4 mt-2">
-              <a
-                href="https://www.facebook.com/byld.space"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-secondaryText hover:text-foreground transition-colors"
-                aria-label="Facebook"
-              >
-                <Facebook className="w-5 h-5" />
-              </a>
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <div className="flex flex-col gap-4">
-            <h3 className="font-display tracking-widest text-xs text-foreground uppercase mb-2">
-              Navigation
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <Link
-                href="/services"
-                className="text-sm text-secondaryText hover:text-foreground transition-colors"
-              >
-                Services
-              </Link>
-              <Link
-                href="/requirements"
-                className="text-sm text-secondaryText hover:text-foreground transition-colors"
-              >
-                Requirements guide
-              </Link>
-              <Link
-                href="/about"
-                className="text-sm text-secondaryText hover:text-foreground transition-colors"
-              >
-                About
-              </Link>
-              <Link
-                href="/contact"
-                className="text-sm text-secondaryText hover:text-foreground transition-colors"
-              >
-                Contact
-              </Link>
-            </div>
-          </div>
-
-          {/* Legal */}
-          <div className="flex flex-col gap-4">
-            <h3 className="font-display tracking-widest text-xs text-foreground uppercase mb-2">
-              Legal
-            </h3>
-            <ul className="flex flex-col gap-3">
-              <li>
-                <Link
-                  href="/privacy-policy"
-                  className="text-sm text-secondaryText hover:text-foreground transition-colors"
-                >
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/terms"
-                  className="text-sm text-secondaryText hover:text-foreground transition-colors"
-                >
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/cookie-policy"
-                  className="text-sm text-secondaryText hover:text-foreground transition-colors"
-                >
-                  Cookie Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/disclaimer"
-                  className="text-sm text-secondaryText hover:text-foreground transition-colors"
-                >
-                  Disclaimer
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="mt-16 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-secondaryText text-center md:text-left">
-            &copy; {new Date().getFullYear()} BYLD SPACE. All rights reserved.
+    <footer className="site-footer">
+      <div className="footer-top">
+        <div className="footer-brand">
+          <Link
+            href="/"
+            className="brand-wordmark"
+            aria-label="BYLD SPACE home"
+          >
+            BYLD<span>SPACE</span>
+          </Link>
+          <p>
+            Independent thinking.
+            <br />
+            Purpose-built software.
           </p>
-          <div className="text-xs font-display tracking-[0.2em] text-foreground opacity-50">
-            BUILD · CREATE · AUTOMATE · EXPLORE
-          </div>
         </div>
+        <nav aria-label="Footer navigation">
+          <p className="footer-label">EXPLORE</p>
+          <Link href="/services">Services</Link>
+          <Link href="/requirements">Requirements guide</Link>
+          <Link href="/about">About us</Link>
+          <Link href="/contact">Contact</Link>
+        </nav>
+        <div className="footer-contact">
+          <p className="footer-label">LET’S MAKE IT HAPPEN</p>
+          <a href="mailto:paulleandrolanot@gmail.com">
+            paulleandrolanot@gmail.com <ArrowUpRight size={14} />
+          </a>
+          <a
+            href="https://www.facebook.com/byld.space"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Find us on Facebook <ArrowUpRight size={14} />
+          </a>
+        </div>
+      </div>
+      <div className="footer-bottom">
+        <p>BYLD SPACE © {new Date().getFullYear()}</p>
+        <nav aria-label="Legal">
+          <Link href="/privacy-policy">Privacy</Link>
+          <Link href="/terms">Terms</Link>
+          <Link href="/cookie-policy">Cookies</Link>
+          <Link href="/disclaimer">Disclaimer</Link>
+        </nav>
+        <span>BUILD WITH INTENTION.</span>
       </div>
     </footer>
   );

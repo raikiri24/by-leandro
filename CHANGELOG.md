@@ -1,6 +1,20 @@
 # Changelog
 
-All notable changes to the Tournament Card Generator are documented here.
+Notable changes to BYLD SPACE and its earlier tools are documented here.
+
+---
+
+## [2026-10-20]
+
+### Changed — Tesla-inspired visual redesign
+
+- Replaced the dark green landing page with a monochrome, photography-led design: oversized centered typography, restrained controls, and generous spacing.
+- Added locally hosted architectural imagery, illustrative service previews, a connected ERP overview, a clearer delivery process, and expandable project questions.
+- Applied the light design system to navigation, service and information pages, the inquiry form, footer, and generated social image.
+- Preserved existing service destinations, project requirements guidance, legal links, and email-based inquiry submission.
+- Rebuilt the mobile menu as a native modal dialog with keyboard navigation, Escape dismissal, focus restoration, and background scroll locking. Reduced-motion preferences and visible keyboard focus remain supported.
+
+Hero photograph: [Unsplash image source](https://images.unsplash.com/photo-1487958449943-2429e8be8625), stored locally as `public/architecture-hero.jpg`.
 
 ---
 

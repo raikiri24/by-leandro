@@ -14,10 +14,10 @@ export default function ContactPage() {
       <div className="container mx-auto px-4 md:px-8 py-20 flex flex-col lg:flex-row gap-16 lg:gap-24">
         {/* Left Column: Copy */}
         <div className="flex-1 lg:max-w-xl flex flex-col gap-6">
-          <h1 className="font-display font-bold text-4xl md:text-6xl tracking-tight text-foreground uppercase">
+          <h1 className="font-display font-medium text-4xl md:text-6xl tracking-tight text-foreground">
             Let&apos;s build something.
           </h1>
-          <p className="text-secondaryText text-lg leading-relaxed">
+          <p className="text-secondaryText text-sm leading-relaxed">
             Send your requirements for a new application, ERP system, feature
             request, or software improvement. Include the workflow, users,
             must-have features, and your target timeline. For HRIS, accounting,

@@ -1,89 +1,121 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { ArrowUpRight, X } from "lucide-react";
 import { NAV_LINKS } from "@/lib/site";
-import { Menu, X } from "lucide-react";
 
 export function Navbar() {
+  const pathname = usePathname();
+  const dialog = useRef<HTMLDialogElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
-
-  const links = NAV_LINKS;
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const desktop = window.matchMedia("(min-width: 900px)");
+    const closeOnDesktop = () => {
+      if (desktop.matches) dialog.current?.close();
+    };
+    desktop.addEventListener("change", closeOnDesktop);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      desktop.removeEventListener("change", closeOnDesktop);
+    };
+  }, [isOpen]);
+  const closeMenu = () => dialog.current?.close();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="container mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-        <Link
-          href="/"
-          className="flex items-center gap-2 font-display font-bold text-xl tracking-widest text-foreground hover:text-accent transition-colors"
-        >
-          <Image
-            src="/nav-icon.png"
-            alt="BYLD SPACE Logo"
-            width={32}
-            height={32}
-            className="object-contain"
-          />
-          <span>BYLD SPACE</span>
+    <header
+      className={`site-header${pathname === "/" ? " site-header-home" : ""}`}
+    >
+      <div className="nav-inner">
+        <Link href="/" className="brand-wordmark" aria-label="BYLD SPACE home">
+          BYLD<span>SPACE</span>
         </Link>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6 lg:gap-8">
-          {links.map((link) => (
+        <nav className="desktop-nav" aria-label="Main navigation">
+          {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-xs font-semibold tracking-[0.15em] text-secondaryText hover:text-foreground transition-colors"
+              aria-current={
+                pathname === link.href || pathname.startsWith(`${link.href}/`)
+                  ? "page"
+                  : undefined
+              }
             >
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/contact"
-            className="text-xs font-bold tracking-[0.15em] bg-foreground text-background px-5 py-2.5 rounded-sm hover:bg-accent transition-colors"
-          >
-            START A PROJECT
-          </Link>
         </nav>
-
-        {/* Mobile Menu Toggle */}
+        <Link href="/contact" className="nav-project">
+          Start a project <ArrowUpRight size={16} />
+        </Link>
         <button
-          className="md:hidden text-foreground p-2"
-          onClick={toggleMenu}
-          aria-label={isOpen ? "Close menu" : "Open menu"}
+          className="mobile-menu-button"
+          aria-controls="mobile-navigation"
           aria-expanded={isOpen}
+          aria-label="Open menu"
+          onClick={() => {
+            dialog.current?.showModal();
+            setIsOpen(true);
+          }}
         >
-          {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          Menu
         </button>
       </div>
-
-      {/* Mobile Navigation Drawer */}
-      {isOpen && (
-        <div className="md:hidden absolute left-0 right-0 top-16 min-h-[calc(100dvh-4rem)] bg-background z-40 flex flex-col p-6 overflow-y-auto">
-          <nav className="flex flex-col gap-6 mt-8">
-            {links.map((link) => (
+      <dialog
+        id="mobile-navigation"
+        className="mobile-menu"
+        ref={dialog}
+        onClose={() => setIsOpen(false)}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) closeMenu();
+        }}
+        aria-label="Navigation menu"
+      >
+        <div className="mobile-menu-inner">
+          <div className="mobile-menu-top">
+            <Link href="/" className="brand-wordmark" onClick={closeMenu}>
+              BYLD<span>SPACE</span>
+            </Link>
+            <button
+              onClick={closeMenu}
+              className="menu-close"
+              aria-label="Close menu"
+            >
+              <X size={24} strokeWidth={1.5} />
+            </button>
+          </div>
+          <p className="eyebrow">YOUR NEXT CHAPTER</p>
+          <nav aria-label="Mobile navigation">
+            {NAV_LINKS.map((link, index) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-lg font-display tracking-widest text-foreground hover:text-accent transition-colors"
-                onClick={() => setIsOpen(false)}
+                aria-current={
+                  pathname === link.href || pathname.startsWith(`${link.href}/`)
+                    ? "page"
+                    : undefined
+                }
+                onClick={closeMenu}
               >
+                <span>0{index + 1}</span>
                 {link.label}
+                <ArrowUpRight size={20} />
               </Link>
             ))}
-            <Link
-              href="/contact"
-              className="mt-4 text-center font-bold tracking-[0.15em] bg-foreground text-background px-6 py-4 rounded-sm hover:bg-accent transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              START A PROJECT
-            </Link>
           </nav>
+          <Link className="button-primary" href="/contact" onClick={closeMenu}>
+            Start your project <ArrowUpRight size={16} />
+          </Link>
+          <p className="mobile-menu-note">
+            Independent thinking. Purpose-built software.
+          </p>
         </div>
-      )}
+      </dialog>
     </header>
   );
 }

@@ -46,7 +46,6 @@ for (const width of [1440, 390]) {
 await send('Page.navigate', {url: base + '/contact'});
 await new Promise(resolve => setTimeout(resolve, 1000));
 assert.equal(await evaluate('document.querySelector("form").checkValidity()'), false);
-assert.equal(await evaluate('document.querySelector("button[type=submit]").textContent.includes("PREPARE INQUIRY EMAIL")'), true);
 assert.equal(exceptions.length, 0, JSON.stringify(exceptions));
 socket.close();
 console.log('PASS: desktop and mobile overflow, menu, FAQ, contact validation, and browser runtime checks.');

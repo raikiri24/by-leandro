@@ -12,20 +12,36 @@ export default function Image() {
         flexDirection: "column",
         justifyContent: "center",
         padding: 80,
-        background: "#10150d",
-        color: "white",
+        background: "#f4f4f4",
+        color: "#171a20",
         fontFamily: "sans-serif",
       }}
     >
-      <div style={{ fontSize: 24, color: "#b5ee82", marginBottom: 40 }}>
+      <div
+        style={{
+          fontSize: 20,
+          color: "#666b73",
+          marginBottom: 54,
+          letterSpacing: 4,
+        }}
+      >
         BYLD SPACE / SOFTWARE DEVELOPMENT
       </div>
-      <div style={{ fontSize: 70, lineHeight: 1.1 }}>Your requirements.</div>
-      <div style={{ fontSize: 70, color: "#b5ee82", lineHeight: 1.1 }}>
-        Let’s build it.
+      <div style={{ fontSize: 86, lineHeight: 1.1, letterSpacing: -5 }}>
+        Built around you.
       </div>
-      <div style={{ fontSize: 26, color: "#bcc4b5", marginTop: 40 }}>
-        Custom applications · HRIS · Accounting · Warehouse
+      <div
+        style={{
+          fontSize: 32,
+          color: "#666b73",
+          lineHeight: 1.5,
+          marginTop: 24,
+        }}
+      >
+        Extraordinary software. Made for your everyday.
+      </div>
+      <div style={{ fontSize: 22, color: "#666b73", marginTop: 54 }}>
+        Custom applications · Connected ERP · Integrations
       </div>
     </div>,
     size,
